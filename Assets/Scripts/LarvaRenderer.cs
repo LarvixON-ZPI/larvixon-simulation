@@ -3,84 +3,194 @@ using UnityEngine;
 [RequireComponent(typeof(Larva))]
 public class LarvaRenderer : MonoBehaviour
 {
-    [Header("Visual Settings")]
+    private static readonly int Color1 = Shader.PropertyToID("_Color");
+
     public Material larvaMaterial;
 
     public Color larvaColor = Color.green;
     public Color headColor = Color.red;
     public float bodyWidth = 0.3f;
-    public int segmentResolution = 8;
+
+    public int segmentResolution = 16;
+
+    public float smoothingFactor = 0.5f;
+
+    public bool useSplineInterpolation = true;
+    private Mesh _bodyMesh;
 
     private Larva _larva;
-    private LineRenderer _lineRenderer;
+    private MeshFilter _meshFilter;
     private MeshRenderer _meshRenderer;
 
     private void Start()
     {
         _larva = GetComponent<Larva>();
-        SetupLineRenderer();
+        SetupMeshRenderer();
+        CreateBodyMesh();
     }
 
     private void Update()
     {
-        if (_larva != null && _lineRenderer != null) UpdateLineRenderer();
+        UpdateBodyMesh();
     }
 
     private void OnDrawGizmos()
     {
-        if (_larva == null) return;
+        DrawPointsGizmos();
 
-        // Draw body points
+        DrawCenterOfMassGizmo();
+    }
+
+    private void DrawPointsGizmos()
+    {
         for (var i = 0; i < _larva.points.Length; i++)
         {
             Gizmos.color = i == 0 ? headColor : larvaColor;
-            Gizmos.DrawWireSphere(_larva.points[i], bodyWidth * 0.2f);
-
-            // Draw segment connections
-            if (i >= _larva.points.Length - 1) continue;
-
-            Gizmos.color = Color.white * 0.5f;
-            Gizmos.DrawLine(_larva.points[i], _larva.points[i + 1]);
+            Gizmos.DrawWireSphere(_larva.points[i], bodyWidth * 0.5f);
         }
+    }
 
-        // Draw center of mass
+    private void DrawCenterOfMassGizmo()
+    {
         Gizmos.color = Color.cyan;
         var center = _larva.GetCenter();
         Gizmos.DrawWireCube(center, Vector3.one * 0.1f);
     }
 
-    private void SetupLineRenderer()
+    private void SetupMeshRenderer()
     {
-        _lineRenderer = gameObject.AddComponent<LineRenderer>();
+        _meshFilter = gameObject.AddComponent<MeshFilter>();
+        _meshRenderer = gameObject.AddComponent<MeshRenderer>();
 
-        // Try to use provided material or create a default one
-        _lineRenderer.material = larvaMaterial != null ? larvaMaterial : CreateDefaultMaterial();
+        _meshRenderer.material = larvaMaterial != null ? larvaMaterial : CreateDefaultMaterial();
+        _meshRenderer.sortingOrder = 1;
+    }
 
-        var gradient = new Gradient();
+    private void CreateBodyMesh()
+    {
+        _bodyMesh = new Mesh
+        {
+            name = "LarvaBody"
+        };
+        _meshFilter.mesh = _bodyMesh;
+    }
 
-        var colors = new GradientColorKey[1];
-        colors[0] = new GradientColorKey(larvaColor, 0.0f);
+    private void UpdateBodyMesh()
+    {
+        var renderPoints = useSplineInterpolation ? GetSmoothedPoints(_larva.points) : _larva.points;
 
-        var alphas = new GradientAlphaKey[1];
-        alphas[0] = new GradientAlphaKey(1.0f, 0.0f);
+        GenerateBodyMesh(renderPoints);
+    }
 
-        gradient.SetKeys(colors, alphas);
+    private Vector2[] GetSmoothedPoints(Vector2[] originalPoints)
+    {
+        if (originalPoints.Length < 3) return originalPoints;
 
-        _lineRenderer.colorGradient = gradient;
-        _lineRenderer.startWidth = bodyWidth;
-        _lineRenderer.endWidth = bodyWidth * 0.7f; // Tapered tail
-        _lineRenderer.positionCount = _larva.points.Length;
-        _lineRenderer.useWorldSpace = true;
-        _lineRenderer.sortingOrder = 1;
+        var smoothedPoints = new Vector2[originalPoints.Length];
 
-        // Make the line smoother
-        _lineRenderer.numCapVertices = 5;
-        _lineRenderer.numCornerVertices = 5;
+        smoothedPoints[0] = originalPoints[0];
+        smoothedPoints[^1] = originalPoints[^1];
+
+        // Smooth middle points using Catmull-Rom spline-like smoothing
+        for (var i = 1; i < originalPoints.Length - 1; i++)
+        {
+            var prev = originalPoints[i - 1];
+            var curr = originalPoints[i];
+            var next = originalPoints[i + 1];
+
+            // Simple smoothing: average with neighbors weighted by smoothing factor
+            var smoothed = Vector2.Lerp(curr, (prev + next) * 0.5f, smoothingFactor);
+            smoothedPoints[i] = smoothed;
+        }
+
+        return smoothedPoints;
+    }
+
+    private void GenerateBodyMesh(Vector2[] points)
+    {
+        if (points.Length < 2) return;
+
+        var totalVertices = points.Length * segmentResolution;
+        var vertices = new Vector3[totalVertices];
+        var uvs = new Vector2[totalVertices];
+        var colors = new Color[totalVertices];
+
+        // Calculate triangles for the body segments
+        var triangleCount =
+            (points.Length - 1) * segmentResolution * 6; // 2 triangles per quad, 3 vertices per triangle
+        var triangles = new int[triangleCount];
+
+        // Convert world positions to local positions relative to transform
+        var transformPosition = transform.position;
+
+        // Generate circular vertices around each point
+        for (var i = 0; i < points.Length; i++)
+        {
+            var center = points[i];
+
+            // Convert to local space by subtracting transform position
+            var localCenter = new Vector2(center.x - transformPosition.x, center.y - transformPosition.y);
+
+            var widthMultiplier = 1.0f;
+            if (i == 0) widthMultiplier = 1.2f; // Head larger
+            else if (i == points.Length - 1) widthMultiplier = 0.6f; // Tail smaller
+
+            var currentWidth = bodyWidth * widthMultiplier;
+
+            // Color interpolation from head to tail
+            var segmentColor = Color.Lerp(headColor, larvaColor, (float)i / (points.Length - 1));
+
+            for (var j = 0; j < segmentResolution; j++)
+            {
+                var angle = (float)j / segmentResolution * 2 * Mathf.PI;
+                var offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * currentWidth;
+
+                var vertexIndex = i * segmentResolution + j;
+                vertices[vertexIndex] = new Vector3(localCenter.x + offset.x, localCenter.y + offset.y, 0);
+
+                // UV mapping
+                uvs[vertexIndex] = new Vector2((float)j / segmentResolution, (float)i / (points.Length - 1));
+                colors[vertexIndex] = segmentColor;
+            }
+        }
+
+        // Generate triangles to connect segments
+        var triangleIndex = 0;
+        for (var i = 0; i < points.Length - 1; i++)
+        {
+            var currentRingStart = i * segmentResolution;
+            var nextRingStart = (i + 1) * segmentResolution;
+
+            for (var j = 0; j < segmentResolution; j++)
+            {
+                var current = currentRingStart + j;
+                var next = currentRingStart + (j + 1) % segmentResolution;
+                var currentNext = nextRingStart + j;
+                var nextNext = nextRingStart + (j + 1) % segmentResolution;
+
+                // First triangle
+                triangles[triangleIndex++] = current;
+                triangles[triangleIndex++] = currentNext;
+                triangles[triangleIndex++] = next;
+
+                // Second triangle
+                triangles[triangleIndex++] = next;
+                triangles[triangleIndex++] = currentNext;
+                triangles[triangleIndex++] = nextNext;
+            }
+        }
+
+        _bodyMesh.Clear();
+        _bodyMesh.vertices = vertices;
+        _bodyMesh.triangles = triangles;
+        _bodyMesh.uv = uvs;
+        _bodyMesh.colors = colors;
+        _bodyMesh.RecalculateNormals();
+        _bodyMesh.RecalculateBounds();
     }
 
     private Material CreateDefaultMaterial()
     {
-        // Try multiple shader options for compatibility
         Material mat = null;
 
         string[] shaderNames =
@@ -94,40 +204,20 @@ public class LarvaRenderer : MonoBehaviour
         foreach (var shaderName in shaderNames)
         {
             var shader = Shader.Find(shaderName);
-            if (shader != null)
-            {
-                mat = new Material(shader);
-                break;
-            }
+
+            if (shader == null) continue;
+
+            mat = new Material(shader);
+            break;
         }
 
-        // Fallback if no shader found
         if (mat == null) mat = new Material(Shader.Find("Standard"));
 
         mat.color = larvaColor;
+
+        if (mat.HasProperty(Color1))
+            mat.SetColor(Color1, Color.white);
+
         return mat;
-    }
-
-    private void UpdateLineRenderer()
-    {
-        // Update line renderer positions
-        for (var i = 0; i < _larva.points.Length; i++)
-        {
-            var point = new Vector3(_larva.points[i].x, _larva.points[i].y, 0);
-            _lineRenderer.SetPosition(i, point);
-        }
-
-        // Create color gradient from head to tail
-        var gradient = new Gradient();
-        var colorKeys = new GradientColorKey[2];
-        colorKeys[0] = new GradientColorKey(headColor, 0.0f);
-        colorKeys[1] = new GradientColorKey(larvaColor, 1.0f);
-
-        var alphaKeys = new GradientAlphaKey[2];
-        alphaKeys[0] = new GradientAlphaKey(1.0f, 0.0f);
-        alphaKeys[1] = new GradientAlphaKey(0.8f, 1.0f);
-
-        gradient.SetKeys(colorKeys, alphaKeys);
-        _lineRenderer.colorGradient = gradient;
     }
 }

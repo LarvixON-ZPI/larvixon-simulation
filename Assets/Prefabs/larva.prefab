@@ -75,7 +75,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   larvaMaterial: {fileID: 0}
-  larvaColor: {r: 0, g: 1, b: 0, a: 1}
-  headColor: {r: 1, g: 0, b: 0, a: 1}
-  bodyWidth: 0.75
-  segmentResolution: 8
+  larvaColor: {r: 0.509434, g: 0.50222504, b: 0.50222504, a: 1}
+  headColor: {r: 0.6792453, g: 0.6504094, b: 0.6504094, a: 1}
+  bodyWidth: 0.5
+  segmentResolution: 22
+  smoothingFactor: 0.1
+  useSplineInterpolation: 1
