@@ -51,14 +51,17 @@ MonoBehaviour:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
   - {x: 0, y: 0}
-  segmentLength: 1
-  bodyWidth: 0.3
-  contractionStrength: 2
-  waveSpeed: 3
-  dampening: 0.9
-  restoreForce: 5
+  segmentLength: 0.8
+  contractionStrength: 2.81
+  waveSpeed: 2.5
+  dampening: 0.95
+  restoreForce: 15
+  headForwardForce: 0.5
+  headDirectionInfluence: 0.8
   isMoving: 0
-  targetDirection: {x: 1, y: 0}
+  targetDirection: {x: 0, y: 0}
+  movementPhaseTime: 1
+  _movementPhase: 1
 --- !u!114 &8710681347848768057
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,5 +77,5 @@ MonoBehaviour:
   larvaMaterial: {fileID: 0}
   larvaColor: {r: 0, g: 1, b: 0, a: 1}
   headColor: {r: 1, g: 0, b: 0, a: 1}
-  bodyWidth: 0.3
+  bodyWidth: 0.75
   segmentResolution: 8
