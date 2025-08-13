@@ -3,13 +3,11 @@ using UnityEngine;
 
 public class LarvaSimulation : MonoBehaviour
 {
-    [Header("Simulation Settings")]
     public GameObject larvaPrefab;
 
     public int larvaCount = 5;
     public Vector2 spawnArea = new(10, 10);
 
-    [Header("Global Movement Settings")]
     public bool autoMove = true;
 
     public float directionChangeInterval = 5.0f;
@@ -66,32 +64,27 @@ public class LarvaSimulation : MonoBehaviour
                 0
             );
 
-            GameObject larvaObj;
-            if (larvaPrefab != null)
-            {
-                larvaObj = Instantiate(larvaPrefab, spawnPos, Quaternion.identity);
-            }
-            else
-            {
-                // Create a simple GameObject with Larva component
-                larvaObj = new GameObject($"Larva_{i}");
-                larvaObj.transform.position = spawnPos;
-                larvaObj.AddComponent<Larva>();
-            }
-
-            var larva = larvaObj.GetComponent<Larva>();
-            if (larva != null)
-            {
-                _larvae.Add(larva);
-
-                // Randomize some parameters for variety
-                larva.segmentLength = Random.Range(0.8f, 1.2f);
-                larva.waveSpeed = Random.Range(2.0f, 4.0f);
-                larva.contractionStrength = Random.Range(1.5f, 2.5f);
-            }
+            SpawnLarva(spawnPos);
         }
+    }
 
-        Debug.Log($"Spawned {_larvae.Count} larvae");
+    private void SpawnLarva(Vector2 position)
+    {
+        var larvaObj = Instantiate(larvaPrefab, position, Quaternion.identity);
+
+        var larva = larvaObj.GetComponent<Larva>();
+
+        _larvae.Add(larva);
+
+        MutateLarva(larva);
+    }
+
+    private static void MutateLarva(Larva larva)
+    {
+        larva.segmentLength *= Random.Range(0.8f, 1.2f);
+        larva.headForwardForce *= Random.Range(0.8f, 1.2f);
+        larva.dampening *= Random.Range(0.95f, 1.05f);
+        larva.restoreForce *= Random.Range(0.8f, 1.2f);
     }
 
     private void StartAllMovement()

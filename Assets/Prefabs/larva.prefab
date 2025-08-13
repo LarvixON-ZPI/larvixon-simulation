@@ -52,9 +52,9 @@ MonoBehaviour:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
   segmentLength: 0.8
-  contractionStrength: 2.81
-  waveSpeed: 2.5
-  dampening: 0.95
+  contractionStrength: 1
+  waveSpeed: 4
+  dampening: 0.9
   restoreForce: 15
   headForwardForce: 0.5
   headDirectionInfluence: 0.8

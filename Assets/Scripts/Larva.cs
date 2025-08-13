@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Larva : MonoBehaviour
@@ -8,10 +9,8 @@ public class Larva : MonoBehaviour
     public float segmentLength = 1.0f;
 
     [Header("Movement Parameters")]
-    public float contractionStrength = 2.0f;
-
-    public float waveSpeed = 3.0f;
     public float dampening = 0.9f;
+
     public float restoreForce = 5.0f;
     public float headForwardForce = 3.0f;
     public float headDirectionInfluence = 0.8f;
@@ -21,7 +20,9 @@ public class Larva : MonoBehaviour
 
     public Vector2 targetDirection = Vector2.right;
     [SerializeField] private float movementPhaseTime = 0.5f;
-    [SerializeField] private MovementPhase _movementPhase = MovementPhase.Rest;
+
+    [SerializeField] private MovementPhase movementPhase = MovementPhase.Rest;
+
     private readonly float[] _naturalLengths = new float[4];
 
     // Internal state
@@ -60,27 +61,38 @@ public class Larva : MonoBehaviour
     private void UpdateMovementWave()
     {
         _timeInPhase += Time.deltaTime;
-        if (_timeInPhase >= movementPhaseTime)
+        if (!(_timeInPhase >= movementPhaseTime)) return;
+
+        _timeInPhase = 0;
+        movementPhase = movementPhase switch
         {
-            _timeInPhase = 0;
-            _movementPhase = _movementPhase switch
-            {
-                MovementPhase.ExtendingHead => MovementPhase.DraggingTail,
-                MovementPhase.Rest => MovementPhase.ExtendingHead,
-                MovementPhase.DraggingTail => MovementPhase.Rest,
-                _ => _movementPhase
-            };
-        }
+            MovementPhase.ExtendingHead => MovementPhase.DraggingTail,
+            MovementPhase.Rest => MovementPhase.ExtendingHead,
+            MovementPhase.DraggingTail => MovementPhase.Rest,
+            _ => movementPhase
+        };
+
 
         for (var i = 0; i < _naturalLengths.Length; i++) _segmentTargetLengths[i] = _naturalLengths[i];
 
-        if (_movementPhase == MovementPhase.DraggingTail) _segmentTargetLengths[3] = _naturalLengths[3] * .5f;
-        else if (_movementPhase == MovementPhase.ExtendingHead) _segmentTargetLengths[0] = _naturalLengths[0] * 2f;
+        switch (movementPhase)
+        {
+            case MovementPhase.DraggingTail:
+                _segmentTargetLengths[3] = _naturalLengths[3] * .5f;
+                break;
+            case MovementPhase.ExtendingHead:
+                _segmentTargetLengths[0] = _naturalLengths[0] * 2f;
+                break;
+            case MovementPhase.Rest:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private void ApplySegmentConstraints()
     {
-        if (_movementPhase != MovementPhase.DraggingTail)
+        if (movementPhase != MovementPhase.DraggingTail)
         {
             var previousPoint = points[1];
             var currentPoint = points[0];
@@ -93,7 +105,6 @@ public class Larva : MonoBehaviour
             var targetPosition = previousPoint + normalizedDirection * targetDistance +
                                  targetDirection * headForwardForce;
 
-            // Move towards target position
             var correction = (targetPosition - currentPoint) * 0.5f;
             _velocities[0] += correction * (restoreForce * Time.deltaTime);
         }
@@ -112,9 +123,12 @@ public class Larva : MonoBehaviour
             var normalizedDirection = direction / currentDistance;
             var targetPosition = previousPoint + normalizedDirection * targetDistance;
 
-            // Move towards target position
+            var additionalForce = currentDistance < _segmentTargetLengths[i - 1] / 5
+                ? _segmentTargetLengths[i - 1] / (5 * currentDistance)
+                : 1;
+
             var correction = (targetPosition - currentPoint) * 0.5f;
-            _velocities[i] += correction * (restoreForce * Time.deltaTime);
+            _velocities[i] += correction * (restoreForce * Time.deltaTime * additionalForce);
         }
     }
 
@@ -156,13 +170,13 @@ public class Larva : MonoBehaviour
     public void StartMoving(Vector2 direction)
     {
         isMoving = true;
-        targetDirection = direction.normalized;
+        SetMovementDirection(direction.normalized);
     }
 
     public void StopMoving()
     {
         isMoving = false;
-        _movementPhase = 0f;
+        movementPhase = 0f;
     }
 
     public void SetMovementDirection(Vector2 direction)
