@@ -52,8 +52,6 @@ MonoBehaviour:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
   segmentLength: 0.8
-  contractionStrength: 1
-  waveSpeed: 4
   dampening: 0.9
   restoreForce: 15
   headForwardForce: 0.5
@@ -61,7 +59,7 @@ MonoBehaviour:
   isMoving: 0
   targetDirection: {x: 0, y: 0}
   movementPhaseTime: 1
-  _movementPhase: 1
+  movementPhase: 1
 --- !u!114 &8710681347848768057
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -81,3 +79,8 @@ MonoBehaviour:
   segmentResolution: 22
   smoothingFactor: 0.1
   useSplineInterpolation: 1
+  showStripes: 1
+  stripeColor: {r: 0.8679245, g: 0.8679245, b: 0.8679245, a: 0.5019608}
+  stripeWidth: 0.04
+  stripeSpacing: 0.2
+  stripesPerSegment: 2
