@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class Larva : MonoBehaviour
 {
+    private const int NotNeighbourMinDistanceDivider = 10;
+    private const int NeighbourMinDistanceDivider = 5;
+
     [Header("Larva Structure")]
     public Vector2[] points = new Vector2[5]; // Head, 2/5, Middle, 4/5, Back
 
@@ -25,7 +28,6 @@ public class Larva : MonoBehaviour
 
     private readonly float[] _naturalLengths = new float[4];
 
-    // Internal state
     private readonly float[] _segmentTargetLengths = new float[4];
     private readonly Vector2[] _velocities = new Vector2[5];
     private float _timeInPhase;
@@ -123,13 +125,41 @@ public class Larva : MonoBehaviour
             var normalizedDirection = direction / currentDistance;
             var targetPosition = previousPoint + normalizedDirection * targetDistance;
 
-            var additionalForce = currentDistance < _segmentTargetLengths[i - 1] / 5
-                ? _segmentTargetLengths[i - 1] / (5 * currentDistance)
-                : 1;
-
             var correction = (targetPosition - currentPoint) * 0.5f;
-            _velocities[i] += correction * (restoreForce * Time.deltaTime * additionalForce);
+
+            correction += CalculateRepelFromPoints(i);
+
+            _velocities[i] += correction * (restoreForce * Time.deltaTime);
         }
+    }
+
+    private Vector2 CalculateRepelFromPoints(int i)
+    {
+        var correction = Vector2.zero;
+
+        for (var j = 0; j < points.Length; j++)
+        {
+            if (i == j) continue;
+
+            var minDistanceDivider =
+                AreNeighbours(i, j) ? NotNeighbourMinDistanceDivider : NeighbourMinDistanceDivider;
+            var desiredDistance = _segmentTargetLengths[i - 1];
+            var minDistanceToRepel = desiredDistance / minDistanceDivider;
+
+            var distance = (points[i] - points[j]).magnitude;
+
+            if (!(distance < minDistanceToRepel)) continue;
+
+            var multiplier = desiredDistance / (minDistanceDivider * distance);
+            correction += (points[i] - points[j]).normalized * multiplier;
+        }
+
+        return correction;
+    }
+
+    private bool AreNeighbours(int i, int j)
+    {
+        return Mathf.Abs(i - j) == 1;
     }
 
     private void UpdatePositions()
