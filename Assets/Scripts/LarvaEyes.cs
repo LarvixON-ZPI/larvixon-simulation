@@ -3,6 +3,10 @@ using UnityEngine;
 [RequireComponent(typeof(Larva))]
 public class LarvaEyes : MonoBehaviour
 {
+    private const float EyeZOffset = -0.02f;
+
+    private const float PupilZOffset = -0.001f;
+
     [Header("Eye Settings")]
     public Material eyeMaterial;
 
@@ -61,12 +65,11 @@ public class LarvaEyes : MonoBehaviour
     {
         if (!Application.isPlaying || _larva == null) return;
 
-        if (_larva.points.Length > 0)
-        {
-            var headPos = _larva.points[0];
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawRay(headPos, _currentLookDirection * lookAheadDistance);
-        }
+        if (_larva.points.Length <= 0) return;
+
+        var headPos = _larva.points[0];
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawRay(headPos, _currentLookDirection * lookAheadDistance);
     }
 
     private void CreateEyes()
@@ -180,8 +183,8 @@ public class LarvaEyes : MonoBehaviour
         var leftEyePos = eyeBasePosition + perpendicular * (eyeSpacing * 0.5f);
         var rightEyePos = eyeBasePosition - perpendicular * (eyeSpacing * 0.5f);
 
-        _leftEye.transform.localPosition = new Vector3(leftEyePos.x, leftEyePos.y, -0.02f);
-        _rightEye.transform.localPosition = new Vector3(rightEyePos.x, rightEyePos.y, -0.02f);
+        _leftEye.transform.localPosition = new Vector3(leftEyePos.x, leftEyePos.y, EyeZOffset);
+        _rightEye.transform.localPosition = new Vector3(rightEyePos.x, rightEyePos.y, EyeZOffset);
     }
 
     private void UpdateEyeLookDirection()
@@ -193,8 +196,8 @@ public class LarvaEyes : MonoBehaviour
 
         var pupilOffset = _currentLookDirection * pupilMaxOffset;
 
-        _leftPupil.transform.localPosition = new Vector3(pupilOffset.x, pupilOffset.y, -0.001f);
-        _rightPupil.transform.localPosition = new Vector3(pupilOffset.x, pupilOffset.y, -0.001f);
+        _leftPupil.transform.localPosition = new Vector3(pupilOffset.x, pupilOffset.y, PupilZOffset);
+        _rightPupil.transform.localPosition = new Vector3(pupilOffset.x, pupilOffset.y, PupilZOffset);
     }
 
     private void UpdateBlinking()
@@ -209,15 +212,14 @@ public class LarvaEyes : MonoBehaviour
             _leftEye.transform.localScale = new Vector3(1f, scaleY, 1f);
             _rightEye.transform.localScale = new Vector3(1f, scaleY, 1f);
 
-            if (_blinkTimer >= blinkDuration)
-            {
-                _isBlinking = false;
-                _blinkTimer = 0f;
-                _nextBlinkTime = GetNextBlinkTime();
+            if (!(_blinkTimer >= blinkDuration)) return;
 
-                _leftEye.transform.localScale = Vector3.one;
-                _rightEye.transform.localScale = Vector3.one;
-            }
+            _isBlinking = false;
+            _blinkTimer = 0f;
+            _nextBlinkTime = GetNextBlinkTime();
+
+            _leftEye.transform.localScale = Vector3.one;
+            _rightEye.transform.localScale = Vector3.one;
         }
         else if (Time.time >= _nextBlinkTime)
         {
