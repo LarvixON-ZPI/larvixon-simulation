@@ -94,55 +94,52 @@ public class Larva : MonoBehaviour
 
     private void ApplySegmentConstraints()
     {
+        var headDirectionalForce = headForwardForce * targetDirection;
+
         if (movementPhase != MovementPhase.DraggingTail)
-        {
-            var previousPoint = points[1];
-            var currentPoint = points[0];
-            var targetDistance = _segmentTargetLengths[0];
-
-            var direction = currentPoint - previousPoint;
-            var currentDistance = direction.magnitude;
-
-            var normalizedDirection = direction / currentDistance;
-            var targetPosition = previousPoint + normalizedDirection * targetDistance +
-                                 targetDirection * headForwardForce;
-
-            var correction = (targetPosition - currentPoint) * 0.5f;
-            _velocities[0] += correction * (restoreForce * Time.deltaTime);
-        }
+            ApplySegmentConstraint(0, 1, _segmentTargetLengths[0], false, headDirectionalForce);
 
         for (var i = 1; i < points.Length; i++)
-        {
-            var previousPoint = points[i - 1];
-            var currentPoint = points[i];
-            var targetDistance = _segmentTargetLengths[i - 1];
+            ApplySegmentConstraint(i, i - 1, _segmentTargetLengths[i - 1], true);
+    }
 
-            var direction = currentPoint - previousPoint;
-            var currentDistance = direction.magnitude;
+    private void ApplySegmentConstraint(int i, int otherPointIndex, float targetDistance, bool applyRepelFromPoints)
+    {
+        ApplySegmentConstraint(i, otherPointIndex, targetDistance, applyRepelFromPoints, Vector2.zero);
+    }
 
-            if (!(currentDistance > 0)) continue;
+    private void ApplySegmentConstraint(int i, int otherPointIndex, float targetDistance, bool applyRepelFromPoints,
+        Vector2 targetPositionOffset)
+    {
+        var previousPoint = points[otherPointIndex];
+        var currentPoint = points[i];
 
-            var normalizedDirection = direction / currentDistance;
-            var targetPosition = previousPoint + normalizedDirection * targetDistance;
+        var direction = currentPoint - previousPoint;
+        var currentDistance = direction.magnitude;
 
-            var correction = (targetPosition - currentPoint) * 0.5f;
+        if (!(currentDistance > 0)) return;
 
-            correction += CalculateRepelFromPoints(i);
+        var normalizedDirection = direction / currentDistance;
+        var targetPosition = previousPoint + normalizedDirection * targetDistance + targetPositionOffset;
 
-            _velocities[i] += correction * (restoreForce * Time.deltaTime);
-        }
+        var correction = (targetPosition - currentPoint) * 0.5f;
+
+        if (applyRepelFromPoints) correction += CalculateRepelFromPoints(i);
+
+        _velocities[i] += correction * (restoreForce * Time.deltaTime);
     }
 
     private Vector2 CalculateRepelFromPoints(int i)
     {
         var correction = Vector2.zero;
+        if (i == 0) return correction;
 
         for (var j = 0; j < points.Length; j++)
         {
             if (i == j) continue;
 
             var minDistanceDivider =
-                AreNeighbours(i, j) ? NotNeighbourMinDistanceDivider : NeighbourMinDistanceDivider;
+                AreNeighbours(i, j) ? NeighbourMinDistanceDivider : NotNeighbourMinDistanceDivider;
             var desiredDistance = _segmentTargetLengths[i - 1];
             var minDistanceToRepel = desiredDistance / minDistanceDivider;
 
@@ -157,7 +154,7 @@ public class Larva : MonoBehaviour
         return correction;
     }
 
-    private bool AreNeighbours(int i, int j)
+    private static bool AreNeighbours(int i, int j)
     {
         return Mathf.Abs(i - j) == 1;
     }
