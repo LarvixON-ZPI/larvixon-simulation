@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8267937854830583403}
   - component: {fileID: 6072565409401028364}
   - component: {fileID: 8710681347848768057}
+  - component: {fileID: 3011872453906952263}
   m_Layer: 0
   m_Name: larva
   m_TagString: Untagged
@@ -82,5 +83,29 @@ MonoBehaviour:
   showStripes: 1
   stripeColor: {r: 0.8679245, g: 0.8679245, b: 0.8679245, a: 0.5019608}
   stripeWidth: 0.04
-  stripeSpacing: 0.2
   stripesPerSegment: 2
+--- !u!114 &3011872453906952263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8550540643179889647}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b1801178d6701245bb9ae9d84a048ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  eyeMaterial: {fileID: 2100000, guid: 53df03fd20f64304d8ea42b788501a6b, type: 2}
+  eyeColor: {r: 1, g: 1, b: 1, a: 1}
+  pupilColor: {r: 0, g: 0, b: 0, a: 1}
+  eyeSize: 0.15
+  eyeSpacing: 0.3
+  eyeOffsetFromHead: 0.2
+  pupilSize: 0.08
+  pupilMaxOffset: 0.04
+  lookAheadDistance: 1
+  eyeRotationSpeed: 5
+  enableBlinking: 1
+  blinkInterval: 3
+  blinkDuration: 0.2
