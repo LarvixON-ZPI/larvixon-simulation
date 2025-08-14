@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class Larva : MonoBehaviour
 {
+    private const int NotNeighbourMinDistanceDivider = 10;
+    private const int NeighbourMinDistanceDivider = 5;
+
     [Header("Larva Structure")]
     public Vector2[] points = new Vector2[5]; // Head, 2/5, Middle, 4/5, Back
 
@@ -25,7 +28,6 @@ public class Larva : MonoBehaviour
 
     private readonly float[] _naturalLengths = new float[4];
 
-    // Internal state
     private readonly float[] _segmentTargetLengths = new float[4];
     private readonly Vector2[] _velocities = new Vector2[5];
     private float _timeInPhase;
@@ -92,44 +94,69 @@ public class Larva : MonoBehaviour
 
     private void ApplySegmentConstraints()
     {
+        var headDirectionalForce = headForwardForce * targetDirection;
+
         if (movementPhase != MovementPhase.DraggingTail)
-        {
-            var previousPoint = points[1];
-            var currentPoint = points[0];
-            var targetDistance = _segmentTargetLengths[0];
-
-            var direction = currentPoint - previousPoint;
-            var currentDistance = direction.magnitude;
-
-            var normalizedDirection = direction / currentDistance;
-            var targetPosition = previousPoint + normalizedDirection * targetDistance +
-                                 targetDirection * headForwardForce;
-
-            var correction = (targetPosition - currentPoint) * 0.5f;
-            _velocities[0] += correction * (restoreForce * Time.deltaTime);
-        }
+            ApplySegmentConstraint(0, 1, _segmentTargetLengths[0], false, headDirectionalForce);
 
         for (var i = 1; i < points.Length; i++)
+            ApplySegmentConstraint(i, i - 1, _segmentTargetLengths[i - 1], true);
+    }
+
+    private void ApplySegmentConstraint(int i, int otherPointIndex, float targetDistance, bool applyRepelFromPoints)
+    {
+        ApplySegmentConstraint(i, otherPointIndex, targetDistance, applyRepelFromPoints, Vector2.zero);
+    }
+
+    private void ApplySegmentConstraint(int i, int otherPointIndex, float targetDistance, bool applyRepelFromPoints,
+        Vector2 targetPositionOffset)
+    {
+        var previousPoint = points[otherPointIndex];
+        var currentPoint = points[i];
+
+        var direction = currentPoint - previousPoint;
+        var currentDistance = direction.magnitude;
+
+        if (!(currentDistance > 0)) return;
+
+        var normalizedDirection = direction / currentDistance;
+        var targetPosition = previousPoint + normalizedDirection * targetDistance + targetPositionOffset;
+
+        var correction = (targetPosition - currentPoint) * 0.5f;
+
+        if (applyRepelFromPoints) correction += CalculateRepelFromPoints(i);
+
+        _velocities[i] += correction * (restoreForce * Time.deltaTime);
+    }
+
+    private Vector2 CalculateRepelFromPoints(int i)
+    {
+        var correction = Vector2.zero;
+        if (i == 0) return correction;
+
+        for (var j = 0; j < points.Length; j++)
         {
-            var previousPoint = points[i - 1];
-            var currentPoint = points[i];
-            var targetDistance = _segmentTargetLengths[i - 1];
+            if (i == j) continue;
 
-            var direction = currentPoint - previousPoint;
-            var currentDistance = direction.magnitude;
+            var minDistanceDivider =
+                AreNeighbours(i, j) ? NeighbourMinDistanceDivider : NotNeighbourMinDistanceDivider;
+            var desiredDistance = _segmentTargetLengths[i - 1];
+            var minDistanceToRepel = desiredDistance / minDistanceDivider;
 
-            if (!(currentDistance > 0)) continue;
+            var distance = (points[i] - points[j]).magnitude;
 
-            var normalizedDirection = direction / currentDistance;
-            var targetPosition = previousPoint + normalizedDirection * targetDistance;
+            if (!(distance < minDistanceToRepel)) continue;
 
-            var additionalForce = currentDistance < _segmentTargetLengths[i - 1] / 5
-                ? _segmentTargetLengths[i - 1] / (5 * currentDistance)
-                : 1;
-
-            var correction = (targetPosition - currentPoint) * 0.5f;
-            _velocities[i] += correction * (restoreForce * Time.deltaTime * additionalForce);
+            var multiplier = desiredDistance / (minDistanceDivider * distance);
+            correction += (points[i] - points[j]).normalized * multiplier;
         }
+
+        return correction;
+    }
+
+    private static bool AreNeighbours(int i, int j)
+    {
+        return Mathf.Abs(i - j) == 1;
     }
 
     private void UpdatePositions()
