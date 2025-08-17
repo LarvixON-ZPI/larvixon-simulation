@@ -8,6 +8,8 @@ namespace Larvae
         private const int NotNeighbourMinDistanceDivider = 10;
         private const int NeighbourMinDistanceDivider = 5;
 
+        private const float MinSpeedToChangeDirection = 0f;
+
         [Header("Larva Structure")]
         public Vector2[] points = new Vector2[5]; // Head, 2/5, Middle, 4/5, Back
 
@@ -95,8 +97,20 @@ namespace Larvae
 
             var segment = newGameObject.AddComponent<Segment>();
             segment.Initialize(i, this);
+            segment.OnSegmentCollision += HandleSegmentCollision;
 
             return newCollider;
+        }
+
+        private void HandleSegmentCollision(int segmentIndex, float speed, Vector2 point)
+        {
+            if (segmentIndex != 0) return;
+
+            if (speed < MinSpeedToChangeDirection) return;
+
+            var oppositeDirection = points[segmentIndex] - point;
+
+            SetMovementDirection(oppositeDirection);
         }
 
         private void UpdateMovementWave()
