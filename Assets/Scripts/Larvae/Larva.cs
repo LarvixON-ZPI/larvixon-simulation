@@ -11,7 +11,11 @@ namespace Larvae
         [Header("Larva Structure")]
         public Vector2[] points = new Vector2[5]; // Head, 2/5, Middle, 4/5, Back
 
+        public float[] pointWidths = new float[5];
+
         public float segmentLength = 1.0f;
+
+        [SerializeField] private float colliderWidthMultiplier = 0.5f;
 
         [Header("Movement Parameters")]
         public float dampening = 0.9f;
@@ -42,11 +46,6 @@ namespace Larvae
             _rb = GetComponent<Rigidbody2D>();
         }
 
-        private void Start()
-        {
-            InitializeLarva();
-        }
-
         private void Update()
         {
             if (isMoving) UpdateMovementWave();
@@ -57,12 +56,12 @@ namespace Larvae
             DebugDrawLarva();
         }
 
-        private void InitializeLarva()
+        public void Initialize(Transform segmentParent)
         {
             for (var i = 0; i < points.Length; i++)
             {
                 points[i] = transform.position + new Vector3(i * segmentLength, 0, 0);
-                _segmentColliders[i] = SpawnColliderForSegment(i);
+                _segmentColliders[i] = SpawnColliderForSegment(i, segmentParent);
                 _segmentRigidbodies[i] = _segmentColliders[i].attachedRigidbody;
             }
 
@@ -75,13 +74,14 @@ namespace Larvae
             for (var i = 0; i < _velocities.Length; i++) _velocities[i] = Vector2.zero;
         }
 
-        private Collider2D SpawnColliderForSegment(int i)
+        private Collider2D SpawnColliderForSegment(int i, Transform segmentParent)
         {
-            var newGameObject = new GameObject
+            var newGameObject = new GameObject($"Segment_{i}")
             {
                 transform =
                 {
-                    position = points[i]
+                    position = points[i],
+                    parent = segmentParent
                 },
                 layer = LayerMask.NameToLayer("Larva")
             };
@@ -91,8 +91,10 @@ namespace Larvae
             rb.bodyType = RigidbodyType2D.Dynamic;
 
             var newCollider = newGameObject.AddComponent<CircleCollider2D>();
+            newCollider.radius = pointWidths[i] * colliderWidthMultiplier;
 
-            newCollider.radius = segmentLength;
+            var segment = newGameObject.AddComponent<Segment>();
+            segment.Initialize(i, this);
 
             return newCollider;
         }

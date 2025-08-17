@@ -23,6 +23,9 @@ public class LarvaSimulation : MonoBehaviour
 
     [SerializeField] private Slider simulationSpeedSlider;
 
+    [SerializeField] private Transform larvaeParent;
+    [SerializeField] private Transform larvaeSegmentParent;
+
     private readonly List<Larva> _larvae = new();
     private float _nextDirectionChange;
 
@@ -88,9 +91,11 @@ public class LarvaSimulation : MonoBehaviour
 
     private void SpawnLarva(Vector2 position)
     {
-        var larvaObj = Instantiate(larvaPrefab, position, Quaternion.identity);
+        var larvaObj = Instantiate(larvaPrefab, position, Quaternion.identity, larvaeParent);
 
         var larva = larvaObj.GetComponent<Larva>();
+
+        larva.Initialize(larvaeSegmentParent);
 
         _larvae.Add(larva);
 

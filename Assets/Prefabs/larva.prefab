@@ -53,7 +53,14 @@ MonoBehaviour:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
   - {x: 0, y: 0}
+  pointWidths:
+  - 0.8
+  - 1
+  - 1
+  - 1
+  - 0.6
   segmentLength: 0.8
+  colliderWidthMultiplier: 0.5
   dampening: 0.9
   restoreForce: 15
   headForwardForce: 0.5
@@ -100,9 +107,9 @@ MonoBehaviour:
   eyeMaterial: {fileID: 2100000, guid: 53df03fd20f64304d8ea42b788501a6b, type: 2}
   eyeColor: {r: 1, g: 1, b: 1, a: 1}
   pupilColor: {r: 0, g: 0, b: 0, a: 1}
-  eyeSize: 0.15
+  eyeSize: 0.1
   eyeSpacing: 0.3
-  eyeOffsetFromHead: 0.2
+  eyeOffsetFromHead: 0
   pupilSize: 0.08
   pupilMaxOffset: 0.04
   lookAheadDistance: 1

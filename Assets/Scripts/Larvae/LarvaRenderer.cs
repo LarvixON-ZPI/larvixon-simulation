@@ -6,8 +6,6 @@ namespace Larvae
     public class LarvaRenderer : MonoBehaviour
     {
         private const float StripeZOffset = -0.01f;
-        private const float HeadWidth = 1.2f;
-        private const float TailWidth = 0.6f;
         private static readonly int Color1 = Shader.PropertyToID("_Color");
 
         public Material larvaMaterial;
@@ -63,7 +61,7 @@ namespace Larvae
             for (var i = 0; i < _larva.points.Length; i++)
             {
                 Gizmos.color = i == 0 ? headColor : larvaColor;
-                Gizmos.DrawWireSphere(_larva.points[i], bodyWidth * 0.5f);
+                Gizmos.DrawWireSphere(_larva.points[i], _larva.pointWidths[i] * bodyWidth * 0.5f);
             }
         }
 
@@ -148,11 +146,7 @@ namespace Larvae
                 // Convert to local space by subtracting transform position
                 var localCenter = new Vector2(center.x - transformPosition.x, center.y - transformPosition.y);
 
-                var widthMultiplier = 1.0f;
-                if (i == 0) widthMultiplier = HeadWidth;
-                else if (i == points.Length - 1) widthMultiplier = TailWidth;
-
-                var currentWidth = bodyWidth * widthMultiplier;
+                var currentWidth = _larva.pointWidths[i] * bodyWidth;
 
                 // Color interpolation from head to tail
                 var segmentColor = Color.Lerp(headColor, larvaColor, (float)i / (points.Length - 1));
@@ -288,7 +282,7 @@ namespace Larvae
 
                 for (var stripeIdx = 0; stripeIdx < stripesPerSegment; stripeIdx++)
                     AddStripeQuad(
-                        startPoint, endPoint, transformPosition, i, points.Length, stripeIdx,
+                        startPoint, endPoint, transformPosition, i, stripeIdx,
                         ref vertexIndex, ref triangleIndex, vertices, triangles, colors
                     );
             }
@@ -302,16 +296,16 @@ namespace Larvae
         }
 
         private void AddStripeQuad(
-            Vector2 start, Vector2 end, Vector3 transformPos, int segmentIdx, int pointsCount, int stripeIdx,
+            Vector2 start, Vector2 end, Vector3 transformPos, int segmentIdx, int stripeIdx,
             ref int vertexIndex, ref int triangleIndex, Vector3[] vertices, int[] triangles, Color[] colors)
         {
             var t = (stripeIdx + 1f) / (stripesPerSegment + 1f);
             var center = Vector2.Lerp(start, end, t);
             var localCenter = center - (Vector2)transformPos;
 
-            var segmentT = segmentIdx / (float)(pointsCount - 1) + t / (pointsCount - 1);
-            var widthMultiplier = segmentT < 0.1f ? HeadWidth : segmentT > 0.9f ? TailWidth : 1f;
-            var currentWidth = bodyWidth * widthMultiplier * 0.9f;
+            var startWidth = _larva.pointWidths[segmentIdx] * bodyWidth;
+            var endWidth = _larva.pointWidths[segmentIdx + 1] * bodyWidth;
+            var currentWidth = Mathf.Lerp(startWidth, endWidth, t) * 0.9f;
 
             var dir = (end - start).normalized;
             var perp = new Vector2(-dir.y, dir.x);
