@@ -27,10 +27,18 @@ public class Larva : MonoBehaviour
     [SerializeField] private MovementPhase movementPhase = MovementPhase.Rest;
 
     private readonly float[] _naturalLengths = new float[4];
+    private readonly Collider2D[] _segmentColliders = new Collider2D[5];
+    private readonly Rigidbody2D[] _segmentRigidbodies = new Rigidbody2D[5];
 
     private readonly float[] _segmentTargetLengths = new float[4];
     private readonly Vector2[] _velocities = new Vector2[5];
+    private Rigidbody2D _rb;
     private float _timeInPhase;
+
+    private void Awake()
+    {
+        _rb = GetComponent<Rigidbody2D>();
+    }
 
     private void Start()
     {
@@ -49,7 +57,12 @@ public class Larva : MonoBehaviour
 
     private void InitializeLarva()
     {
-        for (var i = 0; i < points.Length; i++) points[i] = transform.position + new Vector3(i * segmentLength, 0, 0);
+        for (var i = 0; i < points.Length; i++)
+        {
+            points[i] = transform.position + new Vector3(i * segmentLength, 0, 0);
+            _segmentColliders[i] = SpawnColliderForSegment(i);
+            _segmentRigidbodies[i] = _segmentColliders[i].attachedRigidbody;
+        }
 
         for (var i = 0; i < _naturalLengths.Length; i++)
         {
@@ -58,6 +71,28 @@ public class Larva : MonoBehaviour
         }
 
         for (var i = 0; i < _velocities.Length; i++) _velocities[i] = Vector2.zero;
+    }
+
+    private Collider2D SpawnColliderForSegment(int i)
+    {
+        var newGameObject = new GameObject
+        {
+            transform =
+            {
+                position = points[i]
+            },
+            layer = LayerMask.NameToLayer("Larva")
+        };
+
+        var rb = newGameObject.AddComponent<Rigidbody2D>();
+        rb.gravityScale = 0f;
+        rb.bodyType = RigidbodyType2D.Dynamic;
+
+        var newCollider = newGameObject.AddComponent<CircleCollider2D>();
+
+        newCollider.radius = segmentLength;
+
+        return newCollider;
     }
 
     private void UpdateMovementWave()
@@ -163,12 +198,14 @@ public class Larva : MonoBehaviour
     {
         for (var i = 0; i < points.Length; i++)
         {
+            points[i] = _segmentColliders[i].transform.position;
             points[i] += _velocities[i] * Time.deltaTime;
             _velocities[i] *= dampening;
+            _segmentRigidbodies[i].MovePosition(points[i]);
         }
 
         var center = GetCenter();
-        transform.position = new Vector3(center.x, center.y, transform.position.z);
+        _rb.MovePosition(new Vector3(center.x, center.y, transform.position.z));
     }
 
     public Vector2 GetCenter()
@@ -203,7 +240,7 @@ public class Larva : MonoBehaviour
     public void StopMoving()
     {
         isMoving = false;
-        movementPhase = 0f;
+        movementPhase = MovementPhase.Rest;
     }
 
     public void SetMovementDirection(Vector2 direction)

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LarvaSimulation : MonoBehaviour
 {
@@ -17,6 +18,10 @@ public class LarvaSimulation : MonoBehaviour
     [SerializeField] private int targetFrameRate = 120;
     [SerializeField] private float fixedDeltaTime = 0.01f;
 
+    [SerializeField] private bool mutateLarva;
+
+    [SerializeField] private Slider simulationSpeedSlider;
+
     private readonly List<Larva> _larvae = new();
     private float _nextDirectionChange;
 
@@ -27,6 +32,8 @@ public class LarvaSimulation : MonoBehaviour
         SpawnLarvae();
 
         if (autoMove) StartAllMovement();
+
+        simulationSpeedSlider.onValueChanged.AddListener(OnSimulationSpeedChanged);
     }
 
     private void Update()
@@ -51,7 +58,17 @@ public class LarvaSimulation : MonoBehaviour
     {
         Application.targetFrameRate = targetFrameRate;
         Time.fixedDeltaTime = fixedDeltaTime;
-        Time.timeScale = simulationSpeed;
+        SetSimulationSpeed(simulationSpeed);
+    }
+
+    private void OnSimulationSpeedChanged(float newValue)
+    {
+        SetSimulationSpeed(newValue);
+    }
+
+    private void SetSimulationSpeed(float newSimulationSpeed)
+    {
+        Time.timeScale = newSimulationSpeed;
     }
 
     private void SpawnLarvae()
@@ -76,7 +93,7 @@ public class LarvaSimulation : MonoBehaviour
 
         _larvae.Add(larva);
 
-        MutateLarva(larva);
+        if (mutateLarva) MutateLarva(larva);
     }
 
     private static void MutateLarva(Larva larva)
