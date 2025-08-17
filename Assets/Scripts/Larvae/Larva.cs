@@ -8,9 +8,6 @@ namespace Larvae
 {
     public class Larva : MonoBehaviour
     {
-        private const int NotNeighbourMinDistanceDivider = 10;
-        private const int NeighbourMinDistanceDivider = 5;
-
         private const float MinSpeedToChangeDirection = 0f;
         private const float AheadTargetAngleArc = 140f;
         private const float WideTargetAngleArc = 300f;
@@ -49,8 +46,7 @@ namespace Larvae
         [SerializeField] private float tailRetraction = 0.5f;
 
         private readonly float[] _naturalLengths = new float[4];
-        private readonly Collider2D[] _segmentColliders = new Collider2D[5];
-        private readonly Rigidbody2D[] _segmentRigidbodies = new Rigidbody2D[5];
+        private readonly Segment[] _segments = new Segment[5];
 
         private readonly float[] _segmentTargetLengths = new float[4];
         private readonly Vector2[] _velocities = new Vector2[5];
@@ -84,13 +80,17 @@ namespace Larvae
             _updateTargetDirectionCts?.Dispose();
         }
 
+        public float GetSegmentWidth(int i)
+        {
+            return _segments[i].Width;
+        }
+
         public void Initialize(Transform segmentParent)
         {
             for (var i = 0; i < points.Length; i++)
             {
                 points[i] = transform.position + new Vector3(i * segmentLength, 0, 0);
-                _segmentColliders[i] = SpawnColliderForSegment(i, segmentParent);
-                _segmentRigidbodies[i] = _segmentColliders[i].attachedRigidbody;
+                _segments[i] = SpawnColliderForSegment(i, segmentParent);
             }
 
             for (var i = 0; i < _naturalLengths.Length; i++)
@@ -102,7 +102,7 @@ namespace Larvae
             for (var i = 0; i < _velocities.Length; i++) _velocities[i] = Vector2.zero;
         }
 
-        private Collider2D SpawnColliderForSegment(int i, Transform segmentParent)
+        private Segment SpawnColliderForSegment(int i, Transform segmentParent)
         {
             var newGameObject = new GameObject($"Segment_{i}")
             {
@@ -118,14 +118,16 @@ namespace Larvae
             rb.gravityScale = 0f;
             rb.bodyType = RigidbodyType2D.Dynamic;
 
+            var width = pointWidths[i];
+
             var newCollider = newGameObject.AddComponent<CircleCollider2D>();
-            newCollider.radius = pointWidths[i] * colliderWidthMultiplier;
+            newCollider.radius = width * colliderWidthMultiplier;
 
             var segment = newGameObject.AddComponent<Segment>();
-            segment.Initialize(i, this);
+            segment.Initialize(i, width);
             segment.OnSegmentCollision += HandleSegmentCollision;
 
-            return newCollider;
+            return segment;
         }
 
         private void HandleSegmentCollision(int segmentIndex, float speed, Vector2 point)
@@ -271,11 +273,10 @@ namespace Larvae
 
                 var minDistance = segmentLength;
 
-                if (distance < minDistance)
-                {
-                    var forceMagnitude = (minDistance - distance) * 0.5f; // The 0.5f here softens the repulsion
-                    correction += direction.normalized * forceMagnitude;
-                }
+                if (!(distance < minDistance)) continue;
+
+                var forceMagnitude = (minDistance - distance) * 0.5f;
+                correction += direction.normalized * forceMagnitude;
             }
 
             return correction;
@@ -310,10 +311,10 @@ namespace Larvae
         {
             for (var i = 0; i < points.Length; i++)
             {
-                points[i] = _segmentColliders[i].transform.position;
+                points[i] = _segments[i].transform.position;
                 points[i] += _velocities[i] * Time.fixedDeltaTime;
                 _velocities[i] *= dampening;
-                _segmentRigidbodies[i].MovePosition(points[i]);
+                _segments[i].Rigidbody.MovePosition(points[i]);
             }
 
             var center = GetCenter();

@@ -12,8 +12,6 @@ public class LarvaSimulation : MonoBehaviour
 
     public bool autoMove = true;
 
-    public float directionChangeInterval = 5.0f;
-
     [SerializeField] private float simulationSpeed = 1;
 
     [SerializeField] private int targetFrameRate = 120;
@@ -51,9 +49,7 @@ public class LarvaSimulation : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        // Draw spawn area
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(transform.position, new Vector3(spawnArea.x, spawnArea.y, 0));
+        DrawSpawnAreaGizmos();
     }
 
     private void OnValidate()
@@ -61,6 +57,12 @@ public class LarvaSimulation : MonoBehaviour
         Application.targetFrameRate = targetFrameRate;
         Time.fixedDeltaTime = fixedDeltaTime;
         SetSimulationSpeed(simulationSpeed);
+    }
+
+    private void DrawSpawnAreaGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(transform.position, new Vector3(spawnArea.x, spawnArea.y, 0));
     }
 
     private void OnSimulationSpeedChanged(float newValue)

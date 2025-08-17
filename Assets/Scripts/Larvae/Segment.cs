@@ -6,27 +6,33 @@ namespace Larvae
     public class Segment : MonoBehaviour
     {
         [SerializeField] private int segmentIndex;
-        [SerializeField] private Larva parentLarva;
 
-        public int SegmentIndex => segmentIndex;
-        public Larva ParentLarva => parentLarva;
+        [field: SerializeField]
+        public float Width { get; private set; }
 
-        public float Width => parentLarva != null ? parentLarva.pointWidths[segmentIndex] : 1f;
+        [field: SerializeField]
+        public Rigidbody2D Rigidbody { get; private set; }
+
+        private void Awake()
+        {
+            Rigidbody = GetComponent<Rigidbody2D>();
+            GetComponent<Collider2D>();
+        }
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
             var speed = collision.relativeVelocity.magnitude;
             var contactPoint = collision.GetContact(0).point;
 
-            OnSegmentCollision?.Invoke(SegmentIndex, speed, contactPoint);
+            OnSegmentCollision?.Invoke(segmentIndex, speed, contactPoint);
         }
 
         public event Action<int, float, Vector2> OnSegmentCollision;
 
-        public void Initialize(int index, Larva larva)
+        public void Initialize(int index, float width)
         {
             segmentIndex = index;
-            parentLarva = larva;
+            Width = width;
         }
     }
 }
