@@ -62,11 +62,11 @@ MonoBehaviour:
   segmentLength: 0.8
   colliderWidthMultiplier: 0.5
   dampening: 0.9
-  restoreForce: 40
+  restoreForce: 50
   headForwardForce: 1.5
   headDirectionInfluence: 0.8
   maxAllowedCurveDegrees: 45
-  curveStraighteningForce: 2
+  curveStraighteningForce: 4
   isMoving: 0
   targetDirection: {x: 0, y: 0}
   movementPhaseTime: 0.5
@@ -105,7 +105,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   movementPhase: 1
   headExtension: 2
-  tailRetraction: 0.25
+  tailRetraction: 0.1
 --- !u!114 &8710681347848768057
 MonoBehaviour:
   m_ObjectHideFlags: 0

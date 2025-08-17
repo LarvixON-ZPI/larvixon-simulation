@@ -27,10 +27,12 @@ public class LarvaSimulation : MonoBehaviour
     [SerializeField] private Transform larvaeSegmentParent;
 
     private readonly List<Larva> _larvae = new();
+    private Camera _camera;
     private float _nextDirectionChange;
 
     private void Start()
     {
+        _camera = Camera.main;
         OnValidate();
 
         SpawnLarvae();
@@ -150,6 +152,19 @@ public class LarvaSimulation : MonoBehaviour
         {
             ChangeRandomDirections();
             Debug.Log("Changed all larvae directions randomly");
+        }
+
+        if (Input.GetMouseButton(1))
+        {
+            var mouseWorldPos = _camera.ScreenToWorldPoint(Input.mousePosition);
+            mouseWorldPos.z = 0;
+
+            foreach (var larva in _larvae)
+            {
+                var larvaPos = larva.GetCenter();
+                var directionToMouse = ((Vector2)mouseWorldPos - larvaPos).normalized;
+                larva.SetMovementDirection(directionToMouse);
+            }
         }
     }
 }

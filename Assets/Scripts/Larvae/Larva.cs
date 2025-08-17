@@ -54,10 +54,10 @@ namespace Larvae
 
         private readonly float[] _segmentTargetLengths = new float[4];
         private readonly Vector2[] _velocities = new Vector2[5];
-
-        private CancellationTokenSource _cts;
         private Rigidbody2D _rb;
         private float _timeInPhase;
+
+        private CancellationTokenSource _updateTargetDirectionCts;
 
         private void Awake()
         {
@@ -67,12 +67,11 @@ namespace Larvae
         private void Start()
         {
             UpdateTargetDirection().Forget();
+            UpdateMovementWave().Forget();
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
-            if (isMoving) UpdateMovementWave();
-
             ApplySegmentConstraints();
             UpdatePositions();
 
@@ -81,8 +80,8 @@ namespace Larvae
 
         private void OnDestroy()
         {
-            _cts?.Cancel();
-            _cts?.Dispose();
+            _updateTargetDirectionCts?.Cancel();
+            _updateTargetDirectionCts?.Dispose();
         }
 
         public void Initialize(Transform segmentParent)
@@ -140,48 +139,50 @@ namespace Larvae
             SetMovementDirection(oppositeDirection);
         }
 
-        private void UpdateMovementWave()
+        private async UniTask UpdateMovementWave()
         {
-            _timeInPhase += Time.deltaTime;
-            if (!(_timeInPhase >= movementPhaseTime)) return;
-
-            _timeInPhase = 0;
-            movementPhase = movementPhase switch
+            while (true)
             {
-                MovementPhase.ExtendingHead => MovementPhase.DraggingTail,
-                MovementPhase.Rest => MovementPhase.ExtendingHead,
-                MovementPhase.DraggingTail => MovementPhase.Rest,
-                _ => movementPhase
-            };
+                await UniTask.Delay(TimeSpan.FromSeconds(movementPhaseTime));
 
+                if (!isMoving) continue;
 
-            for (var i = 0; i < _naturalLengths.Length; i++) _segmentTargetLengths[i] = _naturalLengths[i];
+                movementPhase = movementPhase switch
+                {
+                    MovementPhase.ExtendingHead => MovementPhase.DraggingTail,
+                    MovementPhase.Rest => MovementPhase.ExtendingHead,
+                    MovementPhase.DraggingTail => MovementPhase.Rest,
+                    _ => movementPhase
+                };
 
-            switch (movementPhase)
-            {
-                case MovementPhase.DraggingTail:
-                    _segmentTargetLengths[3] = _naturalLengths[3] * tailRetraction;
-                    break;
-                case MovementPhase.ExtendingHead:
-                    _segmentTargetLengths[0] = _naturalLengths[0] * headExtension;
-                    break;
-                case MovementPhase.Rest:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                for (var i = 0; i < _naturalLengths.Length; i++) _segmentTargetLengths[i] = _naturalLengths[i];
+
+                switch (movementPhase)
+                {
+                    case MovementPhase.DraggingTail:
+                        _segmentTargetLengths[3] = _naturalLengths[3] * tailRetraction;
+                        break;
+                    case MovementPhase.ExtendingHead:
+                        _segmentTargetLengths[0] = _naturalLengths[0] * headExtension;
+                        break;
+                    case MovementPhase.Rest:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
         }
 
 
         private async UniTask UpdateTargetDirection()
         {
-            _cts = new CancellationTokenSource();
+            var cts = new CancellationTokenSource();
             try
             {
                 while (true)
                 {
                     var timeToWait = timeToChangeDirection.Evaluate(Random.value);
-                    await UniTask.Delay(TimeSpan.FromSeconds(timeToWait), cancellationToken: _cts.Token);
+                    await UniTask.Delay(TimeSpan.FromSeconds(timeToWait), cancellationToken: cts.Token);
                     SetMovementDirection(GetDesiredDirection());
                 }
             }
@@ -226,7 +227,7 @@ namespace Larvae
                 var forceMultiplier = excessCurvature / maxAllowedCurveDegrees;
                 var straighteningForceVector = curveStraighteningForce * forceMultiplier * straighteningDirection;
 
-                _velocities[i] += straighteningForceVector * Time.deltaTime;
+                _velocities[i] += straighteningForceVector * Time.fixedDeltaTime;
             }
         }
 
@@ -249,11 +250,11 @@ namespace Larvae
             var normalizedDirection = direction / currentDistance;
             var targetPosition = previousPoint + normalizedDirection * targetDistance + targetPositionOffset;
 
-            var correction = (targetPosition - currentPoint) * 0.5f;
+            var correction = targetPosition - currentPoint;
 
             if (applyRepelFromPoints) correction += CalculateRepelFromPoints(i);
 
-            _velocities[i] += restoreForce * Time.deltaTime * correction;
+            _velocities[i] += restoreForce * Time.fixedDeltaTime * correction;
         }
 
         private Vector2 CalculateRepelFromPoints(int i)
@@ -263,19 +264,18 @@ namespace Larvae
 
             for (var j = 0; j < points.Length; j++)
             {
-                if (i == j) continue;
+                if (i == j || AreNeighbours(i, j)) continue;
 
-                var minDistanceDivider =
-                    AreNeighbours(i, j) ? NeighbourMinDistanceDivider : NotNeighbourMinDistanceDivider;
-                var desiredDistance = _segmentTargetLengths[i - 1];
-                var minDistanceToRepel = desiredDistance / minDistanceDivider;
+                var direction = points[i] - points[j];
+                var distance = direction.magnitude;
 
-                var distance = (points[i] - points[j]).magnitude;
+                var minDistance = segmentLength;
 
-                if (!(distance < minDistanceToRepel)) continue;
-
-                var multiplier = desiredDistance / (minDistanceDivider * distance);
-                correction += (points[i] - points[j]).normalized * multiplier;
+                if (distance < minDistance)
+                {
+                    var forceMagnitude = (minDistance - distance) * 0.5f; // The 0.5f here softens the repulsion
+                    correction += direction.normalized * forceMagnitude;
+                }
             }
 
             return correction;
@@ -311,7 +311,7 @@ namespace Larvae
             for (var i = 0; i < points.Length; i++)
             {
                 points[i] = _segmentColliders[i].transform.position;
-                points[i] += _velocities[i] * Time.deltaTime;
+                points[i] += _velocities[i] * Time.fixedDeltaTime;
                 _velocities[i] *= dampening;
                 _segmentRigidbodies[i].MovePosition(points[i]);
             }
