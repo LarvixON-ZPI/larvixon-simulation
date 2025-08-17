@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using Larvae;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LarvaSimulation : MonoBehaviour
 {
@@ -17,6 +19,13 @@ public class LarvaSimulation : MonoBehaviour
     [SerializeField] private int targetFrameRate = 120;
     [SerializeField] private float fixedDeltaTime = 0.01f;
 
+    [SerializeField] private bool mutateLarva;
+
+    [SerializeField] private Slider simulationSpeedSlider;
+
+    [SerializeField] private Transform larvaeParent;
+    [SerializeField] private Transform larvaeSegmentParent;
+
     private readonly List<Larva> _larvae = new();
     private float _nextDirectionChange;
 
@@ -27,6 +36,8 @@ public class LarvaSimulation : MonoBehaviour
         SpawnLarvae();
 
         if (autoMove) StartAllMovement();
+
+        simulationSpeedSlider.onValueChanged.AddListener(OnSimulationSpeedChanged);
     }
 
     private void Update()
@@ -51,7 +62,17 @@ public class LarvaSimulation : MonoBehaviour
     {
         Application.targetFrameRate = targetFrameRate;
         Time.fixedDeltaTime = fixedDeltaTime;
-        Time.timeScale = simulationSpeed;
+        SetSimulationSpeed(simulationSpeed);
+    }
+
+    private void OnSimulationSpeedChanged(float newValue)
+    {
+        SetSimulationSpeed(newValue);
+    }
+
+    private void SetSimulationSpeed(float newSimulationSpeed)
+    {
+        Time.timeScale = newSimulationSpeed;
     }
 
     private void SpawnLarvae()
@@ -70,13 +91,15 @@ public class LarvaSimulation : MonoBehaviour
 
     private void SpawnLarva(Vector2 position)
     {
-        var larvaObj = Instantiate(larvaPrefab, position, Quaternion.identity);
+        var larvaObj = Instantiate(larvaPrefab, position, Quaternion.identity, larvaeParent);
 
         var larva = larvaObj.GetComponent<Larva>();
 
+        larva.Initialize(larvaeSegmentParent);
+
         _larvae.Add(larva);
 
-        MutateLarva(larva);
+        if (mutateLarva) MutateLarva(larva);
     }
 
     private static void MutateLarva(Larva larva)
