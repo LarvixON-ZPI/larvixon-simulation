@@ -42,12 +42,6 @@ public class LarvaSimulation : MonoBehaviour
 
     private void Update()
     {
-        if (autoMove && Time.time > _nextDirectionChange)
-        {
-            ChangeRandomDirections();
-            _nextDirectionChange = Time.time + directionChangeInterval;
-        }
-
         HandleInput();
     }
 

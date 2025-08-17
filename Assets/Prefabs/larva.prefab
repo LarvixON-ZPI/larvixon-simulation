@@ -68,6 +68,39 @@ MonoBehaviour:
   isMoving: 0
   targetDirection: {x: 0, y: 0}
   movementPhaseTime: 0.5
+  timeToChangeDirection:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -0.0053100586
+      value: 2.999939
+      inSlope: 1.1222036
+      outSlope: 1.1222036
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.4805782
+    - serializedVersion: 3
+      time: 0.70181185
+      value: 5.428859
+      inSlope: 9.143564
+      outSlope: 9.143564
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.18332481
+    - serializedVersion: 3
+      time: 1.0242989
+      value: 9.997435
+      inSlope: 14.166694
+      outSlope: 14.166694
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   movementPhase: 1
   headExtension: 2
   tailRetraction: 0.25
@@ -144,5 +177,5 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0

@@ -1,5 +1,8 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Larvae
 {
@@ -9,6 +12,8 @@ namespace Larvae
         private const int NeighbourMinDistanceDivider = 5;
 
         private const float MinSpeedToChangeDirection = 0f;
+        private const float AheadTargetAngleArc = 140f;
+        private const float WideTargetAngleArc = 300f;
 
         [Header("Larva Structure")]
         public Vector2[] points = new Vector2[5]; // Head, 2/5, Middle, 4/5, Back
@@ -26,12 +31,13 @@ namespace Larvae
         public float headForwardForce = 3.0f;
         public float headDirectionInfluence = 0.8f;
 
-
         [Header("Movement State")]
         public bool isMoving;
 
+        // always normalized
         public Vector2 targetDirection = Vector2.right;
         [SerializeField] private float movementPhaseTime = 0.5f;
+        public AnimationCurve timeToChangeDirection;
 
         [SerializeField] private MovementPhase movementPhase = MovementPhase.Rest;
         [SerializeField] private float headExtension = 2f;
@@ -43,12 +49,19 @@ namespace Larvae
 
         private readonly float[] _segmentTargetLengths = new float[4];
         private readonly Vector2[] _velocities = new Vector2[5];
+
+        private CancellationTokenSource _cts;
         private Rigidbody2D _rb;
         private float _timeInPhase;
 
         private void Awake()
         {
             _rb = GetComponent<Rigidbody2D>();
+        }
+
+        private void Start()
+        {
+            UpdateTargetDirection().Forget();
         }
 
         private void Update()
@@ -59,6 +72,12 @@ namespace Larvae
             UpdatePositions();
 
             DebugDrawLarva();
+        }
+
+        private void OnDestroy()
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
         }
 
         public void Initialize(Transform segmentParent)
@@ -145,6 +164,24 @@ namespace Larvae
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+
+
+        private async UniTask UpdateTargetDirection()
+        {
+            _cts = new CancellationTokenSource();
+            try
+            {
+                while (true)
+                {
+                    var timeToWait = timeToChangeDirection.Evaluate(Random.value);
+                    await UniTask.Delay(TimeSpan.FromSeconds(timeToWait), cancellationToken: _cts.Token);
+                    SetMovementDirection(GetDesiredDirection());
+                }
+            }
+            catch (OperationCanceledException)
+            {
             }
         }
 
@@ -262,6 +299,21 @@ namespace Larvae
         {
             isMoving = false;
             movementPhase = MovementPhase.Rest;
+        }
+
+        private Vector2 GetDesiredDirection()
+        {
+            var angleArc = Random.value < headDirectionInfluence ? AheadTargetAngleArc : WideTargetAngleArc;
+            var halfArc = angleArc / 2f;
+            var randomAngle = Random.Range(-halfArc, halfArc);
+
+            var angleRad = randomAngle * Mathf.Deg2Rad;
+            var rotatedDirection = new Vector2(
+                targetDirection.x * Mathf.Cos(angleRad) - targetDirection.y * Mathf.Sin(angleRad),
+                targetDirection.x * Mathf.Sin(angleRad) + targetDirection.y * Mathf.Cos(angleRad)
+            );
+
+            return rotatedDirection.normalized;
         }
 
         public void SetMovementDirection(Vector2 direction)
