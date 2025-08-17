@@ -26,6 +26,7 @@ namespace Larvae
         public float headForwardForce = 3.0f;
         public float headDirectionInfluence = 0.8f;
 
+
         [Header("Movement State")]
         public bool isMoving;
 
@@ -33,6 +34,8 @@ namespace Larvae
         [SerializeField] private float movementPhaseTime = 0.5f;
 
         [SerializeField] private MovementPhase movementPhase = MovementPhase.Rest;
+        [SerializeField] private float headExtension = 2f;
+        [SerializeField] private float tailRetraction = 0.5f;
 
         private readonly float[] _naturalLengths = new float[4];
         private readonly Collider2D[] _segmentColliders = new Collider2D[5];
@@ -133,10 +136,10 @@ namespace Larvae
             switch (movementPhase)
             {
                 case MovementPhase.DraggingTail:
-                    _segmentTargetLengths[3] = _naturalLengths[3] * .5f;
+                    _segmentTargetLengths[3] = _naturalLengths[3] * tailRetraction;
                     break;
                 case MovementPhase.ExtendingHead:
-                    _segmentTargetLengths[0] = _naturalLengths[0] * 2f;
+                    _segmentTargetLengths[0] = _naturalLengths[0] * headExtension;
                     break;
                 case MovementPhase.Rest:
                     break;
