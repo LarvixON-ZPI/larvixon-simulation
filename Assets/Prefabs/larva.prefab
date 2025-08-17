@@ -65,6 +65,8 @@ MonoBehaviour:
   restoreForce: 40
   headForwardForce: 1.5
   headDirectionInfluence: 0.8
+  maxAllowedCurveDegrees: 45
+  curveStraighteningForce: 2
   isMoving: 0
   targetDirection: {x: 0, y: 0}
   movementPhaseTime: 0.5

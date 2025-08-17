@@ -1103,7 +1103,7 @@ Transform:
   m_GameObject: {fileID: 631029845}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -5, z: 0}
+  m_LocalPosition: {x: 0, y: -4.836, z: 0}
   m_LocalScale: {x: 11, y: 0.7126386, z: 0.8421633}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -1181,7 +1181,7 @@ Transform:
   m_GameObject: {fileID: 677697685}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 5, z: 0}
+  m_LocalPosition: {x: 0, y: 4.914, z: 0}
   m_LocalScale: {x: 11, y: 0.7126386, z: 0.8421633}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -1702,7 +1702,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   larvaPrefab: {fileID: 8550540643179889647, guid: cf774e70fe50a30458bb2a22deef396a, type: 3}
   larvaCount: 1
-  spawnArea: {x: 1, y: 1}
+  spawnArea: {x: 20, y: 20}
   autoMove: 1
   directionChangeInterval: 5
   simulationSpeed: 1
@@ -1784,7 +1784,7 @@ Transform:
   m_GameObject: {fileID: 1419470177}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5, y: 0, z: 0}
+  m_LocalPosition: {x: 5.052, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 10, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1907,11 +1907,11 @@ Transform:
   - {fileID: 1796610803}
   - {fileID: 1855321778}
   - {fileID: 882433476}
-  - {fileID: 373281280}
   - {fileID: 1640545708}
+  - {fileID: 373281280}
   - {fileID: 851270135}
-  - {fileID: 1419470180}
   - {fileID: 677697688}
+  - {fileID: 1419470180}
   - {fileID: 631029848}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

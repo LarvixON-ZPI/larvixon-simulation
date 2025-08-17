@@ -38,6 +38,8 @@ public class LarvaSimulation : MonoBehaviour
         if (autoMove) StartAllMovement();
 
         simulationSpeedSlider.onValueChanged.AddListener(OnSimulationSpeedChanged);
+
+        Application.runInBackground = true;
     }
 
     private void Update()

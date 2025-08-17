@@ -31,6 +31,11 @@ namespace Larvae
         public float headForwardForce = 3.0f;
         public float headDirectionInfluence = 0.8f;
 
+        [Header("Curve Straightening")]
+        public float maxAllowedCurveDegrees = 45.0f;
+
+        public float curveStraighteningForce = 2.0f;
+
         [Header("Movement State")]
         public bool isMoving;
 
@@ -130,7 +135,7 @@ namespace Larvae
 
             if (speed < MinSpeedToChangeDirection) return;
 
-            var oppositeDirection = points[segmentIndex] - point;
+            var oppositeDirection = (points[segmentIndex] - point).normalized + Random.insideUnitCircle / 2;
 
             SetMovementDirection(oppositeDirection);
         }
@@ -194,6 +199,35 @@ namespace Larvae
 
             for (var i = 1; i < points.Length; i++)
                 ApplySegmentConstraint(i, i - 1, _segmentTargetLengths[i - 1], true);
+
+            ApplyCurveStraighteningForces();
+        }
+
+        private void ApplyCurveStraighteningForces()
+        {
+            for (var i = 1; i < points.Length - 1; i++)
+            {
+                var angle = CalculateAngleBetweenThreePoints(i - 1, i, i + 1);
+                var curvature = 180f - angle;
+
+                if (!(curvature > maxAllowedCurveDegrees)) continue;
+
+                var prevPoint = points[i - 1];
+                var currentPoint = points[i];
+                var nextPoint = points[i + 1];
+
+                var straightLineDirection = (nextPoint - prevPoint).normalized;
+                var currentToLine =
+                    Vector2.Dot(currentPoint - prevPoint, straightLineDirection) * straightLineDirection +
+                    prevPoint;
+                var straighteningDirection = (currentToLine - currentPoint).normalized;
+
+                var excessCurvature = curvature - maxAllowedCurveDegrees;
+                var forceMultiplier = excessCurvature / maxAllowedCurveDegrees;
+                var straighteningForceVector = curveStraighteningForce * forceMultiplier * straighteningDirection;
+
+                _velocities[i] += straighteningForceVector * Time.deltaTime;
+            }
         }
 
         private void ApplySegmentConstraint(int i, int otherPointIndex, float targetDistance, bool applyRepelFromPoints)
@@ -219,7 +253,7 @@ namespace Larvae
 
             if (applyRepelFromPoints) correction += CalculateRepelFromPoints(i);
 
-            _velocities[i] += correction * (restoreForce * Time.deltaTime);
+            _velocities[i] += restoreForce * Time.deltaTime * correction;
         }
 
         private Vector2 CalculateRepelFromPoints(int i)
@@ -250,6 +284,26 @@ namespace Larvae
         private static bool AreNeighbours(int i, int j)
         {
             return Mathf.Abs(i - j) == 1;
+        }
+
+        private float CalculateAngleBetweenThreePoints(int prevIndex, int currentIndex, int nextIndex)
+        {
+            if (prevIndex < 0 || nextIndex >= points.Length) return 0f;
+
+            var prevPoint = points[prevIndex];
+            var currentPoint = points[currentIndex];
+            var nextPoint = points[nextIndex];
+
+            var vector1 = (prevPoint - currentPoint).normalized;
+            var vector2 = (nextPoint - currentPoint).normalized;
+
+            var dot = Vector2.Dot(vector1, vector2);
+            dot = Mathf.Clamp(dot, -1f, 1f);
+
+            var angleRad = Mathf.Acos(dot);
+            var angleDeg = angleRad * Mathf.Rad2Deg;
+
+            return angleDeg;
         }
 
         private void UpdatePositions()
