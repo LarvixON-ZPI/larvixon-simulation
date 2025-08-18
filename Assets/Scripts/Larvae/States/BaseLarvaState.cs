@@ -36,7 +36,7 @@ namespace Larvae.States
             return Random.insideUnitCircle.normalized;
         }
 
-        protected static Vector2 GetRandomDirectionBiased(Vector2 currentDirection, float bias = 0.7f)
+        protected static Vector2 GetRandomDirectionBiased(Vector2 currentDirection, float bias)
         {
             var random = GetRandomDirection();
             return Vector2.Lerp(random, currentDirection, bias).normalized;

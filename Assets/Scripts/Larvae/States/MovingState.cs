@@ -1,16 +1,23 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Larvae.States
 {
+    [Serializable]
     public class MovingState : BaseLarvaState
     {
+        [SerializeField] private float directionChangeInterval = 3f;
+        [SerializeField] private float directionChangeVariance = 2f;
+
         private float _nextDirectionChange;
-
-        [Header("Movement Parameters")]
-        public float directionChangeInterval = 2f;
-
-        public float directionChangeVariance = 1f;
         public override string StateName => "Moving";
+
+        private float CalculateHeadInfluence(float x)
+        {
+            var y = x < 0.3f ? x * 2 : Mathf.Sqrt(x);
+            return y;
+        }
 
         public override void Enter(LarvaStateMachine stateMachine)
         {
@@ -25,12 +32,12 @@ namespace Larvae.States
 
             var larva = stateMachine.LarvaController;
 
-            if (TimeInState >= _nextDirectionChange)
-            {
-                var newDirection = GetRandomDirectionBiased(larva.targetDirection, 0.6f);
-                larva.SetMovementDirection(newDirection);
-                _nextDirectionChange = TimeInState + GetNextDirectionChangeTime();
-            }
+            if (TimeInState < _nextDirectionChange) return;
+
+            var newDirection =
+                GetRandomDirectionBiased(larva.targetDirection, CalculateHeadInfluence(Random.value));
+            larva.SetMovementDirection(newDirection);
+            _nextDirectionChange = TimeInState + GetNextDirectionChangeTime();
         }
 
         private float GetNextDirectionChangeTime()
