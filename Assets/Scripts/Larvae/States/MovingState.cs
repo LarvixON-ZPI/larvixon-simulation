@@ -9,6 +9,7 @@ namespace Larvae.States
     {
         [SerializeField] private float directionChangeInterval = 3f;
         [SerializeField] private float directionChangeVariance = 2f;
+        [SerializeField] private float stateChangeProbability = 0.2f;
 
         private float _nextDirectionChange;
         public override string StateName => "Moving";
@@ -33,6 +34,18 @@ namespace Larvae.States
             var larva = stateMachine.LarvaController;
 
             if (TimeInState < _nextDirectionChange) return;
+
+            if (Random.value < stateChangeProbability)
+            {
+                var val = Random.value;
+                var newStateName = val switch
+                {
+                    < 0.5f => "LayingDown",
+                    < 0.8f => "LookingAtEnvironment",
+                    _ => "LayingNearWall"
+                };
+                stateMachine.TransitionToState(newStateName);
+            }
 
             var newDirection =
                 GetRandomDirectionBiased(larva.targetDirection, CalculateHeadInfluence(Random.value));

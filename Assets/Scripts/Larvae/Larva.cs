@@ -192,7 +192,7 @@ namespace Larvae
                     movementPhase = phases[Random.Range(0, phases.Length)];
                 }
 
-                for (var i = 0; i < _naturalLengths.Length; i++) _segmentTargetLengths[i] = _naturalLengths[i];
+                ResetTargetLengths();
 
                 switch (movementPhase)
                 {
@@ -213,16 +213,24 @@ namespace Larvae
             }
         }
 
+        private void ResetTargetLengths()
+        {
+            for (var i = 0; i < _segmentTargetLengths.Length; i++)
+                _segmentTargetLengths[i] = _naturalLengths[i];
+        }
+
         private void ApplySegmentConstraints()
         {
             var modifier = CurrentMovementModifier;
-            var headDirectionalForce = headForwardForce * targetDirection * modifier.headForceMultiplier;
+            var headDirectionalForce = headForwardForce * modifier.headForceMultiplier * targetDirection;
 
             if (modifier.randomnessMultiplier > 0)
             {
-                var randomForce = Random.insideUnitCircle * modifier.randomnessMultiplier * Time.fixedDeltaTime;
+                var randomForce = modifier.randomnessMultiplier * Time.fixedDeltaTime * Random.insideUnitCircle;
                 headDirectionalForce += randomForce;
             }
+
+            if (!modifier.canMove || !isMoving) headDirectionalForce = Vector2.zero;
 
             if (movementPhase != MovementPhase.DraggingTail)
                 ApplySegmentConstraint(0, 1, _segmentTargetLengths[0], false, headDirectionalForce);
@@ -289,7 +297,7 @@ namespace Larvae
             if (modifier.segmentSyncMultiplier < 1f && Random.value > modifier.segmentSyncMultiplier)
             {
                 correction *= Random.Range(0.1f, 1.5f);
-                correction += Random.insideUnitCircle * modifier.randomnessMultiplier * 0.5f;
+                correction += modifier.randomnessMultiplier * 0.5f * Random.insideUnitCircle;
             }
 
             _velocities[i] += modifiedRestoreForce * Time.fixedDeltaTime * correction;
@@ -354,7 +362,7 @@ namespace Larvae
                 var velocity = _velocities[i] * modifier.speedMultiplier;
 
                 if (modifier.coordinationMultiplier < 1f)
-                    velocity += Random.insideUnitCircle * (1f - modifier.coordinationMultiplier) * Time.fixedDeltaTime;
+                    velocity += (1f - modifier.coordinationMultiplier) * Time.fixedDeltaTime * Random.insideUnitCircle;
 
                 points[i] += velocity * Time.fixedDeltaTime;
                 _velocities[i] *= dampening;
@@ -398,6 +406,7 @@ namespace Larvae
         {
             isMoving = false;
             movementPhase = MovementPhase.Rest;
+            ResetTargetLengths();
         }
 
         public Vector2 GetDesiredDirection()
