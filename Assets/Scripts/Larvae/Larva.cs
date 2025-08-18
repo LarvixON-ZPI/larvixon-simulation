@@ -1,14 +1,18 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Larvae.Drugs;
+using Larvae.States;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Larvae
 {
     public class Larva : MonoBehaviour
     {
-        private const int NotNeighbourMinDistanceDivider = 10;
-        private const int NeighbourMinDistanceDivider = 5;
-
         private const float MinSpeedToChangeDirection = 0f;
+        private const float AheadTargetAngleArc = 140f;
+        private const float WideTargetAngleArc = 300f;
 
         [Header("Larva Structure")]
         public Vector2[] points = new Vector2[5]; // Head, 2/5, Middle, 4/5, Back
@@ -26,36 +30,79 @@ namespace Larvae
         public float headForwardForce = 3.0f;
         public float headDirectionInfluence = 0.8f;
 
+        [Header("Curve Straightening")]
+        public float maxAllowedCurveDegrees = 45.0f;
+
+        public float curveStraighteningForce = 2.0f;
+
         [Header("Movement State")]
         public bool isMoving;
 
+        // always normalized
         public Vector2 targetDirection = Vector2.right;
         [SerializeField] private float movementPhaseTime = 0.5f;
+        public AnimationCurve timeToChangeDirection;
 
         [SerializeField] private MovementPhase movementPhase = MovementPhase.Rest;
+        [SerializeField] private float headExtension = 2f;
+        [SerializeField] private float tailRetraction = 0.5f;
 
         private readonly float[] _naturalLengths = new float[4];
-        private readonly Collider2D[] _segmentColliders = new Collider2D[5];
-        private readonly Rigidbody2D[] _segmentRigidbodies = new Rigidbody2D[5];
+        private readonly Segment[] _segments = new Segment[5];
 
         private readonly float[] _segmentTargetLengths = new float[4];
         private readonly Vector2[] _velocities = new Vector2[5];
+        private DrugSystem _drugSystem;
         private Rigidbody2D _rb;
+
+        private LarvaStateMachine _stateMachine;
         private float _timeInPhase;
+
+        private CancellationTokenSource _updateTargetDirectionCts;
+
+        public MovementModifier CurrentMovementModifier => _drugSystem?.CurrentModifier ?? MovementModifier.Normal;
 
         private void Awake()
         {
             _rb = GetComponent<Rigidbody2D>();
+
+            _stateMachine = GetComponent<LarvaStateMachine>() ?? gameObject.AddComponent<LarvaStateMachine>();
+            _drugSystem = GetComponent<DrugSystem>() ?? gameObject.AddComponent<DrugSystem>();
+
+            SetupStateMachine();
         }
 
-        private void Update()
+        private void Start()
         {
-            if (isMoving) UpdateMovementWave();
+            _stateMachine.StartStateMachine();
+            UpdateMovementWave().Forget();
+        }
 
+        private void FixedUpdate()
+        {
             ApplySegmentConstraints();
             UpdatePositions();
 
             DebugDrawLarva();
+        }
+
+        private void OnDestroy()
+        {
+            _updateTargetDirectionCts?.Cancel();
+            _updateTargetDirectionCts?.Dispose();
+        }
+
+        private void SetupStateMachine()
+        {
+            _stateMachine.RegisterState(new MovingState());
+            _stateMachine.RegisterState(new LayingDownState());
+            _stateMachine.RegisterState(new LookingAtEnvironmentState());
+            _stateMachine.RegisterState(new LayingNearWallState());
+        }
+
+        public float GetSegmentWidth(int i)
+        {
+            return _segments[i].Width;
         }
 
         public void Initialize(Transform segmentParent)
@@ -63,8 +110,7 @@ namespace Larvae
             for (var i = 0; i < points.Length; i++)
             {
                 points[i] = transform.position + new Vector3(i * segmentLength, 0, 0);
-                _segmentColliders[i] = SpawnColliderForSegment(i, segmentParent);
-                _segmentRigidbodies[i] = _segmentColliders[i].attachedRigidbody;
+                _segments[i] = SpawnColliderForSegment(i, segmentParent);
             }
 
             for (var i = 0; i < _naturalLengths.Length; i++)
@@ -76,7 +122,7 @@ namespace Larvae
             for (var i = 0; i < _velocities.Length; i++) _velocities[i] = Vector2.zero;
         }
 
-        private Collider2D SpawnColliderForSegment(int i, Transform segmentParent)
+        private Segment SpawnColliderForSegment(int i, Transform segmentParent)
         {
             var newGameObject = new GameObject($"Segment_{i}")
             {
@@ -92,14 +138,16 @@ namespace Larvae
             rb.gravityScale = 0f;
             rb.bodyType = RigidbodyType2D.Dynamic;
 
+            var width = pointWidths[i];
+
             var newCollider = newGameObject.AddComponent<CircleCollider2D>();
-            newCollider.radius = pointWidths[i] * colliderWidthMultiplier;
+            newCollider.radius = width * colliderWidthMultiplier;
 
             var segment = newGameObject.AddComponent<Segment>();
-            segment.Initialize(i, this);
+            segment.Initialize(i, width);
             segment.OnSegmentCollision += HandleSegmentCollision;
 
-            return newCollider;
+            return segment;
         }
 
         private void HandleSegmentCollision(int segmentIndex, float speed, Vector2 point)
@@ -108,52 +156,108 @@ namespace Larvae
 
             if (speed < MinSpeedToChangeDirection) return;
 
-            var oppositeDirection = points[segmentIndex] - point;
+            var oppositeDirection = (points[segmentIndex] - point).normalized + Random.insideUnitCircle / 2;
 
             SetMovementDirection(oppositeDirection);
         }
 
-        private void UpdateMovementWave()
+        private async UniTask UpdateMovementWave()
         {
-            _timeInPhase += Time.deltaTime;
-            if (!(_timeInPhase >= movementPhaseTime)) return;
-
-            _timeInPhase = 0;
-            movementPhase = movementPhase switch
+            while (true)
             {
-                MovementPhase.ExtendingHead => MovementPhase.DraggingTail,
-                MovementPhase.Rest => MovementPhase.ExtendingHead,
-                MovementPhase.DraggingTail => MovementPhase.Rest,
-                _ => movementPhase
-            };
+                var modifier = CurrentMovementModifier;
+                var adjustedPhaseTime = movementPhaseTime / (modifier.speedMultiplier + 0.1f);
 
+                await UniTask.Delay(TimeSpan.FromSeconds(adjustedPhaseTime));
 
-            for (var i = 0; i < _naturalLengths.Length; i++) _segmentTargetLengths[i] = _naturalLengths[i];
+                if (!isMoving || !modifier.canMove) continue;
 
-            switch (movementPhase)
-            {
-                case MovementPhase.DraggingTail:
-                    _segmentTargetLengths[3] = _naturalLengths[3] * .5f;
-                    break;
-                case MovementPhase.ExtendingHead:
-                    _segmentTargetLengths[0] = _naturalLengths[0] * 2f;
-                    break;
-                case MovementPhase.Rest:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                // Apply segment synchronization effects
+                var shouldContinueNormalPhase = modifier.segmentSyncMultiplier > Random.value;
+
+                if (shouldContinueNormalPhase)
+                {
+                    movementPhase = movementPhase switch
+                    {
+                        MovementPhase.ExtendingHead => MovementPhase.DraggingTail,
+                        MovementPhase.Rest => MovementPhase.ExtendingHead,
+                        MovementPhase.DraggingTail => MovementPhase.Rest,
+                        _ => movementPhase
+                    };
+                }
+                else
+                {
+                    // Randomize phase for desynchronization
+                    var phases = new[] { MovementPhase.ExtendingHead, MovementPhase.Rest, MovementPhase.DraggingTail };
+                    movementPhase = phases[Random.Range(0, phases.Length)];
+                }
+
+                for (var i = 0; i < _naturalLengths.Length; i++) _segmentTargetLengths[i] = _naturalLengths[i];
+
+                switch (movementPhase)
+                {
+                    case MovementPhase.DraggingTail:
+                        _segmentTargetLengths[3] = _naturalLengths[3] * tailRetraction;
+                        break;
+                    case MovementPhase.ExtendingHead:
+                        var extensionMultiplier = modifier.coordinationMultiplier > 0.5f
+                            ? headExtension
+                            : headExtension * Random.Range(0.5f, 2f);
+                        _segmentTargetLengths[0] = _naturalLengths[0] * extensionMultiplier;
+                        break;
+                    case MovementPhase.Rest:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
         }
 
         private void ApplySegmentConstraints()
         {
-            var headDirectionalForce = headForwardForce * targetDirection;
+            var modifier = CurrentMovementModifier;
+            var headDirectionalForce = headForwardForce * targetDirection * modifier.headForceMultiplier;
+
+            if (modifier.randomnessMultiplier > 0)
+            {
+                var randomForce = Random.insideUnitCircle * modifier.randomnessMultiplier * Time.fixedDeltaTime;
+                headDirectionalForce += randomForce;
+            }
 
             if (movementPhase != MovementPhase.DraggingTail)
                 ApplySegmentConstraint(0, 1, _segmentTargetLengths[0], false, headDirectionalForce);
 
             for (var i = 1; i < points.Length; i++)
                 ApplySegmentConstraint(i, i - 1, _segmentTargetLengths[i - 1], true);
+
+            ApplyCurveStraighteningForces();
+        }
+
+        private void ApplyCurveStraighteningForces()
+        {
+            for (var i = 1; i < points.Length - 1; i++)
+            {
+                var angle = CalculateAngleBetweenThreePoints(i - 1, i, i + 1);
+                var curvature = 180f - angle;
+
+                if (!(curvature > maxAllowedCurveDegrees)) continue;
+
+                var prevPoint = points[i - 1];
+                var currentPoint = points[i];
+                var nextPoint = points[i + 1];
+
+                var straightLineDirection = (nextPoint - prevPoint).normalized;
+                var currentToLine =
+                    Vector2.Dot(currentPoint - prevPoint, straightLineDirection) * straightLineDirection +
+                    prevPoint;
+                var straighteningDirection = (currentToLine - currentPoint).normalized;
+
+                var excessCurvature = curvature - maxAllowedCurveDegrees;
+                var forceMultiplier = excessCurvature / maxAllowedCurveDegrees;
+                var straighteningForceVector = curveStraighteningForce * forceMultiplier * straighteningDirection;
+
+                _velocities[i] += straighteningForceVector * Time.fixedDeltaTime;
+            }
         }
 
         private void ApplySegmentConstraint(int i, int otherPointIndex, float targetDistance, bool applyRepelFromPoints)
@@ -175,11 +279,20 @@ namespace Larvae
             var normalizedDirection = direction / currentDistance;
             var targetPosition = previousPoint + normalizedDirection * targetDistance + targetPositionOffset;
 
-            var correction = (targetPosition - currentPoint) * 0.5f;
+            var correction = targetPosition - currentPoint;
 
             if (applyRepelFromPoints) correction += CalculateRepelFromPoints(i);
 
-            _velocities[i] += correction * (restoreForce * Time.deltaTime);
+            var modifier = CurrentMovementModifier;
+            var modifiedRestoreForce = restoreForce * modifier.restoreForceMultiplier;
+
+            if (modifier.segmentSyncMultiplier < 1f && Random.value > modifier.segmentSyncMultiplier)
+            {
+                correction *= Random.Range(0.1f, 1.5f);
+                correction += Random.insideUnitCircle * modifier.randomnessMultiplier * 0.5f;
+            }
+
+            _velocities[i] += modifiedRestoreForce * Time.fixedDeltaTime * correction;
         }
 
         private Vector2 CalculateRepelFromPoints(int i)
@@ -189,19 +302,17 @@ namespace Larvae
 
             for (var j = 0; j < points.Length; j++)
             {
-                if (i == j) continue;
+                if (i == j || AreNeighbours(i, j)) continue;
 
-                var minDistanceDivider =
-                    AreNeighbours(i, j) ? NeighbourMinDistanceDivider : NotNeighbourMinDistanceDivider;
-                var desiredDistance = _segmentTargetLengths[i - 1];
-                var minDistanceToRepel = desiredDistance / minDistanceDivider;
+                var direction = points[i] - points[j];
+                var distance = direction.magnitude;
 
-                var distance = (points[i] - points[j]).magnitude;
+                var minDistance = segmentLength;
 
-                if (!(distance < minDistanceToRepel)) continue;
+                if (!(distance < minDistance)) continue;
 
-                var multiplier = desiredDistance / (minDistanceDivider * distance);
-                correction += (points[i] - points[j]).normalized * multiplier;
+                var forceMagnitude = (minDistance - distance) * 0.5f;
+                correction += direction.normalized * forceMagnitude;
             }
 
             return correction;
@@ -212,14 +323,42 @@ namespace Larvae
             return Mathf.Abs(i - j) == 1;
         }
 
+        private float CalculateAngleBetweenThreePoints(int prevIndex, int currentIndex, int nextIndex)
+        {
+            if (prevIndex < 0 || nextIndex >= points.Length) return 0f;
+
+            var prevPoint = points[prevIndex];
+            var currentPoint = points[currentIndex];
+            var nextPoint = points[nextIndex];
+
+            var vector1 = (prevPoint - currentPoint).normalized;
+            var vector2 = (nextPoint - currentPoint).normalized;
+
+            var dot = Vector2.Dot(vector1, vector2);
+            dot = Mathf.Clamp(dot, -1f, 1f);
+
+            var angleRad = Mathf.Acos(dot);
+            var angleDeg = angleRad * Mathf.Rad2Deg;
+
+            return angleDeg;
+        }
+
         private void UpdatePositions()
         {
+            var modifier = CurrentMovementModifier;
+
             for (var i = 0; i < points.Length; i++)
             {
-                points[i] = _segmentColliders[i].transform.position;
-                points[i] += _velocities[i] * Time.deltaTime;
+                points[i] = _segments[i].transform.position;
+
+                var velocity = _velocities[i] * modifier.speedMultiplier;
+
+                if (modifier.coordinationMultiplier < 1f)
+                    velocity += Random.insideUnitCircle * (1f - modifier.coordinationMultiplier) * Time.fixedDeltaTime;
+
+                points[i] += velocity * Time.fixedDeltaTime;
                 _velocities[i] *= dampening;
-                _segmentRigidbodies[i].MovePosition(points[i]);
+                _segments[i].Rigidbody.MovePosition(points[i]);
             }
 
             var center = GetCenter();
@@ -261,9 +400,54 @@ namespace Larvae
             movementPhase = MovementPhase.Rest;
         }
 
+        public Vector2 GetDesiredDirection()
+        {
+            var modifier = CurrentMovementModifier;
+            var angleArc = Random.value < headDirectionInfluence ? AheadTargetAngleArc : WideTargetAngleArc;
+
+            if (modifier.directionStability < 0.5f) angleArc = WideTargetAngleArc;
+
+            var halfArc = angleArc / 2f;
+            var randomAngle = Random.Range(-halfArc, halfArc);
+
+            var angleRad = randomAngle * Mathf.Deg2Rad;
+            var rotatedDirection = new Vector2(
+                targetDirection.x * Mathf.Cos(angleRad) - targetDirection.y * Mathf.Sin(angleRad),
+                targetDirection.x * Mathf.Sin(angleRad) + targetDirection.y * Mathf.Cos(angleRad)
+            );
+
+            return rotatedDirection.normalized;
+        }
+
         public void SetMovementDirection(Vector2 direction)
         {
+            var modifier = CurrentMovementModifier;
+
+            if (!modifier.canChangeDirection && Random.value > 0.1f) return;
+
+            if (modifier.directionStability < 1f)
+            {
+                var randomInfluence = 1f - modifier.directionStability;
+                var randomDirection = Random.insideUnitCircle.normalized;
+                direction = Vector2.Lerp(direction, randomDirection, randomInfluence);
+            }
+
             targetDirection = direction.normalized;
+        }
+
+        public void AddDrugEffect(DrugEffect drugEffect, float dosage = 1f)
+        {
+            _drugSystem.AddDrug(drugEffect, dosage);
+        }
+
+        public void ClearAllDrugEffects()
+        {
+            _drugSystem.ClearAllDrugs();
+        }
+
+        public void TransitionToState(string stateName)
+        {
+            _stateMachine.TransitionToState(stateName);
         }
 
         private enum MovementPhase

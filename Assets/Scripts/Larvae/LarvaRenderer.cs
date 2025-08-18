@@ -61,7 +61,7 @@ namespace Larvae
             for (var i = 0; i < _larva.points.Length; i++)
             {
                 Gizmos.color = i == 0 ? headColor : larvaColor;
-                Gizmos.DrawWireSphere(_larva.points[i], _larva.pointWidths[i] * bodyWidth * 0.5f);
+                Gizmos.DrawWireSphere(_larva.points[i], _larva.GetSegmentWidth(i) * bodyWidth * 0.5f);
             }
         }
 
@@ -146,7 +146,7 @@ namespace Larvae
                 // Convert to local space by subtracting transform position
                 var localCenter = new Vector2(center.x - transformPosition.x, center.y - transformPosition.y);
 
-                var currentWidth = _larva.pointWidths[i] * bodyWidth;
+                var currentWidth = _larva.GetSegmentWidth(i) * bodyWidth;
 
                 // Color interpolation from head to tail
                 var segmentColor = Color.Lerp(headColor, larvaColor, (float)i / (points.Length - 1));
@@ -303,8 +303,8 @@ namespace Larvae
             var center = Vector2.Lerp(start, end, t);
             var localCenter = center - (Vector2)transformPos;
 
-            var startWidth = _larva.pointWidths[segmentIdx] * bodyWidth;
-            var endWidth = _larva.pointWidths[segmentIdx + 1] * bodyWidth;
+            var startWidth = _larva.GetSegmentWidth(segmentIdx) * bodyWidth;
+            var endWidth = _larva.GetSegmentWidth(segmentIdx + 1) * bodyWidth;
             var currentWidth = Mathf.Lerp(startWidth, endWidth, t) * 0.9f;
 
             var dir = (end - start).normalized;

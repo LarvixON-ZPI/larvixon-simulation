@@ -12,8 +12,6 @@ public class LarvaSimulation : MonoBehaviour
 
     public bool autoMove = true;
 
-    public float directionChangeInterval = 5.0f;
-
     [SerializeField] private float simulationSpeed = 1;
 
     [SerializeField] private int targetFrameRate = 120;
@@ -27,10 +25,12 @@ public class LarvaSimulation : MonoBehaviour
     [SerializeField] private Transform larvaeSegmentParent;
 
     private readonly List<Larva> _larvae = new();
+    private Camera _camera;
     private float _nextDirectionChange;
 
     private void Start()
     {
+        _camera = Camera.main;
         OnValidate();
 
         SpawnLarvae();
@@ -38,24 +38,18 @@ public class LarvaSimulation : MonoBehaviour
         if (autoMove) StartAllMovement();
 
         simulationSpeedSlider.onValueChanged.AddListener(OnSimulationSpeedChanged);
+
+        Application.runInBackground = true;
     }
 
     private void Update()
     {
-        if (autoMove && Time.time > _nextDirectionChange)
-        {
-            ChangeRandomDirections();
-            _nextDirectionChange = Time.time + directionChangeInterval;
-        }
-
         HandleInput();
     }
 
     private void OnDrawGizmosSelected()
     {
-        // Draw spawn area
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(transform.position, new Vector3(spawnArea.x, spawnArea.y, 0));
+        DrawSpawnAreaGizmos();
     }
 
     private void OnValidate()
@@ -63,6 +57,12 @@ public class LarvaSimulation : MonoBehaviour
         Application.targetFrameRate = targetFrameRate;
         Time.fixedDeltaTime = fixedDeltaTime;
         SetSimulationSpeed(simulationSpeed);
+    }
+
+    private void DrawSpawnAreaGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(transform.position, new Vector3(spawnArea.x, spawnArea.y, 0));
     }
 
     private void OnSimulationSpeedChanged(float newValue)
@@ -154,6 +154,19 @@ public class LarvaSimulation : MonoBehaviour
         {
             ChangeRandomDirections();
             Debug.Log("Changed all larvae directions randomly");
+        }
+
+        if (Input.GetMouseButton(1))
+        {
+            var mouseWorldPos = _camera.ScreenToWorldPoint(Input.mousePosition);
+            mouseWorldPos.z = 0;
+
+            foreach (var larva in _larvae)
+            {
+                var larvaPos = larva.GetCenter();
+                var directionToMouse = ((Vector2)mouseWorldPos - larvaPos).normalized;
+                larva.SetMovementDirection(directionToMouse);
+            }
         }
     }
 }

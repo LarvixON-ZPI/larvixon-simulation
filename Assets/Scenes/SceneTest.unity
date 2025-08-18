@@ -916,7 +916,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 15.31
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -1103,7 +1103,7 @@ Transform:
   m_GameObject: {fileID: 631029845}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -5, z: 0}
+  m_LocalPosition: {x: 0, y: -4.836, z: 0}
   m_LocalScale: {x: 11, y: 0.7126386, z: 0.8421633}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -1181,7 +1181,7 @@ Transform:
   m_GameObject: {fileID: 677697685}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 5, z: 0}
+  m_LocalPosition: {x: 0, y: 4.914, z: 0}
   m_LocalScale: {x: 11, y: 0.7126386, z: 0.8421633}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -1666,6 +1666,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1321582328}
   - component: {fileID: 1321582329}
+  - component: {fileID: 1321582330}
   m_Layer: 0
   m_Name: LarvaSimulation
   m_TagString: Untagged
@@ -1702,9 +1703,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   larvaPrefab: {fileID: 8550540643179889647, guid: cf774e70fe50a30458bb2a22deef396a, type: 3}
   larvaCount: 1
-  spawnArea: {x: 1, y: 1}
+  spawnArea: {x: 20, y: 20}
   autoMove: 1
-  directionChangeInterval: 5
   simulationSpeed: 1
   targetFrameRate: 120
   fixedDeltaTime: 0.01
@@ -1712,6 +1712,26 @@ MonoBehaviour:
   simulationSpeedSlider: {fileID: 105357732}
   larvaeParent: {fileID: 510926915}
   larvaeSegmentParent: {fileID: 709971255}
+--- !u!114 &1321582330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1321582326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20b48237744e40644bdf314bcafc7725, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetLarva: {fileID: 0}
+  ketamineEffect: {fileID: 11400000, guid: 25bb9258095fcd74486bb6b194a4d753, type: 2}
+  dosage: 1
+  addKetamine: 0
+  clearDrugs: 0
+  transitionToLayingDown: 0
+  transitionToLookingAround: 0
+  transitionToWallLaying: 0
 --- !u!1 &1419470177
 GameObject:
   m_ObjectHideFlags: 0
@@ -1784,7 +1804,7 @@ Transform:
   m_GameObject: {fileID: 1419470177}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5, y: 0, z: 0}
+  m_LocalPosition: {x: 5.052, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 10, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1901,17 +1921,17 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1796610803}
   - {fileID: 1855321778}
   - {fileID: 882433476}
-  - {fileID: 373281280}
   - {fileID: 1640545708}
+  - {fileID: 373281280}
   - {fileID: 851270135}
-  - {fileID: 1419470180}
   - {fileID: 677697688}
+  - {fileID: 1419470180}
   - {fileID: 631029848}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
