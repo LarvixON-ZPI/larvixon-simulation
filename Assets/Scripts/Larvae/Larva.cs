@@ -1,6 +1,8 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Larvae.Drugs;
+using Larvae.States;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -50,19 +52,29 @@ namespace Larvae
 
         private readonly float[] _segmentTargetLengths = new float[4];
         private readonly Vector2[] _velocities = new Vector2[5];
+        private DrugSystem _drugSystem;
         private Rigidbody2D _rb;
+
+        private LarvaStateMachine _stateMachine;
         private float _timeInPhase;
 
         private CancellationTokenSource _updateTargetDirectionCts;
 
+        public MovementModifier CurrentMovementModifier => _drugSystem?.CurrentModifier ?? MovementModifier.Normal;
+
         private void Awake()
         {
             _rb = GetComponent<Rigidbody2D>();
+
+            _stateMachine = GetComponent<LarvaStateMachine>() ?? gameObject.AddComponent<LarvaStateMachine>();
+            _drugSystem = GetComponent<DrugSystem>() ?? gameObject.AddComponent<DrugSystem>();
+
+            SetupStateMachine();
         }
 
         private void Start()
         {
-            UpdateTargetDirection().Forget();
+            _stateMachine.StartStateMachine();
             UpdateMovementWave().Forget();
         }
 
@@ -78,6 +90,14 @@ namespace Larvae
         {
             _updateTargetDirectionCts?.Cancel();
             _updateTargetDirectionCts?.Dispose();
+        }
+
+        private void SetupStateMachine()
+        {
+            _stateMachine.RegisterState(new MovingState());
+            _stateMachine.RegisterState(new LayingDownState());
+            _stateMachine.RegisterState(new LookingAtEnvironmentState());
+            _stateMachine.RegisterState(new LayingNearWallState());
         }
 
         public float GetSegmentWidth(int i)
@@ -145,17 +165,32 @@ namespace Larvae
         {
             while (true)
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(movementPhaseTime));
+                var modifier = CurrentMovementModifier;
+                var adjustedPhaseTime = movementPhaseTime / (modifier.speedMultiplier + 0.1f);
 
-                if (!isMoving) continue;
+                await UniTask.Delay(TimeSpan.FromSeconds(adjustedPhaseTime));
 
-                movementPhase = movementPhase switch
+                if (!isMoving || !modifier.canMove) continue;
+
+                // Apply segment synchronization effects
+                var shouldContinueNormalPhase = modifier.segmentSyncMultiplier > Random.value;
+
+                if (shouldContinueNormalPhase)
                 {
-                    MovementPhase.ExtendingHead => MovementPhase.DraggingTail,
-                    MovementPhase.Rest => MovementPhase.ExtendingHead,
-                    MovementPhase.DraggingTail => MovementPhase.Rest,
-                    _ => movementPhase
-                };
+                    movementPhase = movementPhase switch
+                    {
+                        MovementPhase.ExtendingHead => MovementPhase.DraggingTail,
+                        MovementPhase.Rest => MovementPhase.ExtendingHead,
+                        MovementPhase.DraggingTail => MovementPhase.Rest,
+                        _ => movementPhase
+                    };
+                }
+                else
+                {
+                    // Randomize phase for desynchronization
+                    var phases = new[] { MovementPhase.ExtendingHead, MovementPhase.Rest, MovementPhase.DraggingTail };
+                    movementPhase = phases[Random.Range(0, phases.Length)];
+                }
 
                 for (var i = 0; i < _naturalLengths.Length; i++) _segmentTargetLengths[i] = _naturalLengths[i];
 
@@ -165,7 +200,10 @@ namespace Larvae
                         _segmentTargetLengths[3] = _naturalLengths[3] * tailRetraction;
                         break;
                     case MovementPhase.ExtendingHead:
-                        _segmentTargetLengths[0] = _naturalLengths[0] * headExtension;
+                        var extensionMultiplier = modifier.coordinationMultiplier > 0.5f
+                            ? headExtension
+                            : headExtension * Random.Range(0.5f, 2f);
+                        _segmentTargetLengths[0] = _naturalLengths[0] * extensionMultiplier;
                         break;
                     case MovementPhase.Rest:
                         break;
@@ -175,27 +213,16 @@ namespace Larvae
             }
         }
 
-
-        private async UniTask UpdateTargetDirection()
-        {
-            var cts = new CancellationTokenSource();
-            try
-            {
-                while (true)
-                {
-                    var timeToWait = timeToChangeDirection.Evaluate(Random.value);
-                    await UniTask.Delay(TimeSpan.FromSeconds(timeToWait), cancellationToken: cts.Token);
-                    SetMovementDirection(GetDesiredDirection());
-                }
-            }
-            catch (OperationCanceledException)
-            {
-            }
-        }
-
         private void ApplySegmentConstraints()
         {
-            var headDirectionalForce = headForwardForce * targetDirection;
+            var modifier = CurrentMovementModifier;
+            var headDirectionalForce = headForwardForce * targetDirection * modifier.headForceMultiplier;
+
+            if (modifier.randomnessMultiplier > 0)
+            {
+                var randomForce = Random.insideUnitCircle * modifier.randomnessMultiplier * Time.fixedDeltaTime;
+                headDirectionalForce += randomForce;
+            }
 
             if (movementPhase != MovementPhase.DraggingTail)
                 ApplySegmentConstraint(0, 1, _segmentTargetLengths[0], false, headDirectionalForce);
@@ -256,7 +283,16 @@ namespace Larvae
 
             if (applyRepelFromPoints) correction += CalculateRepelFromPoints(i);
 
-            _velocities[i] += restoreForce * Time.fixedDeltaTime * correction;
+            var modifier = CurrentMovementModifier;
+            var modifiedRestoreForce = restoreForce * modifier.restoreForceMultiplier;
+
+            if (modifier.segmentSyncMultiplier < 1f && Random.value > modifier.segmentSyncMultiplier)
+            {
+                correction *= Random.Range(0.1f, 1.5f);
+                correction += Random.insideUnitCircle * modifier.randomnessMultiplier * 0.5f;
+            }
+
+            _velocities[i] += modifiedRestoreForce * Time.fixedDeltaTime * correction;
         }
 
         private Vector2 CalculateRepelFromPoints(int i)
@@ -309,10 +345,18 @@ namespace Larvae
 
         private void UpdatePositions()
         {
+            var modifier = CurrentMovementModifier;
+
             for (var i = 0; i < points.Length; i++)
             {
                 points[i] = _segments[i].transform.position;
-                points[i] += _velocities[i] * Time.fixedDeltaTime;
+
+                var velocity = _velocities[i] * modifier.speedMultiplier;
+
+                if (modifier.coordinationMultiplier < 1f)
+                    velocity += Random.insideUnitCircle * (1f - modifier.coordinationMultiplier) * Time.fixedDeltaTime;
+
+                points[i] += velocity * Time.fixedDeltaTime;
                 _velocities[i] *= dampening;
                 _segments[i].Rigidbody.MovePosition(points[i]);
             }
@@ -356,9 +400,13 @@ namespace Larvae
             movementPhase = MovementPhase.Rest;
         }
 
-        private Vector2 GetDesiredDirection()
+        public Vector2 GetDesiredDirection()
         {
+            var modifier = CurrentMovementModifier;
             var angleArc = Random.value < headDirectionInfluence ? AheadTargetAngleArc : WideTargetAngleArc;
+
+            if (modifier.directionStability < 0.5f) angleArc = WideTargetAngleArc;
+
             var halfArc = angleArc / 2f;
             var randomAngle = Random.Range(-halfArc, halfArc);
 
@@ -373,7 +421,33 @@ namespace Larvae
 
         public void SetMovementDirection(Vector2 direction)
         {
+            var modifier = CurrentMovementModifier;
+
+            if (!modifier.canChangeDirection && Random.value > 0.1f) return;
+
+            if (modifier.directionStability < 1f)
+            {
+                var randomInfluence = 1f - modifier.directionStability;
+                var randomDirection = Random.insideUnitCircle.normalized;
+                direction = Vector2.Lerp(direction, randomDirection, randomInfluence);
+            }
+
             targetDirection = direction.normalized;
+        }
+
+        public void AddDrugEffect(DrugEffect drugEffect, float dosage = 1f)
+        {
+            _drugSystem.AddDrug(drugEffect, dosage);
+        }
+
+        public void ClearAllDrugEffects()
+        {
+            _drugSystem.ClearAllDrugs();
+        }
+
+        public void TransitionToState(string stateName)
+        {
+            _stateMachine.TransitionToState(stateName);
         }
 
         private enum MovementPhase

@@ -1666,6 +1666,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1321582328}
   - component: {fileID: 1321582329}
+  - component: {fileID: 1321582330}
   m_Layer: 0
   m_Name: LarvaSimulation
   m_TagString: Untagged
@@ -1704,7 +1705,6 @@ MonoBehaviour:
   larvaCount: 1
   spawnArea: {x: 20, y: 20}
   autoMove: 1
-  directionChangeInterval: 5
   simulationSpeed: 1
   targetFrameRate: 120
   fixedDeltaTime: 0.01
@@ -1712,6 +1712,26 @@ MonoBehaviour:
   simulationSpeedSlider: {fileID: 105357732}
   larvaeParent: {fileID: 510926915}
   larvaeSegmentParent: {fileID: 709971255}
+--- !u!114 &1321582330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1321582326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20b48237744e40644bdf314bcafc7725, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetLarva: {fileID: 0}
+  ketamineEffect: {fileID: 11400000, guid: 25bb9258095fcd74486bb6b194a4d753, type: 2}
+  dosage: 1
+  addKetamine: 0
+  clearDrugs: 0
+  transitionToLayingDown: 0
+  transitionToLookingAround: 0
+  transitionToWallLaying: 0
 --- !u!1 &1419470177
 GameObject:
   m_ObjectHideFlags: 0
