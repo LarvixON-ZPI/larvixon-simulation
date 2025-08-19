@@ -70,39 +70,6 @@ MonoBehaviour:
   isMoving: 0
   targetDirection: {x: 0, y: 0}
   movementPhaseTime: 0.5
-  timeToChangeDirection:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: -0.0053100586
-      value: 1.9898376
-      inSlope: 1.1222036
-      outSlope: 1.1222036
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.4805782
-    - serializedVersion: 3
-      time: 0.8458437
-      value: 4.229858
-      inSlope: 9.143564
-      outSlope: 9.143564
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.18332481
-    - serializedVersion: 3
-      time: 1.0172799
-      value: 6.5101757
-      inSlope: 13.301263
-      outSlope: 13.301263
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
   movementPhase: 1
   headExtension: 2
   tailRetraction: 0.1
@@ -120,15 +87,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   larvaMaterial: {fileID: 0}
   larvaColor: {r: 0.509434, g: 0.50222504, b: 0.50222504, a: 1}
-  headColor: {r: 0.6792453, g: 0.6504094, b: 0.6504094, a: 1}
-  bodyWidth: 0.5
+  headColor: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 1}
+  tailColor: {r: 0.2735849, g: 0.25938946, b: 0.25938946, a: 1}
+  bodyWidth: 1
   segmentResolution: 22
   smoothingFactor: 0.1
   useSplineInterpolation: 1
   showStripes: 1
   stripeColor: {r: 0.8679245, g: 0.8679245, b: 0.8679245, a: 0.5019608}
-  stripeWidth: 0.04
+  stripeWidth: 0.2
   stripesPerSegment: 2
+  stripeExtension: 0
+  stripeEndCapResolution: 12
+  stripeColorBlend: 1
 --- !u!114 &3011872453906952263
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,7 +107,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8550540643179889647}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b1801178d6701245bb9ae9d84a048ab, type: 3}
   m_Name: 
