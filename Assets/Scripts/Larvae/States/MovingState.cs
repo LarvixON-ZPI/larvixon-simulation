@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -24,6 +25,7 @@ namespace Larvae.States
         {
             base.Enter(stateMachine);
             stateMachine.LarvaController.StartMoving(stateMachine.LarvaController.targetDirection);
+            stateMachine.LarvaController.SoftChangeMovementMultiplier(1f).Forget();
             _nextDirectionChange = GetNextDirectionChangeTime();
         }
 

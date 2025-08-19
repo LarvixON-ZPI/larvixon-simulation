@@ -57,6 +57,8 @@ namespace Larvae
         private float _movementModifier = 1f;
         private Rigidbody2D _rb;
 
+        private CancellationTokenSource _softChangeCts;
+
         private LarvaStateMachine _stateMachine;
         private float _timeInPhase;
 
@@ -107,6 +109,11 @@ namespace Larvae
             return _segments[i].Width;
         }
 
+        public Vector2 GetHeadPosition()
+        {
+            return points[0];
+        }
+
         public void Initialize(Transform segmentParent)
         {
             for (var i = 0; i < points.Length; i++)
@@ -152,8 +159,12 @@ namespace Larvae
             return segment;
         }
 
+        public event Action<int, float, Vector2> OnSegmentCollision;
+
         private void HandleSegmentCollision(int segmentIndex, float speed, Vector2 point)
         {
+            OnSegmentCollision?.Invoke(segmentIndex, speed, point);
+
             if (segmentIndex != 0) return;
 
             if (speed < MinSpeedToChangeDirection) return;
@@ -402,7 +413,6 @@ namespace Larvae
         {
             isMoving = true;
             SetMovementDirection(direction.normalized);
-            SoftChangeMovementMultiplier(DefaultMovementSoftChangeTime, 1f).Forget();
         }
 
         public void StopMoving()
@@ -410,7 +420,6 @@ namespace Larvae
             isMoving = false;
             movementPhase = MovementPhase.Rest;
             ResetTargetLengths();
-            SoftChangeMovementMultiplier(DefaultMovementSoftChangeTime, 0f).Forget();
         }
 
         public void SetMovementMultiplier(float modifier)
@@ -418,17 +427,34 @@ namespace Larvae
             _movementModifier = modifier;
         }
 
+        public async UniTask SoftChangeMovementMultiplier(float target)
+        {
+            await SoftChangeMovementMultiplier(DefaultMovementSoftChangeTime, target);
+        }
+
         public async UniTask SoftChangeMovementMultiplier(float time, float target)
         {
+            _softChangeCts?.Cancel();
+            _softChangeCts?.Dispose();
+            _softChangeCts = new CancellationTokenSource();
+            var token = _softChangeCts.Token;
+
             var start = _movementModifier;
             var elapsed = 0f;
 
+            if (Mathf.Approximately(target, _movementModifier))
+            {
+                _movementModifier = target;
+                return;
+            }
+
             while (elapsed < time)
             {
+                token.ThrowIfCancellationRequested();
                 elapsed += Time.deltaTime;
                 var t = Mathf.Clamp01(elapsed / time);
                 _movementModifier = Mathf.Lerp(start, target, t);
-                await UniTask.Yield();
+                await UniTask.Yield(token);
             }
 
             _movementModifier = target;

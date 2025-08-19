@@ -44,7 +44,7 @@ namespace Larvae.States
             var lookDirection = Quaternion.Euler(0, 0, _currentLookAngle) * baseDirection;
             larva.SetMovementDirection(lookDirection);
 
-            if (TimeInState >= lookingDuration) stateMachine.TransitionToState("Moving");
+            if (TimeInState >= lookingDuration) stateMachine.TransitionToDefaultState();
         }
 
         public override bool CanTransitionTo(string stateName)

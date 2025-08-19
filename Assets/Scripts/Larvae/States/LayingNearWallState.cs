@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Larvae.States
@@ -7,7 +8,7 @@ namespace Larvae.States
     public class LayingNearWallState : BaseLarvaState
     {
         [SerializeField] private float layingTime = 5f;
-        [SerializeField] private float noWallFoundGiveUpTime = 2f;
+        [SerializeField] private float noWallFoundGiveUpTime = 10f;
 
         [SerializeField] private float wallDetectionDistance = 2f;
 
@@ -19,33 +20,36 @@ namespace Larvae.States
         {
             base.Enter(stateMachine);
             _foundWall = false;
+            stateMachine.LarvaController.SoftChangeMovementMultiplier(1f).Forget();
 
-            FindNearestWall(stateMachine);
+            stateMachine.LarvaController.OnSegmentCollision += (_, _, _) =>
+            {
+                stateMachine.ForceTransitionToState("LayingDown");
+            };
         }
 
         public override void Update(LarvaStateMachine stateMachine, float deltaTime)
         {
             base.Update(stateMachine, deltaTime);
 
-            if (!_foundWall)
+            if (TimeInState > noWallFoundGiveUpTime)
             {
-                var larva = stateMachine.LarvaController;
-                larva.StartMoving(larva.targetDirection * wallFollowingSpeed);
-
-                if (TimeInState > noWallFoundGiveUpTime) stateMachine.TransitionToState("Moving");
+                stateMachine.TransitionToDefaultState();
+                return;
             }
-            else
-            {
-                stateMachine.LarvaController.StopMoving();
 
-                if (TimeInState >= layingTime) stateMachine.TransitionToState("Moving");
-            }
+            if (_foundWall) return;
+
+            var larva = stateMachine.LarvaController;
+            larva.StartMoving(larva.targetDirection * wallFollowingSpeed);
+
+            CheckIfNearWall(stateMachine);
         }
 
-        private void FindNearestWall(LarvaStateMachine stateMachine)
+        private void CheckIfNearWall(LarvaStateMachine stateMachine)
         {
             var larva = stateMachine.LarvaController;
-            var position = larva.transform.position;
+            var position = larva.GetHeadPosition();
 
             var directions = new[]
             {
@@ -58,6 +62,7 @@ namespace Larvae.States
             Vector2? closestHit = null;
             foreach (var direction in directions)
             {
+                Debug.DrawRay(position, direction * wallDetectionDistance, Color.red, 1f);
                 var hit = Physics2D.Raycast(position, direction, wallDetectionDistance, LayerMask.GetMask("Default"));
                 if (!hit.collider) continue;
 
@@ -73,8 +78,9 @@ namespace Larvae.States
                 return;
             }
 
-            var wallDirection = (closestHit.Value - (Vector2)position).normalized;
+            var wallDirection = (closestHit.Value - position).normalized;
             larva.SetMovementDirection(wallDirection);
+            larva.SoftChangeMovementMultiplier(.3f, .1f).Forget();
             _foundWall = true;
         }
 
