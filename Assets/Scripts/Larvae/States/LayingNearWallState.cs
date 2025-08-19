@@ -13,7 +13,11 @@ namespace Larvae.States
         [SerializeField] private float wallDetectionDistance = 2f;
 
         [SerializeField] private float wallFollowingSpeed = 0.5f;
+
+        private Action<int, float, Vector2> _collisionHandler;
         private bool _foundWall;
+
+        private LarvaStateMachine _stateMachine;
         public override string StateName => "LayingNearWall";
 
         public override void Enter(LarvaStateMachine stateMachine)
@@ -22,10 +26,8 @@ namespace Larvae.States
             _foundWall = false;
             stateMachine.LarvaController.SoftChangeMovementMultiplier(1f).Forget();
 
-            stateMachine.LarvaController.OnSegmentCollision += (_, _, _) =>
-            {
-                stateMachine.ForceTransitionToState("LayingDown");
-            };
+            _collisionHandler = (_, _, _) => stateMachine.ForceTransitionToState("LayingDown");
+            stateMachine.LarvaController.OnSegmentCollision += _collisionHandler;
         }
 
         public override void Update(LarvaStateMachine stateMachine, float deltaTime)
@@ -82,6 +84,14 @@ namespace Larvae.States
             larva.SetMovementDirection(wallDirection);
             larva.SoftChangeMovementMultiplier(.3f, .1f).Forget();
             _foundWall = true;
+        }
+
+        public override void Exit(LarvaStateMachine stateMachine)
+        {
+            base.Exit(stateMachine);
+
+            if (_collisionHandler != null)
+                stateMachine.LarvaController.OnSegmentCollision -= _collisionHandler;
         }
 
         public override bool CanTransitionTo(string stateName)
