@@ -46,6 +46,19 @@ namespace Larvae.States
             CurrentState.Enter(this);
         }
 
+        public void ForceTransitionToState(string stateName)
+        {
+            if (!_states.TryGetValue(stateName, out var newState))
+            {
+                Debug.LogWarning($"State {stateName} not found in state machine");
+                return;
+            }
+
+            CurrentState?.Exit(this);
+            CurrentState = newState;
+            CurrentState.Enter(this);
+        }
+
         public void StartStateMachine([CanBeNull] string initialStateName = null)
         {
             initialStateName ??= GetDefaultState();

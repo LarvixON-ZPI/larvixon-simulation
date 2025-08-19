@@ -14,6 +14,8 @@ namespace Larvae
         private const float AheadTargetAngleArc = 140f;
         private const float WideTargetAngleArc = 300f;
 
+        public const float DefaultMovementSoftChangeTime = 1f;
+
         [Header("Larva Structure")]
         public Vector2[] points = new Vector2[5]; // Head, 2/5, Middle, 4/5, Back
 
@@ -41,7 +43,6 @@ namespace Larvae
         // always normalized
         public Vector2 targetDirection = Vector2.right;
         [SerializeField] private float movementPhaseTime = 0.5f;
-        public AnimationCurve timeToChangeDirection;
 
         [SerializeField] private MovementPhase movementPhase = MovementPhase.Rest;
         [SerializeField] private float headExtension = 2f;
@@ -53,6 +54,7 @@ namespace Larvae
         private readonly float[] _segmentTargetLengths = new float[4];
         private readonly Vector2[] _velocities = new Vector2[5];
         private DrugSystem _drugSystem;
+        private float _movementModifier = 1f;
         private Rigidbody2D _rb;
 
         private LarvaStateMachine _stateMachine;
@@ -292,7 +294,7 @@ namespace Larvae
             if (applyRepelFromPoints) correction += CalculateRepelFromPoints(i);
 
             var modifier = CurrentMovementModifier;
-            var modifiedRestoreForce = restoreForce * modifier.restoreForceMultiplier;
+            var modifiedRestoreForce = restoreForce * modifier.restoreForceMultiplier * _movementModifier;
 
             if (modifier.segmentSyncMultiplier < 1f && Random.value > modifier.segmentSyncMultiplier)
             {
@@ -400,6 +402,7 @@ namespace Larvae
         {
             isMoving = true;
             SetMovementDirection(direction.normalized);
+            SoftChangeMovementMultiplier(DefaultMovementSoftChangeTime, 1f).Forget();
         }
 
         public void StopMoving()
@@ -407,6 +410,28 @@ namespace Larvae
             isMoving = false;
             movementPhase = MovementPhase.Rest;
             ResetTargetLengths();
+            SoftChangeMovementMultiplier(DefaultMovementSoftChangeTime, 0f).Forget();
+        }
+
+        public void SetMovementMultiplier(float modifier)
+        {
+            _movementModifier = modifier;
+        }
+
+        public async UniTask SoftChangeMovementMultiplier(float time, float target)
+        {
+            var start = _movementModifier;
+            var elapsed = 0f;
+
+            while (elapsed < time)
+            {
+                elapsed += Time.deltaTime;
+                var t = Mathf.Clamp01(elapsed / time);
+                _movementModifier = Mathf.Lerp(start, target, t);
+                await UniTask.Yield();
+            }
+
+            _movementModifier = target;
         }
 
         public Vector2 GetDesiredDirection()

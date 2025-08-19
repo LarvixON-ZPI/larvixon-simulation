@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -12,6 +13,8 @@ namespace Larvae.States
 
         [SerializeField] private float minLayingTime = 15f;
 
+        [SerializeField] private float slowDownTime = 5f;
+
         private float _layingDuration;
 
         public override string StateName => "LayingDown";
@@ -20,7 +23,8 @@ namespace Larvae.States
         {
             base.Enter(stateMachine);
 
-            stateMachine.LarvaController.StopMoving();
+            stateMachine.LarvaController.SoftChangeMovementMultiplier(slowDownTime, 0f).Forget();
+
             _layingDuration = Random.Range(minLayingTime, maxLayingTime);
         }
 
