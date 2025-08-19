@@ -442,22 +442,27 @@ namespace Larvae
             var start = _movementModifier;
             var elapsed = 0f;
 
-            if (Mathf.Approximately(target, _movementModifier))
+            try
             {
+                if (Mathf.Approximately(target, _movementModifier))
+                {
+                    _movementModifier = target;
+                    return;
+                }
+                while (elapsed < time)
+                {
+                    token.ThrowIfCancellationRequested();
+                    elapsed += Time.deltaTime;
+                    var t = Mathf.Clamp01(elapsed / time);
+                    _movementModifier = Mathf.Lerp(start, target, t);
+                    await UniTask.Yield(token);
+                }
                 _movementModifier = target;
+            }
+            catch (OperationCanceledException)
+            {
                 return;
             }
-
-            while (elapsed < time)
-            {
-                token.ThrowIfCancellationRequested();
-                elapsed += Time.deltaTime;
-                var t = Mathf.Clamp01(elapsed / time);
-                _movementModifier = Mathf.Lerp(start, target, t);
-                await UniTask.Yield(token);
-            }
-
-            _movementModifier = target;
         }
 
         public Vector2 GetDesiredDirection()
