@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -9,6 +10,7 @@ namespace Larvae.States
     {
         [SerializeField] private float directionChangeInterval = 3f;
         [SerializeField] private float directionChangeVariance = 2f;
+        [SerializeField] private float stateChangeProbability = 0.1f;
 
         private float _nextDirectionChange;
         public override string StateName => "Moving";
@@ -23,6 +25,7 @@ namespace Larvae.States
         {
             base.Enter(stateMachine);
             stateMachine.LarvaController.StartMoving(stateMachine.LarvaController.targetDirection);
+            stateMachine.LarvaController.SoftChangeMovementMultiplier(1f).Forget();
             _nextDirectionChange = GetNextDirectionChangeTime();
         }
 
@@ -33,6 +36,18 @@ namespace Larvae.States
             var larva = stateMachine.LarvaController;
 
             if (TimeInState < _nextDirectionChange) return;
+
+            if (Random.value < stateChangeProbability)
+            {
+                var val = Random.value;
+                var newStateName = val switch
+                {
+                    < 0.5f => "LayingDown",
+                    < 0.8f => "LookingAtEnvironment",
+                    _ => "LayingNearWall"
+                };
+                stateMachine.TransitionToState(newStateName);
+            }
 
             var newDirection =
                 GetRandomDirectionBiased(larva.targetDirection, CalculateHeadInfluence(Random.value));

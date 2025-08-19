@@ -14,6 +14,8 @@ namespace Larvae
         private const float AheadTargetAngleArc = 140f;
         private const float WideTargetAngleArc = 300f;
 
+        public const float DefaultMovementSoftChangeTime = 1f;
+
         [Header("Larva Structure")]
         public Vector2[] points = new Vector2[5]; // Head, 2/5, Middle, 4/5, Back
 
@@ -41,7 +43,6 @@ namespace Larvae
         // always normalized
         public Vector2 targetDirection = Vector2.right;
         [SerializeField] private float movementPhaseTime = 0.5f;
-        public AnimationCurve timeToChangeDirection;
 
         [SerializeField] private MovementPhase movementPhase = MovementPhase.Rest;
         [SerializeField] private float headExtension = 2f;
@@ -53,7 +54,10 @@ namespace Larvae
         private readonly float[] _segmentTargetLengths = new float[4];
         private readonly Vector2[] _velocities = new Vector2[5];
         private DrugSystem _drugSystem;
+        private float _movementModifier = 1f;
         private Rigidbody2D _rb;
+
+        private CancellationTokenSource _softChangeCts;
 
         private LarvaStateMachine _stateMachine;
         private float _timeInPhase;
@@ -105,6 +109,11 @@ namespace Larvae
             return _segments[i].Width;
         }
 
+        public Vector2 GetHeadPosition()
+        {
+            return points[0];
+        }
+
         public void Initialize(Transform segmentParent)
         {
             for (var i = 0; i < points.Length; i++)
@@ -150,8 +159,12 @@ namespace Larvae
             return segment;
         }
 
+        public event Action<int, float, Vector2> OnSegmentCollision;
+
         private void HandleSegmentCollision(int segmentIndex, float speed, Vector2 point)
         {
+            OnSegmentCollision?.Invoke(segmentIndex, speed, point);
+
             if (segmentIndex != 0) return;
 
             if (speed < MinSpeedToChangeDirection) return;
@@ -192,7 +205,7 @@ namespace Larvae
                     movementPhase = phases[Random.Range(0, phases.Length)];
                 }
 
-                for (var i = 0; i < _naturalLengths.Length; i++) _segmentTargetLengths[i] = _naturalLengths[i];
+                ResetTargetLengths();
 
                 switch (movementPhase)
                 {
@@ -213,16 +226,24 @@ namespace Larvae
             }
         }
 
+        private void ResetTargetLengths()
+        {
+            for (var i = 0; i < _segmentTargetLengths.Length; i++)
+                _segmentTargetLengths[i] = _naturalLengths[i];
+        }
+
         private void ApplySegmentConstraints()
         {
             var modifier = CurrentMovementModifier;
-            var headDirectionalForce = headForwardForce * targetDirection * modifier.headForceMultiplier;
+            var headDirectionalForce = headForwardForce * modifier.headForceMultiplier * targetDirection;
 
             if (modifier.randomnessMultiplier > 0)
             {
-                var randomForce = Random.insideUnitCircle * modifier.randomnessMultiplier * Time.fixedDeltaTime;
+                var randomForce = modifier.randomnessMultiplier * Time.fixedDeltaTime * Random.insideUnitCircle;
                 headDirectionalForce += randomForce;
             }
+
+            if (!modifier.canMove || !isMoving) headDirectionalForce = Vector2.zero;
 
             if (movementPhase != MovementPhase.DraggingTail)
                 ApplySegmentConstraint(0, 1, _segmentTargetLengths[0], false, headDirectionalForce);
@@ -284,12 +305,12 @@ namespace Larvae
             if (applyRepelFromPoints) correction += CalculateRepelFromPoints(i);
 
             var modifier = CurrentMovementModifier;
-            var modifiedRestoreForce = restoreForce * modifier.restoreForceMultiplier;
+            var modifiedRestoreForce = restoreForce * modifier.restoreForceMultiplier * _movementModifier;
 
             if (modifier.segmentSyncMultiplier < 1f && Random.value > modifier.segmentSyncMultiplier)
             {
                 correction *= Random.Range(0.1f, 1.5f);
-                correction += Random.insideUnitCircle * modifier.randomnessMultiplier * 0.5f;
+                correction += modifier.randomnessMultiplier * 0.5f * Random.insideUnitCircle;
             }
 
             _velocities[i] += modifiedRestoreForce * Time.fixedDeltaTime * correction;
@@ -354,7 +375,7 @@ namespace Larvae
                 var velocity = _velocities[i] * modifier.speedMultiplier;
 
                 if (modifier.coordinationMultiplier < 1f)
-                    velocity += Random.insideUnitCircle * (1f - modifier.coordinationMultiplier) * Time.fixedDeltaTime;
+                    velocity += (1f - modifier.coordinationMultiplier) * Time.fixedDeltaTime * Random.insideUnitCircle;
 
                 points[i] += velocity * Time.fixedDeltaTime;
                 _velocities[i] *= dampening;
@@ -398,6 +419,50 @@ namespace Larvae
         {
             isMoving = false;
             movementPhase = MovementPhase.Rest;
+            ResetTargetLengths();
+        }
+
+        public void SetMovementMultiplier(float modifier)
+        {
+            _movementModifier = modifier;
+        }
+
+        public async UniTask SoftChangeMovementMultiplier(float target)
+        {
+            await SoftChangeMovementMultiplier(DefaultMovementSoftChangeTime, target);
+        }
+
+        public async UniTask SoftChangeMovementMultiplier(float time, float target)
+        {
+            _softChangeCts?.Cancel();
+            _softChangeCts?.Dispose();
+            _softChangeCts = new CancellationTokenSource();
+            var token = _softChangeCts.Token;
+
+            var start = _movementModifier;
+            var elapsed = 0f;
+
+            try
+            {
+                if (Mathf.Approximately(target, _movementModifier))
+                {
+                    _movementModifier = target;
+                    return;
+                }
+                while (elapsed < time)
+                {
+                    token.ThrowIfCancellationRequested();
+                    elapsed += Time.deltaTime;
+                    var t = Mathf.Clamp01(elapsed / time);
+                    _movementModifier = Mathf.Lerp(start, target, t);
+                    await UniTask.Yield(token);
+                }
+                _movementModifier = target;
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
         }
 
         public Vector2 GetDesiredDirection()
