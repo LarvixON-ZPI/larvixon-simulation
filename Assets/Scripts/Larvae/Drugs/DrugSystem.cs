@@ -92,9 +92,9 @@ namespace Larvae.Drugs
                 var drugModifier = activeDrug.Effect.GetMovementModifier(activeDrug.CurrentIntensity);
                 modifier = CombineModifiers(modifier, drugModifier, activeDrug.CurrentIntensity);
 
-                var preferredState = activeDrug.Effect.GetPreferredState(activeDrug.CurrentIntensity);
-                if (_stateMachine.CurrentState?.StateName != preferredState)
-                    _stateMachine.TransitionToState(preferredState);
+                //var preferredState = activeDrug.Effect.GetPreferredState(activeDrug.CurrentIntensity);
+                //if (_stateMachine.CurrentState?.StateName != preferredState)
+                //    _stateMachine.TransitionToState(preferredState);
             }
 
             CurrentModifier = modifier;

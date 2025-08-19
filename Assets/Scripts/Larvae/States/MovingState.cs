@@ -10,7 +10,7 @@ namespace Larvae.States
     {
         [SerializeField] private float directionChangeInterval = 3f;
         [SerializeField] private float directionChangeVariance = 2f;
-        [SerializeField] private float stateChangeProbability = 0.2f;
+        [SerializeField] private float stateChangeProbability = 0.1f;
 
         private float _nextDirectionChange;
         public override string StateName => "Moving";
