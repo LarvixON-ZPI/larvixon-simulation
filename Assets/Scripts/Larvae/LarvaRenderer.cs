@@ -76,7 +76,7 @@ namespace Larvae
             for (var i = 0; i < _larva.points.Length; i++)
             {
                 Gizmos.color = GetBodyColorAt((float)i / (_larva.points.Length - 1));
-                Gizmos.DrawWireSphere(_larva.points[i], _larva.GetSegmentWidth(i) * bodyWidth * 0.5f);
+                Gizmos.DrawWireSphere(_larva.points[i], _larva.GetSegmentWidth(i) * bodyWidth);
             }
         }
 
@@ -148,7 +148,7 @@ namespace Larvae
             {
                 var center = points[i];
                 var localCenter = new Vector2(center.x - transformPosition.x, center.y - transformPosition.y);
-                var currentWidth = _larva.GetSegmentWidth(i) * bodyWidth * 0.5f;
+                var currentWidth = _larva.GetSegmentWidth(i) * bodyWidth;
 
                 var segmentColor = GetBodyColorAt((float)i / (points.Length - 1));
 
@@ -294,8 +294,8 @@ namespace Larvae
             var finalStripeColor = Color.Lerp(bodyColor, stripeColor, stripeColorBlend);
 
             // Size and Extension
-            var startRadius = _larva.GetSegmentWidth(segmentIdx) * bodyWidth * 0.5f;
-            var endRadius = _larva.GetSegmentWidth(segmentIdx + 1) * bodyWidth * 0.5f;
+            var startRadius = _larva.GetSegmentWidth(segmentIdx) * bodyWidth;
+            var endRadius = _larva.GetSegmentWidth(segmentIdx + 1) * bodyWidth;
             var bodyRadius = Mathf.Lerp(startRadius, endRadius, t);
 
             var stripeHalfLength = bodyRadius + stripeExtension;
