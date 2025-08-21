@@ -10,14 +10,14 @@ namespace Larvae
 
         public Material larvaMaterial;
 
+        [Header("Body Settings")]
         public Color larvaColor = Color.green;
+
         public Color headColor = Color.red;
+        public Color tailColor = Color.blue;
         public float bodyWidth = 0.3f;
-
         public int segmentResolution = 16;
-
         public float smoothingFactor = 0.5f;
-
         public bool useSplineInterpolation = true;
 
         [Header("Stripe Settings")]
@@ -27,8 +27,16 @@ namespace Larvae
         public float stripeWidth = 0.02f;
         public int stripesPerSegment = 3;
 
-        private Mesh _bodyMesh;
+        [Tooltip("How much the stripes extend beyond the body's radius.")]
+        public float stripeExtension = 0.05f;
 
+        [Tooltip("The resolution of the circular ends of the stripes. Higher is smoother.")]
+        public int stripeEndCapResolution = 6;
+
+        [Tooltip("Blends stripe color with the body color. 0 = Body Color, 1 = Stripe Color.")] [Range(0, 1)]
+        public float stripeColorBlend = 1f;
+
+        private Mesh _bodyMesh;
         private Larva _larva;
         private MeshFilter _meshFilter;
         private MeshRenderer _meshRenderer;
@@ -52,21 +60,29 @@ namespace Larvae
         private void OnDrawGizmos()
         {
             DrawPointsGizmos();
-
             DrawCenterOfMassGizmo();
+        }
+
+        private Color GetBodyColorAt(float normalizedPosition)
+        {
+            return normalizedPosition < 0.5f
+                ? Color.Lerp(headColor, larvaColor, normalizedPosition * 2)
+                : Color.Lerp(larvaColor, tailColor, (normalizedPosition - 0.5f) * 2);
         }
 
         private void DrawPointsGizmos()
         {
+            if (_larva == null || _larva.points == null) return;
             for (var i = 0; i < _larva.points.Length; i++)
             {
-                Gizmos.color = i == 0 ? headColor : larvaColor;
-                Gizmos.DrawWireSphere(_larva.points[i], _larva.GetSegmentWidth(i) * bodyWidth * 0.5f);
+                Gizmos.color = GetBodyColorAt((float)i / (_larva.points.Length - 1));
+                Gizmos.DrawWireSphere(_larva.points[i], _larva.GetSegmentWidth(i) * bodyWidth);
             }
         }
 
         private void DrawCenterOfMassGizmo()
         {
+            if (_larva == null) return;
             Gizmos.color = Color.cyan;
             var center = _larva.GetCenter();
             Gizmos.DrawWireCube(center, Vector3.one * 0.1f);
@@ -83,17 +99,13 @@ namespace Larvae
 
         private void CreateBodyMesh()
         {
-            _bodyMesh = new Mesh
-            {
-                name = "LarvaBody"
-            };
+            _bodyMesh = new Mesh { name = "LarvaBody" };
             _meshFilter.mesh = _bodyMesh;
         }
 
         private void UpdateBodyMesh()
         {
             var renderPoints = useSplineInterpolation ? GetSmoothedPoints(_larva.points) : _larva.points;
-
             GenerateBodyMesh(renderPoints);
         }
 
@@ -102,18 +114,15 @@ namespace Larvae
             if (originalPoints.Length < 3) return originalPoints;
 
             var smoothedPoints = new Vector2[originalPoints.Length];
-
             smoothedPoints[0] = originalPoints[0];
             smoothedPoints[^1] = originalPoints[^1];
 
-            // Smooth middle points using Catmull-Rom spline-like smoothing
             for (var i = 1; i < originalPoints.Length - 1; i++)
             {
                 var prev = originalPoints[i - 1];
                 var curr = originalPoints[i];
                 var next = originalPoints[i + 1];
 
-                // Simple smoothing: average with neighbors weighted by smoothing factor
                 var smoothed = Vector2.Lerp(curr, (prev + next) * 0.5f, smoothingFactor);
                 smoothedPoints[i] = smoothed;
             }
@@ -130,26 +139,18 @@ namespace Larvae
             var uvs = new Vector2[totalVertices];
             var colors = new Color[totalVertices];
 
-            // Calculate triangles for the body segments
-            // 2 triangles per quad, 3 vertices per triangle
             var triangleCount = (points.Length - 1) * segmentResolution * 6;
             var triangles = new int[triangleCount];
 
-            // Convert world positions to local positions relative to transform
             var transformPosition = transform.position;
 
-            // Generate circular vertices around each point
             for (var i = 0; i < points.Length; i++)
             {
                 var center = points[i];
-
-                // Convert to local space by subtracting transform position
                 var localCenter = new Vector2(center.x - transformPosition.x, center.y - transformPosition.y);
-
                 var currentWidth = _larva.GetSegmentWidth(i) * bodyWidth;
 
-                // Color interpolation from head to tail
-                var segmentColor = Color.Lerp(headColor, larvaColor, (float)i / (points.Length - 1));
+                var segmentColor = GetBodyColorAt((float)i / (points.Length - 1));
 
                 for (var j = 0; j < segmentResolution; j++)
                 {
@@ -158,14 +159,11 @@ namespace Larvae
 
                     var vertexIndex = i * segmentResolution + j;
                     vertices[vertexIndex] = new Vector3(localCenter.x + offset.x, localCenter.y + offset.y, 0);
-
-                    // UV mapping
                     uvs[vertexIndex] = new Vector2((float)j / segmentResolution, (float)i / (points.Length - 1));
                     colors[vertexIndex] = segmentColor;
                 }
             }
 
-            // Generate triangles to connect segments
             var triangleIndex = 0;
             for (var i = 0; i < points.Length - 1; i++)
             {
@@ -179,12 +177,10 @@ namespace Larvae
                     var currentNext = nextRingStart + j;
                     var nextNext = nextRingStart + (j + 1) % segmentResolution;
 
-                    // First triangle
                     triangles[triangleIndex++] = current;
                     triangles[triangleIndex++] = currentNext;
                     triangles[triangleIndex++] = next;
 
-                    // Second triangle
                     triangles[triangleIndex++] = next;
                     triangles[triangleIndex++] = currentNext;
                     triangles[triangleIndex++] = nextNext;
@@ -203,32 +199,20 @@ namespace Larvae
         private Material CreateDefaultMaterial()
         {
             Material mat = null;
-
             string[] shaderNames =
-            {
-                "Sprites/Default",
-                "Legacy Shaders/Particles/Alpha Blended Premultiply",
-                "UI/Default",
-                "Standard"
-            };
+                { "Sprites/Default", "Legacy Shaders/Particles/Alpha Blended Premultiply", "UI/Default", "Standard" };
 
             foreach (var shaderName in shaderNames)
             {
                 var shader = Shader.Find(shaderName);
-
                 if (shader == null) continue;
-
                 mat = new Material(shader);
                 break;
             }
 
             if (mat == null) mat = new Material(Shader.Find("Standard"));
-
             mat.color = larvaColor;
-
-            if (mat.HasProperty(Color1))
-                mat.SetColor(Color1, Color.white);
-
+            if (mat.HasProperty(Color1)) mat.SetColor(Color1, Color.white);
             return mat;
         }
 
@@ -241,18 +225,12 @@ namespace Larvae
             var stripeMeshFilter = _stripesObject.AddComponent<MeshFilter>();
             var stripeMeshRenderer = _stripesObject.AddComponent<MeshRenderer>();
 
-            _stripesMesh = new Mesh
-            {
-                name = "LarvaStripes"
-            };
+            _stripesMesh = new Mesh { name = "LarvaStripes" };
             stripeMeshFilter.mesh = _stripesMesh;
 
-            var stripeMaterial = new Material(Shader.Find("Sprites/Default"))
-            {
-                color = stripeColor
-            };
+            var stripeMaterial = new Material(Shader.Find("Sprites/Default")) { color = stripeColor };
             stripeMeshRenderer.material = stripeMaterial;
-            stripeMeshRenderer.sortingOrder = 2; // Render on top of body
+            stripeMeshRenderer.sortingOrder = 2;
         }
 
         private void UpdateStripes()
@@ -265,27 +243,30 @@ namespace Larvae
 
         private void GenerateStripesMesh(Vector2[] points)
         {
-            if (points.Length < 2) return;
+            if (points.Length < 2 || stripesPerSegment <= 0 || stripeEndCapResolution < 1)
+            {
+                _stripesMesh.Clear();
+                return;
+            }
+
+            var capVerts = stripeEndCapResolution + 1;
+            var vertsPerStripe = capVerts * 2;
+            var trisPerStripe = stripeEndCapResolution * 6;
 
             var totalStripes = (points.Length - 1) * stripesPerSegment;
-            var vertices = new Vector3[totalStripes * 4];
-            var triangles = new int[totalStripes * 6];
-            var colors = new Color[totalStripes * 4];
+            var vertices = new Vector3[totalStripes * vertsPerStripe];
+            var triangles = new int[totalStripes * trisPerStripe];
+            var colors = new Color[totalStripes * vertsPerStripe];
 
             var transformPosition = transform.position;
             int vertexIndex = 0, triangleIndex = 0;
 
             for (var i = 0; i < points.Length - 1; i++)
-            {
-                var startPoint = points[i];
-                var endPoint = points[i + 1];
-
-                for (var stripeIdx = 0; stripeIdx < stripesPerSegment; stripeIdx++)
-                    AddStripeQuad(
-                        startPoint, endPoint, transformPosition, i, stripeIdx,
-                        ref vertexIndex, ref triangleIndex, vertices, triangles, colors
-                    );
-            }
+            for (var stripeIdx = 0; stripeIdx < stripesPerSegment; stripeIdx++)
+                GenerateSingleStripe(
+                    points[i], points[i + 1], transformPosition, i, points.Length, stripeIdx,
+                    ref vertexIndex, ref triangleIndex, vertices, triangles, colors
+                );
 
             _stripesMesh.Clear();
             _stripesMesh.vertices = vertices;
@@ -295,41 +276,77 @@ namespace Larvae
             _stripesMesh.RecalculateBounds();
         }
 
-        private void AddStripeQuad(
-            Vector2 start, Vector2 end, Vector3 transformPos, int segmentIdx, int stripeIdx,
+        private void GenerateSingleStripe(
+            Vector2 start, Vector2 end, Vector3 transformPos, int segmentIdx, float totalSegments, int stripeIdx,
             ref int vertexIndex, ref int triangleIndex, Vector3[] vertices, int[] triangles, Color[] colors)
         {
+            // Basic Properties
             var t = (stripeIdx + 1f) / (stripesPerSegment + 1f);
             var center = Vector2.Lerp(start, end, t);
             var localCenter = center - (Vector2)transformPos;
 
-            var startWidth = _larva.GetSegmentWidth(segmentIdx) * bodyWidth;
-            var endWidth = _larva.GetSegmentWidth(segmentIdx + 1) * bodyWidth;
-            var currentWidth = Mathf.Lerp(startWidth, endWidth, t) * 0.9f;
-
             var dir = (end - start).normalized;
             var perp = new Vector2(-dir.y, dir.x);
-            var lineStart = localCenter - perp * currentWidth;
-            var lineEnd = localCenter + perp * currentWidth;
-            var lineDir = dir * (stripeWidth * 0.5f);
+
+            // Color Blending
+            var normalizedGlobalPos = (segmentIdx + t) / (totalSegments - 1);
+            var bodyColor = GetBodyColorAt(normalizedGlobalPos);
+            var finalStripeColor = Color.Lerp(bodyColor, stripeColor, stripeColorBlend);
+
+            // Size and Extension
+            var startRadius = _larva.GetSegmentWidth(segmentIdx) * bodyWidth;
+            var endRadius = _larva.GetSegmentWidth(segmentIdx + 1) * bodyWidth;
+            var bodyRadius = Mathf.Lerp(startRadius, endRadius, t);
+
+            var stripeHalfLength = bodyRadius + stripeExtension;
+            var stripeRadius = stripeWidth * 0.5f;
+
+            // Geometry Calculation
+            var capCenter1 = localCenter - perp * stripeHalfLength;
+            var capCenter2 = localCenter + perp * stripeHalfLength;
 
             var baseIdx = vertexIndex;
+            var capVerts = stripeEndCapResolution + 1;
 
-            vertices[vertexIndex] = new Vector3(lineStart.x - lineDir.x, lineStart.y - lineDir.y, StripeZOffset);
-            colors[vertexIndex++] = stripeColor;
-            vertices[vertexIndex] = new Vector3(lineStart.x + lineDir.x, lineStart.y + lineDir.y, StripeZOffset);
-            colors[vertexIndex++] = stripeColor;
-            vertices[vertexIndex] = new Vector3(lineEnd.x + lineDir.x, lineEnd.y + lineDir.y, StripeZOffset);
-            colors[vertexIndex++] = stripeColor;
-            vertices[vertexIndex] = new Vector3(lineEnd.x - lineDir.x, lineEnd.y - lineDir.y, StripeZOffset);
-            colors[vertexIndex++] = stripeColor;
+            // Generate vertices for the two semicircle caps
+            for (var j = 0; j < capVerts; j++)
+            {
+                var p = (float)j / stripeEndCapResolution; // 0 to 1
+                var angle = p * Mathf.PI - Mathf.PI / 2f; // -90 to +90 degrees
 
-            triangles[triangleIndex++] = baseIdx;
-            triangles[triangleIndex++] = baseIdx + 1;
-            triangles[triangleIndex++] = baseIdx + 2;
-            triangles[triangleIndex++] = baseIdx;
-            triangles[triangleIndex++] = baseIdx + 2;
-            triangles[triangleIndex++] = baseIdx + 3;
+                var u = Mathf.Sin(angle) * stripeRadius; // Displacement along the stripe's direction
+                var v = Mathf.Cos(angle) * stripeRadius; // Displacement perpendicular to the stripe (outward bulge)
+
+                // First cap strip (on the "-perp" side)
+                var offset1 = dir * u - perp * v;
+                vertices[vertexIndex] = new Vector3(capCenter1.x + offset1.x, capCenter1.y + offset1.y, StripeZOffset);
+                colors[vertexIndex++] = finalStripeColor;
+
+                // Second cap strip (on the "+perp" side)
+                var offset2 = dir * u + perp * v;
+                vertices[vertexIndex] = new Vector3(capCenter2.x + offset2.x, capCenter2.y + offset2.y, StripeZOffset);
+                colors[vertexIndex++] = finalStripeColor;
+            }
+
+            // Triangulation
+            // Connect the two strips of vertices with quads
+            for (var j = 0; j < stripeEndCapResolution; j++)
+            {
+                var i1 = baseIdx + j * 2;
+                var i2 = baseIdx + j * 2 + 1;
+                var i3 = baseIdx + (j + 1) * 2;
+                var i4 = baseIdx + (j + 1) * 2 + 1;
+
+                // First triangle of the quad
+                triangles[triangleIndex++] = i1;
+                triangles[triangleIndex++] = i2;
+                triangles[triangleIndex++] = i3;
+
+                // Second triangle of the quad
+                triangles[triangleIndex++] = i3;
+                triangles[triangleIndex++] = i2;
+                triangles[triangleIndex++] = i4;
+            }
         }
     }
 }
