@@ -280,7 +280,7 @@ namespace Larvae
             Vector2 start, Vector2 end, Vector3 transformPos, int segmentIdx, float totalSegments, int stripeIdx,
             ref int vertexIndex, ref int triangleIndex, Vector3[] vertices, int[] triangles, Color[] colors)
         {
-            // --- Basic Properties ---
+            // Basic Properties
             var t = (stripeIdx + 1f) / (stripesPerSegment + 1f);
             var center = Vector2.Lerp(start, end, t);
             var localCenter = center - (Vector2)transformPos;
@@ -288,12 +288,12 @@ namespace Larvae
             var dir = (end - start).normalized;
             var perp = new Vector2(-dir.y, dir.x);
 
-            // --- Color Blending ---
+            // Color Blending
             var normalizedGlobalPos = (segmentIdx + t) / (totalSegments - 1);
             var bodyColor = GetBodyColorAt(normalizedGlobalPos);
             var finalStripeColor = Color.Lerp(bodyColor, stripeColor, stripeColorBlend);
 
-            // --- Size and Extension ---
+            // Size and Extension
             var startRadius = _larva.GetSegmentWidth(segmentIdx) * bodyWidth * 0.5f;
             var endRadius = _larva.GetSegmentWidth(segmentIdx + 1) * bodyWidth * 0.5f;
             var bodyRadius = Mathf.Lerp(startRadius, endRadius, t);
@@ -301,7 +301,7 @@ namespace Larvae
             var stripeHalfLength = bodyRadius + stripeExtension;
             var stripeRadius = stripeWidth * 0.5f;
 
-            // --- Geometry Calculation ---
+            // Geometry Calculation
             var capCenter1 = localCenter - perp * stripeHalfLength;
             var capCenter2 = localCenter + perp * stripeHalfLength;
 
@@ -328,7 +328,7 @@ namespace Larvae
                 colors[vertexIndex++] = finalStripeColor;
             }
 
-            // --- Triangulation ---
+            // Triangulation
             // Connect the two strips of vertices with quads
             for (var j = 0; j < stripeEndCapResolution; j++)
             {
