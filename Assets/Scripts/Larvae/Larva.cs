@@ -237,11 +237,8 @@ namespace Larvae
             var modifier = CurrentMovementModifier;
             var headDirectionalForce = headForwardForce * modifier.headForceMultiplier * targetDirection;
 
-            if (modifier.randomnessMultiplier > 0)
-            {
-                var randomForce = modifier.randomnessMultiplier * Time.fixedDeltaTime * Random.insideUnitCircle;
-                headDirectionalForce += randomForce;
-            }
+            var randomForce = modifier.randomnessMultiplier * Time.fixedDeltaTime * Random.insideUnitCircle;
+            headDirectionalForce += randomForce;
 
             if (!modifier.canMove || !isMoving) headDirectionalForce = Vector2.zero;
 
@@ -449,6 +446,7 @@ namespace Larvae
                     _movementModifier = target;
                     return;
                 }
+
                 while (elapsed < time)
                 {
                     token.ThrowIfCancellationRequested();
@@ -457,11 +455,11 @@ namespace Larvae
                     _movementModifier = Mathf.Lerp(start, target, t);
                     await UniTask.Yield(token);
                 }
+
                 _movementModifier = target;
             }
             catch (OperationCanceledException)
             {
-                return;
             }
         }
 

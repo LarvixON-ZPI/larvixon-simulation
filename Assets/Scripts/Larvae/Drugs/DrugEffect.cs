@@ -33,7 +33,7 @@ namespace Larvae.Drugs
         {
             speedMultiplier = 1f,
             coordinationMultiplier = 1f,
-            randomnessMultiplier = 0f,
+            randomnessMultiplier = 1f,
             directionStability = 1f,
             segmentSyncMultiplier = 1f,
             headForceMultiplier = 1f,

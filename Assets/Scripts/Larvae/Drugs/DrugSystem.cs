@@ -1,6 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
-using Larvae.States;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Larvae.Drugs
@@ -9,7 +8,6 @@ namespace Larvae.Drugs
     {
         private readonly List<ActiveDrugEffect> _activeDrugs = new();
         private Larva _larva;
-        private LarvaStateMachine _stateMachine;
 
         public MovementModifier CurrentModifier { get; private set; } = MovementModifier.Normal;
         public bool HasActiveDrugs => _activeDrugs.Count > 0;
@@ -17,7 +15,6 @@ namespace Larvae.Drugs
         private void Awake()
         {
             _larva = GetComponent<Larva>();
-            _stateMachine = GetComponent<LarvaStateMachine>();
         }
 
         private void Update()
@@ -31,10 +28,10 @@ namespace Larvae.Drugs
             var activeDrug = new ActiveDrugEffect(drugEffect, dosage);
             _activeDrugs.Add(activeDrug);
 
-            StartCoroutine(DrugEffectCoroutine(activeDrug));
+            ProgressDrugPhase(activeDrug).Forget();
         }
 
-        private IEnumerator DrugEffectCoroutine(ActiveDrugEffect activeDrug)
+        private async UniTaskVoid ProgressDrugPhase(ActiveDrugEffect activeDrug)
         {
             var totalDuration = activeDrug.Effect.onsetTime + activeDrug.Effect.duration +
                                 activeDrug.Effect.comedownTime;
@@ -65,7 +62,7 @@ namespace Larvae.Drugs
 
                 activeDrug.CurrentIntensity = currentIntensity * activeDrug.Dosage;
 
-                yield return null;
+                await UniTask.Yield();
             }
 
             _activeDrugs.Remove(activeDrug);
@@ -126,20 +123,6 @@ namespace Larvae.Drugs
         public void ClearAllDrugs()
         {
             _activeDrugs.Clear();
-        }
-
-        private class ActiveDrugEffect
-        {
-            public ActiveDrugEffect(DrugEffect effect, float dosage)
-            {
-                Effect = effect;
-                Dosage = Mathf.Clamp01(dosage);
-                CurrentIntensity = 0f;
-            }
-
-            public DrugEffect Effect { get; }
-            public float Dosage { get; }
-            public float CurrentIntensity { get; set; }
         }
     }
 }
