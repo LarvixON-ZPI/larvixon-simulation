@@ -11,6 +11,7 @@ namespace Larvae.Drugs
 
         public MovementModifier CurrentModifier { get; private set; } = MovementModifier.Normal;
         public bool HasActiveDrugs => _activeDrugs.Count > 0;
+        public IReadOnlyList<ActiveDrugEffect> ActiveDrugs => _activeDrugs;
 
         private void Awake()
         {
