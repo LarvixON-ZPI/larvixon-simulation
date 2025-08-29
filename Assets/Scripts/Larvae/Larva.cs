@@ -84,10 +84,10 @@ namespace Larvae
 
         private void FixedUpdate()
         {
+            DebugDrawLarva();
+
             ApplySegmentConstraints();
             UpdatePositions();
-
-            DebugDrawLarva();
         }
 
         private void OnDestroy()
@@ -177,7 +177,7 @@ namespace Larvae
 
         private async UniTask UpdateMovementWave()
         {
-            while (true)
+            while (_stateMachine.CurrentState.StateName != "Dead")
             {
                 var modifier = CurrentMovementModifier;
                 var adjustedPhaseTime = movementPhaseTime / (modifier.speedMultiplier + 0.1f);

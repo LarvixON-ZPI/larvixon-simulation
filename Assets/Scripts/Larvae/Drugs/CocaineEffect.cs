@@ -15,8 +15,6 @@ namespace Larvae.Drugs
 
         [Range(0f, 1f)] public float lethalDosageThreshold = 1f;
 
-        [Range(60f, 300f)] public float lethalTime = 150f; // 2.5 minutes in seconds
-
         [Range(0f, 2f)] public float maxSpeedMultiplier = 3f;
 
         [Range(0f, 5f)] public float maxRandomnessMultiplier = 2f;
@@ -71,7 +69,6 @@ namespace Larvae.Drugs
         public override void ApplyCustomEffects(Larva larva, float intensity)
         {
             StartErraticDirectionChanges(larva, intensity).Forget();
-            if (intensity >= lethalDosageThreshold) StartLethalEffect(larva).Forget();
         }
 
         private async UniTaskVoid StartErraticDirectionChanges(Larva larva, float intensity)
@@ -97,23 +94,6 @@ namespace Larvae.Drugs
                     larva.SetMovementDirection(newDirection);
                     if (!larva.isMoving) larva.StartMoving(newDirection);
                 }
-            }
-            catch (OperationCanceledException)
-            {
-            }
-        }
-
-        private async UniTaskVoid StartLethalEffect(Larva larva)
-        {
-            if (_lethalEffectCts != null) return;
-            _lethalEffectCts = new CancellationTokenSource();
-            var token = _lethalEffectCts.Token;
-
-            try
-            {
-                await UniTask.Delay(TimeSpan.FromSeconds(lethalTime), cancellationToken: token);
-                if (!token.IsCancellationRequested)
-                    larva.Die();
             }
             catch (OperationCanceledException)
             {
