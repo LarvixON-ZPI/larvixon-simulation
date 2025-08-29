@@ -515,7 +515,6 @@ namespace Larvae
             SetMovementMultiplier(0f);
             ClearAllDrugEffects();
             _stateMachine.ForceTransitionToState("Dead");
-            Debug.Log($"Larva {name} died from cocaine overdose after metabolic exhaustion.");
         }
 
         private enum MovementPhase
