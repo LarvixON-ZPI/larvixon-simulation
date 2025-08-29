@@ -11,6 +11,7 @@ namespace Larvae.Drugs
 
         public MovementModifier CurrentModifier { get; private set; } = MovementModifier.Normal;
         public bool HasActiveDrugs => _activeDrugs.Count > 0;
+        public IReadOnlyList<ActiveDrugEffect> ActiveDrugs => _activeDrugs;
 
         private void Awake()
         {
@@ -45,13 +46,12 @@ namespace Larvae.Drugs
                 if (elapsed < activeDrug.Effect.onsetTime)
                 {
                     var onsetProgress = elapsed / activeDrug.Effect.onsetTime;
-                    currentIntensity = Mathf.Lerp(0f, activeDrug.Effect.maxIntensity, onsetProgress);
+                    currentIntensity = Mathf.Lerp(0f, activeDrug.Effect.maxIntensity,
+                        activeDrug.Effect.intensityCurve.Evaluate(onsetProgress));
                 }
                 else if (elapsed < activeDrug.Effect.onsetTime + activeDrug.Effect.duration)
                 {
-                    var peakProgress = (elapsed - activeDrug.Effect.onsetTime) / activeDrug.Effect.duration;
-                    currentIntensity = activeDrug.Effect.maxIntensity *
-                                       activeDrug.Effect.intensityCurve.Evaluate(peakProgress);
+                    currentIntensity = activeDrug.Effect.maxIntensity;
                 }
                 else
                 {

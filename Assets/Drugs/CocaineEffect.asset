@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8859d5b0bd2da17499fd65014334d874, type: 3}
+  m_Name: CocaineEffect
+  m_EditorClassIdentifier: 
+  drugName: Cocaine
+  description: 
+  maxIntensity: 1
+  duration: 1200
+  onsetTime: 300
+  comedownTime: 300
+  intensityCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  directionChangeFrequency: 3
+  lethalDosageThreshold: 1
+  lethalTime: 150
+  maxSpeedMultiplier: 1.5
+  maxRandomnessMultiplier: 2.5
+  maxHeadForceMultiplier: 1.5
+  maxRestoreForceMultiplier: 2
+  minCoordinationMultiplier: 0.2
+  minDirectionStability: 0.1
+  minSegmentSyncMultiplier: 0.3

@@ -8,7 +8,6 @@ namespace Larvae.States
     [Serializable]
     public class LayingDownState : BaseLarvaState
     {
-        [SerializeField] private float occasionalTwitchChance = 0.1f;
         [SerializeField] private float maxLayingTime = 60f;
 
         [SerializeField] private float minLayingTime = 15f;

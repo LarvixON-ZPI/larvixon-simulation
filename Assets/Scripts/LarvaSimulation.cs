@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Larvae;
+using Larvae.Drugs;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class LarvaSimulation : MonoBehaviour
 {
@@ -19,7 +19,10 @@ public class LarvaSimulation : MonoBehaviour
 
     [SerializeField] private bool mutateLarva;
 
-    [SerializeField] private Slider simulationSpeedSlider;
+    [Header("Drug Testing")]
+    [SerializeField] private CocaineEffect cocaineEffect;
+
+    [SerializeField] private float drugDosage = 1f;
 
     [SerializeField] private Transform larvaeParent;
     [SerializeField] private Transform larvaeSegmentParent;
@@ -27,6 +30,7 @@ public class LarvaSimulation : MonoBehaviour
     private readonly List<Larva> _larvae = new();
     private Camera _camera;
     private float _nextDirectionChange;
+    public IReadOnlyList<Larva> Larvae => _larvae;
 
     private void Start()
     {
@@ -36,8 +40,6 @@ public class LarvaSimulation : MonoBehaviour
         SpawnLarvae();
 
         if (autoMove) StartAllMovement();
-
-        simulationSpeedSlider.onValueChanged.AddListener(OnSimulationSpeedChanged);
 
         Application.runInBackground = true;
     }
@@ -65,12 +67,12 @@ public class LarvaSimulation : MonoBehaviour
         Gizmos.DrawWireCube(transform.position, new Vector3(spawnArea.x, spawnArea.y, 0));
     }
 
-    private void OnSimulationSpeedChanged(float newValue)
+    public void OnSimulationSpeedChanged(float newValue)
     {
         SetSimulationSpeed(newValue);
     }
 
-    private void SetSimulationSpeed(float newSimulationSpeed)
+    private static void SetSimulationSpeed(float newSimulationSpeed)
     {
         Time.timeScale = newSimulationSpeed;
     }
@@ -156,6 +158,19 @@ public class LarvaSimulation : MonoBehaviour
             Debug.Log("Changed all larvae directions randomly");
         }
 
+        // Drug testing controls
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            ApplyCocaineToAllLarvae();
+            Debug.Log($"Applied cocaine (dosage: {drugDosage}) to all larvae");
+        }
+
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            ClearAllDrugsFromLarvae();
+            Debug.Log("Cleared all drugs from all larvae");
+        }
+
         if (Input.GetMouseButton(1))
         {
             var mouseWorldPos = _camera.ScreenToWorldPoint(Input.mousePosition);
@@ -168,5 +183,25 @@ public class LarvaSimulation : MonoBehaviour
                 larva.SetMovementDirection(directionToMouse);
             }
         }
+    }
+
+    private void ApplyCocaineToAllLarvae()
+    {
+        if (!cocaineEffect)
+        {
+            Debug.LogError("CocaineEffect not assigned! Please assign it in the inspector.");
+            return;
+        }
+
+        foreach (var larva in _larvae)
+            if (larva)
+                larva.AddDrugEffect(cocaineEffect, drugDosage);
+    }
+
+    private void ClearAllDrugsFromLarvae()
+    {
+        foreach (var larva in _larvae)
+            if (larva)
+                larva.ClearAllDrugEffects();
     }
 }
