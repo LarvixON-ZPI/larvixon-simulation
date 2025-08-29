@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8859d5b0bd2da17499fd65014334d874, type: 3}
   m_Name: CocaineEffect
   m_EditorClassIdentifier: 
-  drugName: 
+  drugName: Cocaine
   description: 
   maxIntensity: 1
-  duration: 30
-  onsetTime: 2
-  comedownTime: 5
+  duration: 1200
+  onsetTime: 300
+  comedownTime: 300
   intensityCurve:
     serializedVersion: 2
     m_Curve:
@@ -48,3 +48,7 @@ MonoBehaviour:
   maxSpeedMultiplier: 1.5
   maxRandomnessMultiplier: 2.5
   maxHeadForceMultiplier: 1.5
+  maxRestoreForceMultiplier: 2
+  minCoordinationMultiplier: 0.2
+  minDirectionStability: 0.1
+  minSegmentSyncMultiplier: 0.3
