@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Larvae;
 using Larvae.Drugs;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class LarvaSimulation : MonoBehaviour
 {
@@ -19,8 +18,6 @@ public class LarvaSimulation : MonoBehaviour
     [SerializeField] private float fixedDeltaTime = 0.01f;
 
     [SerializeField] private bool mutateLarva;
-
-    [SerializeField] private Slider simulationSpeedSlider;
 
     [Header("Drug Testing")]
     [SerializeField] private CocaineEffect cocaineEffect;
@@ -43,8 +40,6 @@ public class LarvaSimulation : MonoBehaviour
         SpawnLarvae();
 
         if (autoMove) StartAllMovement();
-
-        simulationSpeedSlider.onValueChanged.AddListener(OnSimulationSpeedChanged);
 
         Application.runInBackground = true;
     }
@@ -72,12 +67,12 @@ public class LarvaSimulation : MonoBehaviour
         Gizmos.DrawWireCube(transform.position, new Vector3(spawnArea.x, spawnArea.y, 0));
     }
 
-    private void OnSimulationSpeedChanged(float newValue)
+    public void OnSimulationSpeedChanged(float newValue)
     {
-        SetSimulationSpeed(newValue * newValue);
+        SetSimulationSpeed(newValue);
     }
 
-    private void SetSimulationSpeed(float newSimulationSpeed)
+    private static void SetSimulationSpeed(float newSimulationSpeed)
     {
         Time.timeScale = newSimulationSpeed;
     }
@@ -192,21 +187,21 @@ public class LarvaSimulation : MonoBehaviour
 
     private void ApplyCocaineToAllLarvae()
     {
-        if (cocaineEffect == null)
+        if (!cocaineEffect)
         {
             Debug.LogError("CocaineEffect not assigned! Please assign it in the inspector.");
             return;
         }
 
         foreach (var larva in _larvae)
-            if (larva != null)
+            if (larva)
                 larva.AddDrugEffect(cocaineEffect, drugDosage);
     }
 
     private void ClearAllDrugsFromLarvae()
     {
         foreach (var larva in _larvae)
-            if (larva != null)
+            if (larva)
                 larva.ClearAllDrugEffects();
     }
 }
