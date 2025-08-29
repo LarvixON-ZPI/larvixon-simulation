@@ -102,6 +102,7 @@ namespace Larvae
             _stateMachine.RegisterState(new LayingDownState());
             _stateMachine.RegisterState(new LookingAtEnvironmentState());
             _stateMachine.RegisterState(new LayingNearWallState());
+            _stateMachine.RegisterState(new DeadState());
         }
 
         public float GetSegmentWidth(int i)
@@ -508,17 +509,12 @@ namespace Larvae
             _drugSystem.ClearAllDrugs();
         }
 
-        private void TransitionToState(string stateName)
-        {
-            _stateMachine.TransitionToState(stateName);
-        }
-
         public void Die()
         {
             StopMoving();
             SetMovementMultiplier(0f);
             ClearAllDrugEffects();
-            TransitionToState("Dead");
+            _stateMachine.ForceTransitionToState("Dead");
             Debug.Log($"Larva {name} died from cocaine overdose after metabolic exhaustion.");
         }
 
