@@ -46,13 +46,12 @@ namespace Larvae.Drugs
                 if (elapsed < activeDrug.Effect.onsetTime)
                 {
                     var onsetProgress = elapsed / activeDrug.Effect.onsetTime;
-                    currentIntensity = Mathf.Lerp(0f, activeDrug.Effect.maxIntensity, onsetProgress);
+                    currentIntensity = Mathf.Lerp(0f, activeDrug.Effect.maxIntensity,
+                        activeDrug.Effect.intensityCurve.Evaluate(onsetProgress));
                 }
                 else if (elapsed < activeDrug.Effect.onsetTime + activeDrug.Effect.duration)
                 {
-                    var peakProgress = (elapsed - activeDrug.Effect.onsetTime) / activeDrug.Effect.duration;
-                    currentIntensity = activeDrug.Effect.maxIntensity *
-                                       activeDrug.Effect.intensityCurve.Evaluate(peakProgress);
+                    currentIntensity = activeDrug.Effect.maxIntensity;
                 }
                 else
                 {
