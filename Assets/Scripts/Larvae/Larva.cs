@@ -14,7 +14,7 @@ namespace Larvae
         private const float AheadTargetAngleArc = 140f;
         private const float WideTargetAngleArc = 300f;
 
-        public const float DefaultMovementSoftChangeTime = 1f;
+        private const float DefaultMovementSoftChangeTime = 1f;
 
         [Header("Larva Structure")]
         public Vector2[] points = new Vector2[5]; // Head, 2/5, Middle, 4/5, Back
@@ -64,7 +64,7 @@ namespace Larvae
 
         private CancellationTokenSource _updateTargetDirectionCts;
 
-        public MovementModifier CurrentMovementModifier => _drugSystem?.CurrentModifier ?? MovementModifier.Normal;
+        private MovementModifier CurrentMovementModifier => _drugSystem?.CurrentModifier ?? MovementModifier.Normal;
 
         private void Awake()
         {
@@ -508,9 +508,18 @@ namespace Larvae
             _drugSystem.ClearAllDrugs();
         }
 
-        public void TransitionToState(string stateName)
+        private void TransitionToState(string stateName)
         {
             _stateMachine.TransitionToState(stateName);
+        }
+
+        public void Die()
+        {
+            StopMoving();
+            SetMovementMultiplier(0f);
+            ClearAllDrugEffects();
+            TransitionToState("Dead");
+            Debug.Log($"Larva {name} died from cocaine overdose after metabolic exhaustion.");
         }
 
         private enum MovementPhase

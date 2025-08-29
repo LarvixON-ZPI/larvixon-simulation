@@ -113,21 +113,11 @@ namespace Larvae.Drugs
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(lethalTime), cancellationToken: token);
                 if (!token.IsCancellationRequested)
-                    KillLarva(larva);
+                    larva.Die();
             }
             catch (OperationCanceledException)
             {
             }
-        }
-
-        private static void KillLarva(Larva larva)
-        {
-            larva.StopMoving();
-            larva.SetMovementMultiplier(0f);
-            larva.ClearAllDrugEffects();
-            larva.TransitionToState("Dead");
-            larva.gameObject.SetActive(false);
-            Debug.Log($"Larva {larva.name} died from cocaine overdose after metabolic exhaustion.");
         }
     }
 }
