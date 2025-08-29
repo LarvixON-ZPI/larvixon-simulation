@@ -13,19 +13,6 @@ namespace Larvae.Drugs
         [Header("Additional Parameters")]
         [Range(0.1f, 5f)] public float directionChangeFrequency = 2f;
 
-        [Range(0f, 1f)] public float lethalDosageThreshold = 1f;
-
-        [Range(0f, 2f)] public float maxSpeedMultiplier = 3f;
-
-        [Range(0f, 5f)] public float maxRandomnessMultiplier = 2f;
-        [Range(1f, 10f)] public float maxHeadForceMultiplier = 5f;
-        [Range(1f, 5f)] public float maxRestoreForceMultiplier = 2f;
-
-        [Range(0f, 1f)] public float minCoordinationMultiplier = 0.2f;
-
-        [Range(0f, 1f)] public float minDirectionStability = 0.1f;
-        [Range(0f, 1f)] public float minSegmentSyncMultiplier = 0.3f;
-
         [CanBeNull] private CancellationTokenSource _directionChangeCts;
         [CanBeNull] private CancellationTokenSource _lethalEffectCts;
 
@@ -35,30 +22,6 @@ namespace Larvae.Drugs
             _directionChangeCts?.Dispose();
             _lethalEffectCts?.Cancel();
             _lethalEffectCts?.Dispose();
-        }
-
-        public override MovementModifier GetMovementModifier(float intensity)
-        {
-            var speedMultiplier = Mathf.Lerp(1f, maxSpeedMultiplier, intensity);
-            var coordinationMultiplier = Mathf.Lerp(1f, minCoordinationMultiplier, intensity);
-            var randomnessMultiplier = Mathf.Lerp(1f, maxRandomnessMultiplier, intensity);
-            var directionStability = Mathf.Lerp(1f, minDirectionStability, intensity);
-            var segmentSyncMultiplier = Mathf.Lerp(1f, minSegmentSyncMultiplier, intensity);
-            var headForceMultiplier = Mathf.Lerp(1f, maxHeadForceMultiplier, intensity);
-            var restoreForceMultiplier = Mathf.Lerp(1f, maxRestoreForceMultiplier, intensity);
-
-            return new MovementModifier
-            {
-                speedMultiplier = speedMultiplier,
-                coordinationMultiplier = coordinationMultiplier,
-                randomnessMultiplier = randomnessMultiplier,
-                directionStability = directionStability,
-                segmentSyncMultiplier = segmentSyncMultiplier,
-                headForceMultiplier = headForceMultiplier,
-                restoreForceMultiplier = restoreForceMultiplier,
-                canMove = true,
-                canChangeDirection = true
-            };
         }
 
         public override string GetPreferredState(float intensity)

@@ -23,7 +23,8 @@ namespace UI
             "Moving",
             "LayingDown",
             "LookingAtEnvironment",
-            "LayingNearWall"
+            "LayingNearWall",
+            "Dead"
         };
 
         private void Start()
