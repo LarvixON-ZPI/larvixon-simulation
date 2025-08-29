@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using JetBrains.Annotations;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -27,8 +28,8 @@ namespace Larvae.Drugs
         [Range(0f, 1f)] public float minDirectionStability = 0.1f;
         [Range(0f, 1f)] public float minSegmentSyncMultiplier = 0.3f;
 
-        private CancellationTokenSource _directionChangeCts;
-        private CancellationTokenSource _lethalEffectCts;
+        [CanBeNull] private CancellationTokenSource _directionChangeCts;
+        [CanBeNull] private CancellationTokenSource _lethalEffectCts;
 
         private void OnDestroy()
         {
@@ -104,8 +105,7 @@ namespace Larvae.Drugs
 
         private async UniTaskVoid StartLethalEffect(Larva larva)
         {
-            _lethalEffectCts?.Cancel();
-            _lethalEffectCts?.Dispose();
+            if (_lethalEffectCts != null) return;
             _lethalEffectCts = new CancellationTokenSource();
             var token = _lethalEffectCts.Token;
 
@@ -113,21 +113,11 @@ namespace Larvae.Drugs
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(lethalTime), cancellationToken: token);
                 if (!token.IsCancellationRequested)
-                    KillLarva(larva);
+                    larva.Die();
             }
             catch (OperationCanceledException)
             {
             }
-        }
-
-        private static void KillLarva(Larva larva)
-        {
-            larva.StopMoving();
-            larva.SetMovementMultiplier(0f);
-            larva.ClearAllDrugEffects();
-            larva.TransitionToState("Dead");
-            larva.gameObject.SetActive(false);
-            Debug.Log($"Larva {larva.name} died from cocaine overdose after metabolic exhaustion.");
         }
     }
 }

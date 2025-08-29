@@ -54,6 +54,8 @@ namespace Larvae.States
                 return;
             }
 
+            if (!CurrentState.OverridableByForce) return;
+
             CurrentState?.Exit(this);
             CurrentState = newState;
             CurrentState.Enter(this);
