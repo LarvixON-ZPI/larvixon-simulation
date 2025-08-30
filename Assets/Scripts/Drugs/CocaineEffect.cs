@@ -11,18 +11,15 @@ namespace Drugs
     [CreateAssetMenu(fileName = "CocaineEffect", menuName = "Drugs/Cocaine Effect")]
     public class CocaineEffect : DrugEffect
     {
-        [Header("Additional Parameters")]
-        [Range(0.1f, 5f)] public float directionChangeFrequency = 2f;
+        [Header("Additional Parameters")] [Range(0.1f, 5f)]
+        public float directionChangeFrequency = 2f;
 
         [CanBeNull] private CancellationTokenSource _directionChangeCts;
-        [CanBeNull] private CancellationTokenSource _lethalEffectCts;
 
         private void OnDestroy()
         {
             _directionChangeCts?.Cancel();
             _directionChangeCts?.Dispose();
-            _lethalEffectCts?.Cancel();
-            _lethalEffectCts?.Dispose();
         }
 
         public override string GetPreferredState(float intensity)

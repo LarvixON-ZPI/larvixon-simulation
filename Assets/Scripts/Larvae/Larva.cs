@@ -15,9 +15,9 @@ namespace Larvae
         private const float WideTargetAngleArc = 300f;
 
         private const float DefaultMovementSoftChangeTime = 1f;
+        private const float DirectionTweakMultiplier = 0.05f;
 
-        [Header("Larva Structure")]
-        public Vector2[] points = new Vector2[5]; // Head, 2/5, Middle, 4/5, Back
+        [Header("Larva Structure")] public Vector2[] points = new Vector2[5]; // Head, 2/5, Middle, 4/5, Back
 
         public float[] pointWidths = new float[5];
 
@@ -25,20 +25,17 @@ namespace Larvae
 
         [SerializeField] private float colliderWidthMultiplier = 0.5f;
 
-        [Header("Movement Parameters")]
-        public float dampening = 0.9f;
+        [Header("Movement Parameters")] public float dampening = 0.9f;
 
         public float restoreForce = 5.0f;
         public float headForwardForce = 3.0f;
         public float headDirectionInfluence = 0.8f;
 
-        [Header("Curve Straightening")]
-        public float maxAllowedCurveDegrees = 45.0f;
+        [Header("Curve Straightening")] public float maxAllowedCurveDegrees = 45.0f;
 
         public float curveStraighteningForce = 2.0f;
 
-        [Header("Movement State")]
-        public bool isMoving;
+        [Header("Movement State")] public bool isMoving;
 
         // always normalized
         public Vector2 targetDirection = Vector2.right;
@@ -88,12 +85,19 @@ namespace Larvae
 
             ApplySegmentConstraints();
             UpdatePositions();
+            TweakTargetDirection();
         }
 
         private void OnDestroy()
         {
             _updateTargetDirectionCts?.Cancel();
             _updateTargetDirectionCts?.Dispose();
+        }
+
+        private void TweakTargetDirection()
+        {
+            targetDirection += Random.insideUnitCircle * DirectionTweakMultiplier;
+            targetDirection.Normalize();
         }
 
         private void SetupStateMachine()
