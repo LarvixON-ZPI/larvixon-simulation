@@ -1,6 +1,5 @@
 using Larvae;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Drugs
 {
@@ -24,9 +23,9 @@ namespace Drugs
 
         [Range(0f, 5f)] public float maxRandomnessMultiplier = 2f;
 
-        [Range(1f, 10f)] public float maxHeadForceMultiplier = 5f;
+        [Range(0f, 10f)] public float maxHeadForceMultiplier = 5f;
 
-        [Range(1f, 5f)] public float maxRestoreForceMultiplier = 2f;
+        [Range(0f, 5f)] public float maxRestoreForceMultiplier = 2f;
 
         [Range(0f, 1f)] public float minCoordinationMultiplier = 0.2f;
 

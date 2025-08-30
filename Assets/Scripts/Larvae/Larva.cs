@@ -96,7 +96,8 @@ namespace Larvae
 
         private void TweakTargetDirection()
         {
-            targetDirection += Random.insideUnitCircle * DirectionTweakMultiplier;
+            targetDirection += DirectionTweakMultiplier * CurrentMovementModifier.randomnessMultiplier *
+                               Random.insideUnitCircle;
             targetDirection.Normalize();
         }
 
@@ -179,6 +180,12 @@ namespace Larvae
             SetMovementDirection(oppositeDirection);
         }
 
+        private float GetRandomCoordinationMultiplier()
+        {
+            return Random.Range(CurrentMovementModifier.coordinationMultiplier,
+                2 - CurrentMovementModifier.coordinationMultiplier);
+        }
+
         private async UniTask UpdateMovementWave()
         {
             while (_stateMachine.CurrentState.StateName != "Dead")
@@ -215,12 +222,11 @@ namespace Larvae
                 switch (movementPhase)
                 {
                     case MovementPhase.DraggingTail:
-                        _segmentTargetLengths[3] = _naturalLengths[3] * tailRetraction;
+                        var retractionMultiplier = tailRetraction * GetRandomCoordinationMultiplier();
+                        _segmentTargetLengths[3] = _naturalLengths[3] * retractionMultiplier;
                         break;
                     case MovementPhase.ExtendingHead:
-                        var extensionMultiplier = modifier.coordinationMultiplier > 0.5f
-                            ? headExtension
-                            : headExtension * Random.Range(0.5f, 2f);
+                        var extensionMultiplier = headExtension * GetRandomCoordinationMultiplier();
                         _segmentTargetLengths[0] = _naturalLengths[0] * extensionMultiplier;
                         break;
                     case MovementPhase.Rest:
@@ -473,7 +479,7 @@ namespace Larvae
             var modifier = CurrentMovementModifier;
             var angleArc = Random.value < headDirectionInfluence ? AheadTargetAngleArc : WideTargetAngleArc;
 
-            if (modifier.directionStability < 0.5f) angleArc = WideTargetAngleArc;
+            if (Random.value > modifier.directionStability) angleArc = WideTargetAngleArc;
 
             var halfArc = angleArc / 2f;
             var randomAngle = Random.Range(-halfArc, halfArc);

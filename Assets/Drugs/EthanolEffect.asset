@@ -9,21 +9,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8859d5b0bd2da17499fd65014334d874, type: 3}
-  m_Name: CocaineEffect
-  m_EditorClassIdentifier: 
-  drugName: Cocaine
+  m_Script: {fileID: 11500000, guid: e1ee2e2a224b4bcd9be3cdfb44c36f7c, type: 3}
+  m_Name: EthanolEffect
+  m_EditorClassIdentifier: Assembly-CSharp::Drugs.EthanolEffect
+  drugName: Ethanol
   description: 
   maxIntensity: 1
-  duration: 800
+  duration: 400
   onsetTime: 100
   comedownTime: 100
-  maxSpeedMultiplier: 1.5
-  maxRandomnessMultiplier: 2.5
-  maxHeadForceMultiplier: 1.5
-  maxRestoreForceMultiplier: 2
-  minCoordinationMultiplier: 0.5
-  minDirectionStability: 0.1
+  maxSpeedMultiplier: 0.5
+  maxRandomnessMultiplier: 0.5
+  maxHeadForceMultiplier: 0.5
+  maxRestoreForceMultiplier: 0.5
+  minCoordinationMultiplier: 0.2
+  minDirectionStability: 0.5
   minSegmentSyncMultiplier: 0.3
   lethalTimeRange:
     serializedVersion: 2
@@ -31,20 +31,20 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: -1
-      inSlope: 0
-      outSlope: 0
+      inSlope: 1.5621225
+      outSlope: 1.5621225
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.118436255
     - serializedVersion: 3
-      time: 1
-      value: 0.5
-      inSlope: 0
-      outSlope: 0
+      time: 0.97886676
+      value: 0.9922377
+      inSlope: -0.038185306
+      outSlope: -0.038185306
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.65537107
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -74,4 +74,3 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  directionChangeFrequency: 3
