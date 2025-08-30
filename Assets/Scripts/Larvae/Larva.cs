@@ -122,9 +122,14 @@ namespace Larvae
 
         public void Initialize(Transform segmentParent)
         {
+            Vector3 rotation = Random.insideUnitCircle.normalized;
+
+            var invertedRotation = new Vector3(-rotation.x, -rotation.y, 0f);
+            SetMovementDirection(invertedRotation);
+
             for (var i = 0; i < points.Length; i++)
             {
-                points[i] = transform.position + new Vector3(i * segmentLength, 0, 0);
+                points[i] = transform.position + rotation * i * segmentLength;
                 _segments[i] = SpawnColliderForSegment(i, segmentParent);
             }
 

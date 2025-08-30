@@ -10,7 +10,7 @@ public class LarvaSimulation : MonoBehaviour
     public int larvaCount = 5;
     public Vector2 spawnArea = new(10, 10);
 
-    public bool autoMove = true;
+    public bool setRandomTargetDirectionOnStart;
 
     [SerializeField] private float simulationSpeed = 1;
 
@@ -40,7 +40,7 @@ public class LarvaSimulation : MonoBehaviour
 
         SpawnLarvae();
 
-        if (autoMove) StartAllMovement();
+        if (setRandomTargetDirectionOnStart) StartAllMovement();
 
         Application.runInBackground = true;
     }
@@ -140,8 +140,8 @@ public class LarvaSimulation : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            autoMove = !autoMove;
-            if (autoMove)
+            setRandomTargetDirectionOnStart = !setRandomTargetDirectionOnStart;
+            if (setRandomTargetDirectionOnStart)
             {
                 StartAllMovement();
                 Debug.Log("Auto movement enabled");

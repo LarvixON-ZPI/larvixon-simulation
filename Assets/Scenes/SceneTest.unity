@@ -2259,7 +2259,7 @@ MonoBehaviour:
   larvaPrefab: {fileID: 8550540643179889647, guid: cf774e70fe50a30458bb2a22deef396a, type: 3}
   larvaCount: 1
   spawnArea: {x: 20, y: 20}
-  autoMove: 1
+  setRandomTargetDirectionOnStart: 0
   simulationSpeed: 1
   targetFrameRate: 120
   fixedDeltaTime: 0.01
