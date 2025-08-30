@@ -1,6 +1,7 @@
+using Larvae;
 using UnityEngine;
 
-namespace Larvae.Drugs
+namespace Drugs
 {
     public abstract class DrugEffect : ScriptableObject
     {
@@ -33,8 +34,8 @@ namespace Larvae.Drugs
 
         [Range(0f, 1f)] public float minSegmentSyncMultiplier = 0.3f;
 
-        // defines probability of death - Random.value of it if 0 or higher defines time from after onset to die in proportion to duration
-        // if lower than 0 for all time range - no lethal effect
+        // Defines lethal effect timing: negative values indicate no lethal effect, 
+        // positive values represent the proportion of drug duration after which death occurs
         public AnimationCurve lethalTimeRange = AnimationCurve.EaseInOut(0, -1, 1, 0.5f);
         [SerializeField] private float maxSafeDose = 0.5f;
 

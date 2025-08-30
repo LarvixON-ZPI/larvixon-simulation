@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Larvae;
 using UnityEngine;
 
-namespace Larvae.Drugs
+namespace Drugs
 {
     public class DrugSystem : MonoBehaviour
     {

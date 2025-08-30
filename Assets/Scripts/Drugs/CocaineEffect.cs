@@ -2,10 +2,11 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
+using Larvae;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Larvae.Drugs
+namespace Drugs
 {
     [CreateAssetMenu(fileName = "CocaineEffect", menuName = "Drugs/Cocaine Effect")]
     public class CocaineEffect : DrugEffect

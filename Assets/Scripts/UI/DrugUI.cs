@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using Drugs;
 using Larvae;
-using Larvae.Drugs;
 using Larvae.States;
 using UnityEngine;
 using UnityEngine.UI;

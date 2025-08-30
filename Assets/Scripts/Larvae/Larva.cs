@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Larvae.Drugs;
+using Drugs;
 using Larvae.States;
 using UnityEngine;
 using Random = UnityEngine.Random;

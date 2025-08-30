@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Larvae.Drugs
+namespace Drugs
 {
     public class ActiveDrugEffect
     {
