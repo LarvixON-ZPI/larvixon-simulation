@@ -39,6 +39,7 @@ namespace Drugs
         [SerializeField] private float maxSafeDose = 0.5f;
 
         public AnimationCurve onsetIntensityCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+        public float TotalDurationTime => onsetTime + duration + comedownTime;
 
         public bool IsSafeDose(float dose)
         {
