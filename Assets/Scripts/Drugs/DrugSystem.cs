@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Larvae;
 using UnityEngine;
 
-namespace Larvae.Drugs
+namespace Drugs
 {
     public class DrugSystem : MonoBehaviour
     {
@@ -30,6 +32,22 @@ namespace Larvae.Drugs
             _activeDrugs.Add(activeDrug);
 
             ProgressDrugPhase(activeDrug).Forget();
+
+            if (!activeDrug.IsSafe())
+                Overdose(activeDrug).Forget();
+        }
+
+        // not guaranteed to actually kill the larva
+        private async UniTaskVoid Overdose(ActiveDrugEffect activeDrug)
+        {
+            var lethalTime = activeDrug.GetLethalTime();
+
+            if (lethalTime < 0) return;
+
+            await UniTask.Delay(TimeSpan.FromSeconds(lethalTime));
+
+            if (_activeDrugs.Contains(activeDrug))
+                _larva.Die();
         }
 
         private async UniTaskVoid ProgressDrugPhase(ActiveDrugEffect activeDrug)
@@ -97,7 +115,7 @@ namespace Larvae.Drugs
             CurrentModifier = modifier;
         }
 
-        private MovementModifier CombineModifiers(MovementModifier baseModifier, MovementModifier drugModifier,
+        private static MovementModifier CombineModifiers(MovementModifier baseModifier, MovementModifier drugModifier,
             float intensity)
         {
             return new MovementModifier

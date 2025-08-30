@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Larvae.Drugs
+namespace Drugs
 {
     [Serializable]
     public struct MovementModifier

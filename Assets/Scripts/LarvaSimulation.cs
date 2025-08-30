@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using Drugs;
 using Larvae;
-using Larvae.Drugs;
 using UnityEngine;
 
 public class LarvaSimulation : MonoBehaviour

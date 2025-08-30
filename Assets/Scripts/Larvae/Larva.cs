@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Larvae.Drugs;
+using Drugs;
 using Larvae.States;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -84,10 +84,10 @@ namespace Larvae
 
         private void FixedUpdate()
         {
+            DebugDrawLarva();
+
             ApplySegmentConstraints();
             UpdatePositions();
-
-            DebugDrawLarva();
         }
 
         private void OnDestroy()
@@ -177,7 +177,7 @@ namespace Larvae
 
         private async UniTask UpdateMovementWave()
         {
-            while (true)
+            while (_stateMachine.CurrentState.StateName != "Dead")
             {
                 var modifier = CurrentMovementModifier;
                 var adjustedPhaseTime = movementPhaseTime / (modifier.speedMultiplier + 0.1f);

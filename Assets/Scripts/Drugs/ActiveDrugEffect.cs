@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Larvae.Drugs
+namespace Drugs
 {
     public class ActiveDrugEffect
     {
@@ -14,5 +14,15 @@ namespace Larvae.Drugs
         public DrugEffect Effect { get; }
         public float Dosage { get; }
         public float CurrentIntensity { get; set; }
+
+        public float GetLethalTime()
+        {
+            return Effect.lethalTimeRange.Evaluate(Random.value) * Effect.duration;
+        }
+
+        public bool IsSafe()
+        {
+            return Effect.IsSafeDose(Dosage);
+        }
     }
 }
