@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      petri_dish_background_0: -2145446389932679079
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
