@@ -19,8 +19,8 @@ public class LarvaSimulation : MonoBehaviour
 
     [SerializeField] private bool mutateLarva;
 
-    [Header("Drug Testing")]
     [SerializeField] private CocaineEffect cocaineEffect;
+    [SerializeField] private EthanolEffect ethanolEffect;
 
     [SerializeField] private float drugDosage = 1f;
 
@@ -159,11 +159,8 @@ public class LarvaSimulation : MonoBehaviour
         }
 
         // Drug testing controls
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            ApplyCocaineToAllLarvae();
-            Debug.Log($"Applied cocaine (dosage: {drugDosage}) to all larvae");
-        }
+        if (Input.GetKeyDown(KeyCode.C)) ApplyDrugToAllLarvae(cocaineEffect);
+        if (Input.GetKeyDown(KeyCode.E)) ApplyDrugToAllLarvae(ethanolEffect);
 
         if (Input.GetKeyDown(KeyCode.X))
         {
@@ -185,23 +182,23 @@ public class LarvaSimulation : MonoBehaviour
         }
     }
 
-    private void ApplyCocaineToAllLarvae()
+    private void ApplyDrugToAllLarvae(DrugEffect drugEffect)
     {
-        if (!cocaineEffect)
+        if (!drugEffect)
         {
-            Debug.LogError("CocaineEffect not assigned! Please assign it in the inspector.");
+            Debug.LogError("DrugEffect not assigned! Please assign it in the inspector.");
             return;
         }
 
         foreach (var larva in _larvae)
-            if (larva)
-                larva.AddDrugEffect(cocaineEffect, drugDosage);
+            larva.AddDrugEffect(drugEffect, drugDosage);
+
+        Debug.Log($"Applied {drugEffect.drugName} (dosage: {drugDosage}) to all larvae");
     }
 
     private void ClearAllDrugsFromLarvae()
     {
         foreach (var larva in _larvae)
-            if (larva)
-                larva.ClearAllDrugEffects();
+            larva.ClearAllDrugEffects();
     }
 }

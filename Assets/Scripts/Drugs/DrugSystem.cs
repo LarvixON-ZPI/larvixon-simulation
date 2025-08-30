@@ -65,7 +65,7 @@ namespace Drugs
                 {
                     var onsetProgress = elapsed / activeDrug.Effect.onsetTime;
                     currentIntensity = Mathf.Lerp(0f, activeDrug.Effect.maxIntensity,
-                        activeDrug.Effect.intensityCurve.Evaluate(onsetProgress));
+                        activeDrug.Effect.onsetIntensityCurve.Evaluate(onsetProgress));
                 }
                 else if (elapsed < activeDrug.Effect.onsetTime + activeDrug.Effect.duration)
                 {

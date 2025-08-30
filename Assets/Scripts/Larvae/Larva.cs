@@ -15,9 +15,9 @@ namespace Larvae
         private const float WideTargetAngleArc = 300f;
 
         private const float DefaultMovementSoftChangeTime = 1f;
+        private const float DirectionTweakMultiplier = 0.05f;
 
-        [Header("Larva Structure")]
-        public Vector2[] points = new Vector2[5]; // Head, 2/5, Middle, 4/5, Back
+        [Header("Larva Structure")] public Vector2[] points = new Vector2[5]; // Head, 2/5, Middle, 4/5, Back
 
         public float[] pointWidths = new float[5];
 
@@ -25,20 +25,17 @@ namespace Larvae
 
         [SerializeField] private float colliderWidthMultiplier = 0.5f;
 
-        [Header("Movement Parameters")]
-        public float dampening = 0.9f;
+        [Header("Movement Parameters")] public float dampening = 0.9f;
 
         public float restoreForce = 5.0f;
         public float headForwardForce = 3.0f;
         public float headDirectionInfluence = 0.8f;
 
-        [Header("Curve Straightening")]
-        public float maxAllowedCurveDegrees = 45.0f;
+        [Header("Curve Straightening")] public float maxAllowedCurveDegrees = 45.0f;
 
         public float curveStraighteningForce = 2.0f;
 
-        [Header("Movement State")]
-        public bool isMoving;
+        [Header("Movement State")] public bool isMoving;
 
         // always normalized
         public Vector2 targetDirection = Vector2.right;
@@ -88,12 +85,20 @@ namespace Larvae
 
             ApplySegmentConstraints();
             UpdatePositions();
+            TweakTargetDirection();
         }
 
         private void OnDestroy()
         {
             _updateTargetDirectionCts?.Cancel();
             _updateTargetDirectionCts?.Dispose();
+        }
+
+        private void TweakTargetDirection()
+        {
+            targetDirection += DirectionTweakMultiplier * CurrentMovementModifier.randomnessMultiplier *
+                               Random.insideUnitCircle;
+            targetDirection.Normalize();
         }
 
         private void SetupStateMachine()
@@ -175,6 +180,12 @@ namespace Larvae
             SetMovementDirection(oppositeDirection);
         }
 
+        private float GetRandomCoordinationMultiplier()
+        {
+            return Random.Range(CurrentMovementModifier.coordinationMultiplier,
+                2 - CurrentMovementModifier.coordinationMultiplier);
+        }
+
         private async UniTask UpdateMovementWave()
         {
             while (_stateMachine.CurrentState.StateName != "Dead")
@@ -211,12 +222,11 @@ namespace Larvae
                 switch (movementPhase)
                 {
                     case MovementPhase.DraggingTail:
-                        _segmentTargetLengths[3] = _naturalLengths[3] * tailRetraction;
+                        var retractionMultiplier = tailRetraction * GetRandomCoordinationMultiplier();
+                        _segmentTargetLengths[3] = _naturalLengths[3] * retractionMultiplier;
                         break;
                     case MovementPhase.ExtendingHead:
-                        var extensionMultiplier = modifier.coordinationMultiplier > 0.5f
-                            ? headExtension
-                            : headExtension * Random.Range(0.5f, 2f);
+                        var extensionMultiplier = headExtension * GetRandomCoordinationMultiplier();
                         _segmentTargetLengths[0] = _naturalLengths[0] * extensionMultiplier;
                         break;
                     case MovementPhase.Rest:
@@ -469,7 +479,7 @@ namespace Larvae
             var modifier = CurrentMovementModifier;
             var angleArc = Random.value < headDirectionInfluence ? AheadTargetAngleArc : WideTargetAngleArc;
 
-            if (modifier.directionStability < 0.5f) angleArc = WideTargetAngleArc;
+            if (Random.value > modifier.directionStability) angleArc = WideTargetAngleArc;
 
             var halfArc = angleArc / 2f;
             var randomAngle = Random.Range(-halfArc, halfArc);
