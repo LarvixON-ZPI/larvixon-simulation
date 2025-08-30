@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 747f98f7a80941dbabcdc0e026d2082b, type: 3}
+  m_Name: TetrodotoxinEffect
+  m_EditorClassIdentifier: Assembly-CSharp::Drugs.TetrodotoxinEffect
+  drugName: Tetrodotoxin
+  description: 
+  maxIntensity: 1
+  duration: 300
+  onsetTime: 120
+  comedownTime: 300
+  maxSpeedMultiplier: 0.05
+  maxRandomnessMultiplier: 0.1
+  maxHeadForceMultiplier: 0.05
+  maxRestoreForceMultiplier: 0.05
+  minCoordinationMultiplier: 1
+  minDirectionStability: 1
+  minSegmentSyncMultiplier: 1
+  lethalTimeRange:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -0.0045156926
+      value: -0.056781992
+      inSlope: -0.32568568
+      outSlope: -0.32568568
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.27758297
+    - serializedVersion: 3
+      time: 0.20100757
+      value: 0.25681633
+      inSlope: 49.165688
+      outSlope: 49.165688
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.015931625
+      outWeight: 0.0031739168
+    - serializedVersion: 3
+      time: 0.21062592
+      value: 0.38591528
+      inSlope: 2.5498118
+      outSlope: 2.5498118
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.05982359
+    - serializedVersion: 3
+      time: 1.0265961
+      value: 1.0271301
+      inSlope: 0.007924773
+      outSlope: 0.007924773
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.35829926
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  maxSafeDose: 0.5
+  onsetIntensityCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
