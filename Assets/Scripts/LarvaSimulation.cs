@@ -21,6 +21,7 @@ public class LarvaSimulation : MonoBehaviour
 
     [SerializeField] private CocaineEffect cocaineEffect;
     [SerializeField] private EthanolEffect ethanolEffect;
+    [SerializeField] private TetrodotoxinEffect tetrodotoxinEffect;
 
     [SerializeField] private float drugDosage = 1f;
 
@@ -161,6 +162,7 @@ public class LarvaSimulation : MonoBehaviour
         // Drug testing controls
         if (Input.GetKeyDown(KeyCode.C)) ApplyDrugToAllLarvae(cocaineEffect);
         if (Input.GetKeyDown(KeyCode.E)) ApplyDrugToAllLarvae(ethanolEffect);
+        if (Input.GetKeyDown(KeyCode.T)) ApplyDrugToAllLarvae(tetrodotoxinEffect);
 
         if (Input.GetKeyDown(KeyCode.X))
         {

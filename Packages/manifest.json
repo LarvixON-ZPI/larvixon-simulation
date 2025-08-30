@@ -2,6 +2,10 @@
   "dependencies": {
     "com.coffee.git-dependency-resolver": "https://github.com/mob-sakai/GitDependencyResolverForUnity.git",
     "com.lm.pro": "https://github.com/lmProgramming/lm-pro-package.git",
+    "com.unity.2d.enhancers": "1.0.0",
+    "com.unity.ai.assistant": "1.0.0-pre.12",
+    "com.unity.ai.generators": "1.0.0-pre.20",
+    "com.unity.ai.inference": "2.3.0",
     "com.unity.collab-proxy": "2.8.2",
     "com.unity.feature.2d": "2.0.1",
     "com.unity.ide.rider": "3.0.36",

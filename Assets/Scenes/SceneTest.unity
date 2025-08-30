@@ -2266,6 +2266,7 @@ MonoBehaviour:
   mutateLarva: 0
   cocaineEffect: {fileID: 11400000, guid: f6bdfe8143840974db2e1e394234455f, type: 2}
   ethanolEffect: {fileID: 11400000, guid: ee1047761d418d247a253f3ff079f7eb, type: 2}
+  tetrodotoxinEffect: {fileID: 11400000, guid: aad61164811f71e34aff0733cfa63c48, type: 2}
   drugDosage: 1
   larvaeParent: {fileID: 510926915}
   larvaeSegmentParent: {fileID: 709971255}

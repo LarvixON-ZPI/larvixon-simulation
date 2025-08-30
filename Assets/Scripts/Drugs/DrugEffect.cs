@@ -40,6 +40,29 @@ namespace Drugs
 
         public AnimationCurve onsetIntensityCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
+        public float TotalDurationTime => onsetTime + duration + comedownTime;
+
+        // not counting comedownTime
+        public float MainDurationTime => onsetTime + duration;
+
+        public float DeathProbability
+        {
+            get
+            {
+                const int steps = 1000;
+                var positiveCount = 0;
+
+                for (var i = 0; i <= steps; i++)
+                {
+                    var t = i / (float)steps;
+                    if (lethalTimeRange.Evaluate(t) >= 0f)
+                        positiveCount++;
+                }
+
+                return positiveCount / (steps + 1f);
+            }
+        }
+
         public bool IsSafeDose(float dose)
         {
             return dose <= maxSafeDose;
