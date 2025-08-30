@@ -17,7 +17,7 @@ namespace Drugs
 
         public float GetLethalTime()
         {
-            return Effect.lethalTimeRange.Evaluate(Random.value) * Effect.TotalDurationTime;
+            return Effect.lethalTimeRange.Evaluate(Random.value) * Effect.MainDurationTime;
         }
 
         public bool IsSafe()
