@@ -2268,6 +2268,7 @@ MonoBehaviour:
   ethanolEffect: {fileID: 11400000, guid: ee1047761d418d247a253f3ff079f7eb, type: 2}
   tetrodotoxinEffect: {fileID: 11400000, guid: aad61164811f71e34aff0733cfa63c48, type: 2}
   ketamineEffect: {fileID: 11400000, guid: edd9e53f11656b870a4fabb1ff9aa3bf, type: 2}
+  morphineEffect: {fileID: 11400000, guid: d39794aa0b813070bb6d754a70a0145d, type: 2}
   drugDosage: 1
   larvaeParent: {fileID: 510926915}
   larvaeSegmentParent: {fileID: 709971255}

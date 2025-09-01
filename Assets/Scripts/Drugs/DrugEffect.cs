@@ -5,12 +5,14 @@ namespace Drugs
 {
     public abstract class DrugEffect : ScriptableObject
     {
-        [Header("Drug Properties")] public string drugName;
+        [Header("Drug Properties")]
+        public string drugName;
 
-        [SerializeField] [TextArea(3, 6)] private string description;
+        [SerializeField]
+        [TextArea(3, 6)] private string description;
 
-        [Header("Effect Parameters")] [Range(0f, 1f)]
-        public float maxIntensity = 1f;
+        [Header("Effect Parameters")]
+        [Range(0f, 1f)] public float maxIntensity = 1f;
 
         [Range(0.1f, 1800f)] public float duration = 1500f;
 
@@ -18,8 +20,9 @@ namespace Drugs
 
         [Range(0.1f, 1800f)] public float comedownTime = 300f;
 
-        [Header("Movement Modifiers")] [Range(0f, 2f)]
-        public float maxSpeedMultiplier = 3f;
+        [Header("Movement Modifiers")]
+        [Range(0f, 2f)]
+        public float maxSpeedMultiplier = 1f;
 
         [Range(0f, 5f)] public float maxRandomnessMultiplier = 1f;
 
