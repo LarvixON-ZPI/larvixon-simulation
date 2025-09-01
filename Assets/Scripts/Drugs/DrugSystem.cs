@@ -35,7 +35,7 @@ namespace Drugs
 
             if (activeDrug.IsSafe()) return;
             if (CheckIfOverdose(activeDrug, out var lethalTime))
-                Overdose(lethalTime).Forget();
+                Overdose(activeDrug, lethalTime).Forget();
         }
 
         private static bool CheckIfOverdose(ActiveDrugEffect activeDrug, out float lethalTime)
@@ -45,11 +45,12 @@ namespace Drugs
             return lethalTime >= 0;
         }
 
-        private async UniTaskVoid Overdose(float lethalTime)
+        private async UniTaskVoid Overdose(ActiveDrugEffect activeDrug, float lethalTime)
         {
             await UniTask.Delay(TimeSpan.FromSeconds(lethalTime));
 
-            _larva.Die();
+            if (_activeDrugs.Contains(activeDrug))
+                _larva.Die();
         }
 
         private async UniTaskVoid ProgressDrugPhase(ActiveDrugEffect activeDrug)
