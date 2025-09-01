@@ -33,17 +33,20 @@ namespace Drugs
 
             ProgressDrugPhase(activeDrug).Forget();
 
-            if (!activeDrug.IsSafe())
-                Overdose(activeDrug).Forget();
+            if (activeDrug.IsSafe()) return;
+            if (CheckIfOverdose(activeDrug, out var lethalTime))
+                Overdose(activeDrug, lethalTime).Forget();
         }
 
-        // not guaranteed to actually kill the larva
-        private async UniTaskVoid Overdose(ActiveDrugEffect activeDrug)
+        private static bool CheckIfOverdose(ActiveDrugEffect activeDrug, out float lethalTime)
         {
-            var lethalTime = activeDrug.GetLethalTime();
+            lethalTime = activeDrug.GetLethalTime();
 
-            if (lethalTime < 0) return;
+            return lethalTime >= 0;
+        }
 
+        private async UniTaskVoid Overdose(ActiveDrugEffect activeDrug, float lethalTime)
+        {
             await UniTask.Delay(TimeSpan.FromSeconds(lethalTime));
 
             if (_activeDrugs.Contains(activeDrug))
@@ -120,21 +123,21 @@ namespace Drugs
         {
             return new MovementModifier
             {
-                speedMultiplier = Mathf.Lerp(baseModifier.speedMultiplier, drugModifier.speedMultiplier, intensity),
-                coordinationMultiplier = Mathf.Lerp(baseModifier.coordinationMultiplier,
-                    drugModifier.coordinationMultiplier, intensity),
-                randomnessMultiplier = Mathf.Max(baseModifier.randomnessMultiplier,
-                    drugModifier.randomnessMultiplier * intensity),
-                directionStability = Mathf.Lerp(baseModifier.directionStability, drugModifier.directionStability,
+                SpeedMultiplier = Mathf.Lerp(baseModifier.SpeedMultiplier, drugModifier.SpeedMultiplier, intensity),
+                SegmentCoordinationMultiplier = Mathf.Lerp(baseModifier.SegmentCoordinationMultiplier,
+                    drugModifier.SegmentCoordinationMultiplier, intensity),
+                RandomnessMultiplier = Mathf.Max(baseModifier.RandomnessMultiplier,
+                    drugModifier.RandomnessMultiplier * intensity),
+                DirectionStability = Mathf.Lerp(baseModifier.DirectionStability, drugModifier.DirectionStability,
                     intensity),
-                segmentSyncMultiplier = Mathf.Lerp(baseModifier.segmentSyncMultiplier,
-                    drugModifier.segmentSyncMultiplier, intensity),
-                headForceMultiplier = Mathf.Lerp(baseModifier.headForceMultiplier, drugModifier.headForceMultiplier,
+                SegmentSyncMultiplier = Mathf.Lerp(baseModifier.SegmentSyncMultiplier,
+                    drugModifier.SegmentSyncMultiplier, intensity),
+                HeadForceMultiplier = Mathf.Lerp(baseModifier.HeadForceMultiplier, drugModifier.HeadForceMultiplier,
                     intensity),
-                restoreForceMultiplier = Mathf.Lerp(baseModifier.restoreForceMultiplier,
-                    drugModifier.restoreForceMultiplier, intensity),
-                canMove = baseModifier.canMove && drugModifier.canMove,
-                canChangeDirection = baseModifier.canChangeDirection && drugModifier.canChangeDirection
+                RestoreForceMultiplier = Mathf.Lerp(baseModifier.RestoreForceMultiplier,
+                    drugModifier.RestoreForceMultiplier, intensity),
+                CanMove = baseModifier.CanMove && drugModifier.CanMove,
+                CanChangeDirection = baseModifier.CanChangeDirection && drugModifier.CanChangeDirection
             };
         }
 

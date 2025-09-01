@@ -21,17 +21,17 @@ namespace Drugs
         [Header("Movement Modifiers")] [Range(0f, 2f)]
         public float maxSpeedMultiplier = 3f;
 
-        [Range(0f, 5f)] public float maxRandomnessMultiplier = 2f;
+        [Range(0f, 5f)] public float maxRandomnessMultiplier = 1f;
 
-        [Range(0f, 10f)] public float maxHeadForceMultiplier = 5f;
+        [Range(0f, 10f)] public float maxHeadForceMultiplier = 1f;
 
-        [Range(0f, 5f)] public float maxRestoreForceMultiplier = 2f;
+        [Range(0f, 5f)] public float maxRestoreForceMultiplier = 1f;
 
-        [Range(0f, 1f)] public float minCoordinationMultiplier = 0.2f;
+        [Range(0f, 1f)] public float minCoordinationMultiplier = 1f;
 
-        [Range(0f, 1f)] public float minDirectionStability = 0.1f;
+        [Range(0f, 1f)] public float minDirectionStability = 1f;
 
-        [Range(0f, 1f)] public float minSegmentSyncMultiplier = 0.3f;
+        [Range(0f, 1f)] public float minSegmentSyncMultiplier = 1f;
 
         // Defines lethal effect timing: negative values indicate no lethal effect, 
         // positive values represent the proportion of drug duration after which death occurs
@@ -89,15 +89,15 @@ namespace Drugs
 
             return new MovementModifier
             {
-                speedMultiplier = speedMultiplier,
-                coordinationMultiplier = coordinationMultiplier,
-                randomnessMultiplier = randomnessMultiplier,
-                directionStability = directionStability,
-                segmentSyncMultiplier = segmentSyncMultiplier,
-                headForceMultiplier = headForceMultiplier,
-                restoreForceMultiplier = restoreForceMultiplier,
-                canMove = true,
-                canChangeDirection = true
+                SpeedMultiplier = speedMultiplier,
+                SegmentCoordinationMultiplier = coordinationMultiplier,
+                RandomnessMultiplier = randomnessMultiplier,
+                DirectionStability = directionStability,
+                SegmentSyncMultiplier = segmentSyncMultiplier,
+                HeadForceMultiplier = headForceMultiplier,
+                RestoreForceMultiplier = restoreForceMultiplier,
+                CanMove = true,
+                CanChangeDirection = true
             };
         }
     }

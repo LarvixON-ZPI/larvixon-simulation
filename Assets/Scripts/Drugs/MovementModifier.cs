@@ -1,39 +1,35 @@
-﻿using System;
-using UnityEngine;
-
-namespace Drugs
+﻿namespace Drugs
 {
-    [Serializable]
     public struct MovementModifier
     {
-        [Range(0f, 2f)] public float speedMultiplier;
+        public float SpeedMultiplier;
 
-        [Range(0f, 2f)] public float coordinationMultiplier; // How well segments work together
+        public float SegmentCoordinationMultiplier;
 
-        [Range(0f, 5f)] public float randomnessMultiplier; // Amount of random movement
+        public float RandomnessMultiplier;
 
-        [Range(0f, 1f)] public float directionStability; // How well the larva maintains direction
+        public float DirectionStability;
 
-        [Range(0f, 1f)] public float segmentSyncMultiplier; // How synchronized the segments are
+        public float SegmentSyncMultiplier;
 
-        [Range(0f, 2f)] public float headForceMultiplier;
+        public float HeadForceMultiplier;
 
-        [Range(0f, 2f)] public float restoreForceMultiplier;
+        public float RestoreForceMultiplier;
 
-        public bool canMove;
-        public bool canChangeDirection;
+        public bool CanMove;
+        public bool CanChangeDirection;
 
         public static MovementModifier Normal => new()
         {
-            speedMultiplier = 1f,
-            coordinationMultiplier = 1f,
-            randomnessMultiplier = 1f,
-            directionStability = 1f,
-            segmentSyncMultiplier = 1f,
-            headForceMultiplier = 1f,
-            restoreForceMultiplier = 1f,
-            canMove = true,
-            canChangeDirection = true
+            SpeedMultiplier = 1f,
+            SegmentCoordinationMultiplier = 1f,
+            RandomnessMultiplier = 1f,
+            DirectionStability = 1f,
+            SegmentSyncMultiplier = 1f,
+            HeadForceMultiplier = 1f,
+            RestoreForceMultiplier = 1f,
+            CanMove = true,
+            CanChangeDirection = true
         };
     }
 }

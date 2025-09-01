@@ -15,9 +15,9 @@ MonoBehaviour:
   drugName: Tetrodotoxin
   description: 
   maxIntensity: 1
-  duration: 300
+  duration: 200
   onsetTime: 120
-  comedownTime: 300
+  comedownTime: 400
   maxSpeedMultiplier: 0.05
   maxRandomnessMultiplier: 0.1
   maxHeadForceMultiplier: 0.05
