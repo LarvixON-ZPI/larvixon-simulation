@@ -49,7 +49,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  maxSafeDose: 0.5
+  maxSafeDose: 0.8
   onsetIntensityCurve:
     serializedVersion: 2
     m_Curve:
