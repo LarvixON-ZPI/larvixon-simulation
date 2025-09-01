@@ -31,6 +31,8 @@ namespace Drugs
             var activeDrug = new ActiveDrugEffect(drugEffect, dosage);
             _activeDrugs.Add(activeDrug);
 
+            drugEffect.OnEnter(_larva);
+
             ProgressDrugPhase(activeDrug).Forget();
 
             if (activeDrug.IsSafe()) return;
@@ -86,6 +88,12 @@ namespace Drugs
                 await UniTask.Yield();
             }
 
+            OnDrugEnd(activeDrug);
+        }
+
+        private void OnDrugEnd(ActiveDrugEffect activeDrug)
+        {
+            activeDrug.Effect.OnExit(_larva);
             _activeDrugs.Remove(activeDrug);
         }
 

@@ -24,7 +24,8 @@ namespace UI
             "LayingDown",
             "LookingAtEnvironment",
             "LayingNearWall",
-            "Dead"
+            "Dead",
+            "CurledLayingDown"
         };
 
         private void Start()

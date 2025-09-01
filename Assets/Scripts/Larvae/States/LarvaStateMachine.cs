@@ -9,7 +9,7 @@ namespace Larvae.States
     {
         private readonly Dictionary<string, ILarvaState> _states = new();
 
-        public Dictionary<string, float> WeightedStates = new()
+        private readonly Dictionary<string, float> _weightedStates = new()
         {
             { "LayingDown", 0.5f },
             { "LookingAtEnvironment", 0.3f },
@@ -34,6 +34,16 @@ namespace Larvae.States
         public void RegisterState(ILarvaState state)
         {
             _states.TryAdd(state.StateName, state);
+        }
+
+        public void AddWeightedState(string stateName, float weight)
+        {
+            _weightedStates[stateName] = weight;
+        }
+
+        public void RemoveWeightedState(string stateName)
+        {
+            _weightedStates.Remove(stateName);
         }
 
         public void TransitionToState(string stateName)
@@ -91,8 +101,8 @@ namespace Larvae.States
         private float GetTotalStateWeight([CanBeNull] string skippedState = null)
         {
             return skippedState == null
-                ? WeightedStates.Values.Sum()
-                : WeightedStates.Where(kv => kv.Key != skippedState).Sum(kv => kv.Value);
+                ? _weightedStates.Values.Sum()
+                : _weightedStates.Where(kv => kv.Key != skippedState).Sum(kv => kv.Value);
         }
 
         private string CalculateNextState([CanBeNull] string skippedState = null)
@@ -100,8 +110,8 @@ namespace Larvae.States
             var val = Random.value * GetTotalStateWeight(skippedState);
 
             var possibleStates = skippedState == null
-                ? WeightedStates
-                : WeightedStates.Where(kv => kv.Key != skippedState).ToDictionary(kv => kv.Key, kv => kv.Value);
+                ? _weightedStates
+                : _weightedStates.Where(kv => kv.Key != skippedState).ToDictionary(kv => kv.Key, kv => kv.Value);
 
             var cumulative = 0f;
             foreach (var stateWeight in possibleStates)
@@ -111,7 +121,7 @@ namespace Larvae.States
                 if (val <= cumulative) return stateWeight.Key;
             }
 
-            return WeightedStates.Keys.Last();
+            return _weightedStates.Keys.Last();
         }
 
         private static string GetDefaultState()

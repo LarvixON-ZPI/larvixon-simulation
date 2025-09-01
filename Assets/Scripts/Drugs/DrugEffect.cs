@@ -80,6 +80,14 @@ namespace Drugs
         {
         }
 
+        public virtual void OnEnter(Larva larva)
+        {
+        }
+
+        public virtual void OnExit(Larva larva)
+        {
+        }
+
         public virtual MovementModifier GetMovementModifier(float intensity)
         {
             var speedMultiplier = Mathf.Lerp(1f, maxSpeedMultiplier, intensity);

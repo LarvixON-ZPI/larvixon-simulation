@@ -3,6 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Drugs;
 using Larvae.States;
+using Larvae.States.Drug;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -56,18 +57,18 @@ namespace Larvae
 
         private CancellationTokenSource _softChangeCts;
 
-        private LarvaStateMachine _stateMachine;
         private float _timeInPhase;
 
         private CancellationTokenSource _updateTargetDirectionCts;
 
         private MovementModifier CurrentMovementModifier => _drugSystem?.CurrentModifier ?? MovementModifier.Normal;
+        public LarvaStateMachine StateMachine { get; private set; }
 
         private void Awake()
         {
             _rb = GetComponent<Rigidbody2D>();
 
-            _stateMachine = GetComponent<LarvaStateMachine>() ?? gameObject.AddComponent<LarvaStateMachine>();
+            StateMachine = GetComponent<LarvaStateMachine>() ?? gameObject.AddComponent<LarvaStateMachine>();
             _drugSystem = GetComponent<DrugSystem>() ?? gameObject.AddComponent<DrugSystem>();
 
             SetupStateMachine();
@@ -75,7 +76,7 @@ namespace Larvae
 
         private void Start()
         {
-            _stateMachine.StartStateMachine();
+            StateMachine.StartStateMachine();
             UpdateMovementWave().Forget();
         }
 
@@ -103,11 +104,12 @@ namespace Larvae
 
         private void SetupStateMachine()
         {
-            _stateMachine.RegisterState(new MovingState());
-            _stateMachine.RegisterState(new LayingDownState());
-            _stateMachine.RegisterState(new LookingAtEnvironmentState());
-            _stateMachine.RegisterState(new LayingNearWallState());
-            _stateMachine.RegisterState(new DeadState());
+            StateMachine.RegisterState(new MovingState());
+            StateMachine.RegisterState(new LayingDownState());
+            StateMachine.RegisterState(new LookingAtEnvironmentState());
+            StateMachine.RegisterState(new LayingNearWallState());
+            StateMachine.RegisterState(new DeadState());
+            StateMachine.RegisterState(new CurledLayingDownState());
         }
 
         public float GetSegmentWidth(int i)
@@ -118,6 +120,11 @@ namespace Larvae
         public Vector2 GetHeadPosition()
         {
             return points[0];
+        }
+
+        public Vector2 GetTailPosition()
+        {
+            return points[^1];
         }
 
         public void Initialize(Transform segmentParent)
@@ -193,7 +200,7 @@ namespace Larvae
 
         private async UniTask UpdateMovementWave()
         {
-            while (_stateMachine.CurrentState.StateName != "Dead")
+            while (StateMachine.CurrentState.StateName != "Dead")
             {
                 var modifier = CurrentMovementModifier;
                 var adjustedPhaseTime = movementPhaseTime / (modifier.SpeedMultiplier + 0.1f);
@@ -530,7 +537,7 @@ namespace Larvae
             StopMoving();
             SetMovementMultiplier(0f);
             ClearAllDrugEffects();
-            _stateMachine.ForceTransitionToState("Dead");
+            StateMachine.ForceTransitionToState("Dead");
         }
 
         private enum MovementPhase
