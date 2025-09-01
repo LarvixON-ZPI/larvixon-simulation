@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Larvae.States
 {
@@ -46,7 +47,7 @@ namespace Larvae.States
             _weightedStates.Remove(stateName);
         }
 
-        public void TransitionToState(string stateName)
+        private void TransitionToState(string stateName)
         {
             if (!_states.TryGetValue(stateName, out var newState))
             {
@@ -108,20 +109,18 @@ namespace Larvae.States
         private string CalculateNextState([CanBeNull] string skippedState = null)
         {
             var val = Random.value * GetTotalStateWeight(skippedState);
-
             var possibleStates = skippedState == null
                 ? _weightedStates
                 : _weightedStates.Where(kv => kv.Key != skippedState).ToDictionary(kv => kv.Key, kv => kv.Value);
 
             var cumulative = 0f;
-            foreach (var stateWeight in possibleStates)
+            foreach (var stateWeight in possibleStates.SkipLast(1))
             {
                 cumulative += stateWeight.Value;
-
                 if (val <= cumulative) return stateWeight.Key;
             }
 
-            return _weightedStates.Keys.Last();
+            return possibleStates.Keys.Last();
         }
 
         private static string GetDefaultState()

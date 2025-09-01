@@ -6,7 +6,7 @@ namespace Larvae.States.Drug
     public class CurledLayingDownState : BaseLarvaState
     {
         private const float MaxLayingTime = 120f;
-        private const float MinLayingTime = 60;
+        private const float MinLayingTime = 60f;
         private const float SlowDownTime = 15f;
         private const float TailPositionBiasDistance = 2f;
 
