@@ -1,18 +1,13 @@
-using System;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Larvae.States
 {
-    [Serializable]
     public class LayingDownState : BaseLarvaState
     {
-        [SerializeField] private float maxLayingTime = 60f;
-
-        [SerializeField] private float minLayingTime = 15f;
-
-        [SerializeField] private float slowDownTime = 5f;
+        private const float MaxLayingTime = 60f;
+        private const float MinLayingTime = 15f;
+        private const float SlowDownTime = 5f;
 
         private float _layingDuration;
 
@@ -22,9 +17,9 @@ namespace Larvae.States
         {
             base.Enter(stateMachine);
 
-            stateMachine.LarvaController.SoftChangeMovementMultiplier(slowDownTime, 0f).Forget();
+            stateMachine.LarvaController.SoftChangeMovementMultiplier(SlowDownTime, 0f).Forget();
 
-            _layingDuration = Random.Range(minLayingTime, maxLayingTime);
+            _layingDuration = Random.Range(MinLayingTime, MaxLayingTime);
         }
 
         public override void Update(LarvaStateMachine stateMachine, float deltaTime)
@@ -36,7 +31,7 @@ namespace Larvae.States
 
         public override bool CanTransitionTo(string stateName)
         {
-            return TimeInState >= minLayingTime * 0.5f && stateName == "Moving";
+            return TimeInState >= MinLayingTime * 0.5f && stateName == "Moving";
         }
     }
 }

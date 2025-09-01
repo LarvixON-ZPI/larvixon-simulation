@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -7,6 +8,14 @@ namespace Larvae.States
     public class LarvaStateMachine : MonoBehaviour
     {
         private readonly Dictionary<string, ILarvaState> _states = new();
+
+        public Dictionary<string, float> WeightedStates = new()
+        {
+            { "LayingDown", 0.5f },
+            { "LookingAtEnvironment", 0.3f },
+            { "LayingNearWall", 0.2f },
+            { "Moving", 1f }
+        };
 
         public ILarvaState CurrentState { get; private set; }
 
@@ -71,6 +80,38 @@ namespace Larvae.States
         public void TransitionToDefaultState()
         {
             TransitionToState(GetDefaultState());
+        }
+
+        public void TransitionToNextState([CanBeNull] string skippedState = null)
+        {
+            var nextState = CalculateNextState(skippedState);
+            TransitionToState(nextState);
+        }
+
+        private float GetTotalStateWeight([CanBeNull] string skippedState = null)
+        {
+            return skippedState == null
+                ? WeightedStates.Values.Sum()
+                : WeightedStates.Where(kv => kv.Key != skippedState).Sum(kv => kv.Value);
+        }
+
+        private string CalculateNextState([CanBeNull] string skippedState = null)
+        {
+            var val = Random.value * GetTotalStateWeight(skippedState);
+
+            var possibleStates = skippedState == null
+                ? WeightedStates
+                : WeightedStates.Where(kv => kv.Key != skippedState).ToDictionary(kv => kv.Key, kv => kv.Value);
+
+            var cumulative = 0f;
+            foreach (var stateWeight in possibleStates)
+            {
+                cumulative += stateWeight.Value;
+
+                if (val <= cumulative) return stateWeight.Key;
+            }
+
+            return WeightedStates.Keys.Last();
         }
 
         private static string GetDefaultState()

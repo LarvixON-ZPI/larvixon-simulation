@@ -5,17 +5,18 @@ using UnityEngine;
 
 namespace Larvae.States
 {
-    [Serializable]
     public class LookingAtEnvironmentState : BaseLarvaState
     {
-        [SerializeField] private float gazeHoldTime = 2f;
-        [SerializeField] private float totalStateTime = 10f;
-        [SerializeField] private float minAngleBetweenLooks = 60f;
-        [SerializeField] private float headNudgeDuration = 0.3f;
-        [SerializeField] private float headNudgeMovementMultiplier = 0.2f;
+        private const float GazeHoldTime = 2f;
+        private const float HeadNudgeDuration = 0.3f;
+        private const float HeadNudgeMovementMultiplier = 0.2f;
+        private const float MinAngleBetweenLooks = 60f;
+        private const float TotalStateTime = 10f;
+
         private Vector2 _currentLookDirection;
 
         private float _nextGazeChange;
+
         private CancellationTokenSource _nudgeCts;
 
         public override string StateName => "LookingAtEnvironment";
@@ -32,7 +33,7 @@ namespace Larvae.States
                 : Vector2.right;
 
             stateMachine.LarvaController.SetMovementDirection(_currentLookDirection);
-            _nextGazeChange = gazeHoldTime;
+            _nextGazeChange = GazeHoldTime;
 
             NudgeHead(stateMachine.LarvaController, _currentLookDirection);
         }
@@ -41,7 +42,7 @@ namespace Larvae.States
         {
             base.Update(stateMachine, deltaTime);
 
-            if (TimeInState >= totalStateTime)
+            if (TimeInState >= TotalStateTime)
             {
                 stateMachine.TransitionToDefaultState();
                 return;
@@ -50,11 +51,11 @@ namespace Larvae.States
             if (TimeInState < _nextGazeChange) return;
 
             var larva = stateMachine.LarvaController;
-            var newDir = PickDifferentDirection(larva, _currentLookDirection, minAngleBetweenLooks);
+            var newDir = PickDifferentDirection(larva, _currentLookDirection, MinAngleBetweenLooks);
             _currentLookDirection = newDir;
             larva.SetMovementDirection(newDir);
 
-            _nextGazeChange = TimeInState + gazeHoldTime;
+            _nextGazeChange = TimeInState + GazeHoldTime;
 
             NudgeHead(larva, newDir);
         }
@@ -70,7 +71,7 @@ namespace Larvae.States
 
         public override bool CanTransitionTo(string stateName)
         {
-            return stateName is "Spastic" or "KHole" || TimeInState >= totalStateTime;
+            return TimeInState >= TotalStateTime;
         }
 
         private static Vector2 PickDifferentDirection(Larva larva, Vector2 current, float minAngleDeg)
@@ -100,8 +101,8 @@ namespace Larvae.States
                 try
                 {
                     larva.StartMoving(dir);
-                    larva.SoftChangeMovementMultiplier(0.05f, headNudgeMovementMultiplier).Forget();
-                    await UniTask.Delay(TimeSpan.FromSeconds(headNudgeDuration), cancellationToken: token);
+                    larva.SoftChangeMovementMultiplier(0.05f, HeadNudgeMovementMultiplier).Forget();
+                    await UniTask.Delay(TimeSpan.FromSeconds(HeadNudgeDuration), cancellationToken: token);
                 }
                 catch (OperationCanceledException)
                 {

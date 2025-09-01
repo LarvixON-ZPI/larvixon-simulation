@@ -1,21 +1,20 @@
-using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Larvae.States
 {
-    [Serializable]
     public class MovingState : BaseLarvaState
     {
-        [SerializeField] private float directionChangeInterval = 3f;
-        [SerializeField] private float directionChangeVariance = 2f;
-        [SerializeField] private float stateChangeProbability = 0.1f;
+        private const float DirectionChangeInterval = 3f;
+        private const float DirectionChangeVariance = 2f;
+        private const float StateChangeProbability = 0.1f;
 
         private float _nextDirectionChange;
+
         public override string StateName => "Moving";
 
-        private float CalculateHeadInfluence(float x)
+        private static float CalculateHeadInfluence(float x)
         {
             var y = x < 0.3f ? x * 2 : Mathf.Sqrt(x);
             return y;
@@ -37,16 +36,10 @@ namespace Larvae.States
 
             if (TimeInState < _nextDirectionChange) return;
 
-            if (Random.value < stateChangeProbability)
+            if (Random.value < StateChangeProbability)
             {
-                var val = Random.value;
-                var newStateName = val switch
-                {
-                    < 0.5f => "LayingDown",
-                    < 0.8f => "LookingAtEnvironment",
-                    _ => "LayingNearWall"
-                };
-                stateMachine.TransitionToState(newStateName);
+                stateMachine.TransitionToNextState();
+                return;
             }
 
             var newDirection =
@@ -57,10 +50,10 @@ namespace Larvae.States
 
         private float GetNextDirectionChangeTime()
         {
-            return directionChangeInterval + Random.Range(-directionChangeVariance, directionChangeVariance);
+            return DirectionChangeInterval + Random.Range(-DirectionChangeVariance, DirectionChangeVariance);
         }
 
-        public override bool CanTransitionTo(string stateName)
+        public override bool CanTransitionTo(string _)
         {
             return true;
         }
