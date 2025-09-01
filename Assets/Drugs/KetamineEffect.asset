@@ -18,10 +18,10 @@ MonoBehaviour:
   duration: 1500
   onsetTime: 300
   comedownTime: 300
-  maxSpeedMultiplier: 1
-  maxRandomnessMultiplier: 1
+  maxSpeedMultiplier: 0.2
+  maxRandomnessMultiplier: 4
   maxHeadForceMultiplier: 1
-  maxRestoreForceMultiplier: 1
+  maxRestoreForceMultiplier: 1.5
   minCoordinationMultiplier: 0
   minDirectionStability: 0
   minSegmentSyncMultiplier: 0
