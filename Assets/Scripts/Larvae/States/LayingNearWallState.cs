@@ -4,20 +4,15 @@ using UnityEngine;
 
 namespace Larvae.States
 {
-    [Serializable]
     public class LayingNearWallState : BaseLarvaState
     {
-        [SerializeField] private float layingTime = 5f;
-        [SerializeField] private float noWallFoundGiveUpTime = 10f;
-
-        [SerializeField] private float wallDetectionDistance = 2f;
-
-        [SerializeField] private float wallFollowingSpeed = 0.5f;
+        private const float LayingTime = 5f;
+        private const float NoWallFoundGiveUpTime = 10f;
+        private const float WallDetectionDistance = 2f;
+        private const float WallFollowingSpeed = 0.5f;
 
         private Action<int, float, Vector2> _collisionHandler;
         private bool _foundWall;
-
-        private LarvaStateMachine _stateMachine;
         public override string StateName => "LayingNearWall";
 
         public override void Enter(LarvaStateMachine stateMachine)
@@ -34,7 +29,7 @@ namespace Larvae.States
         {
             base.Update(stateMachine, deltaTime);
 
-            if (TimeInState > noWallFoundGiveUpTime)
+            if (TimeInState > NoWallFoundGiveUpTime)
             {
                 stateMachine.TransitionToDefaultState();
                 return;
@@ -43,7 +38,7 @@ namespace Larvae.States
             if (_foundWall) return;
 
             var larva = stateMachine.LarvaController;
-            larva.StartMoving(larva.targetDirection * wallFollowingSpeed);
+            larva.StartMoving(larva.targetDirection * WallFollowingSpeed);
 
             CheckIfNearWall(stateMachine);
         }
@@ -64,8 +59,8 @@ namespace Larvae.States
             Vector2? closestHit = null;
             foreach (var direction in directions)
             {
-                Debug.DrawRay(position, direction * wallDetectionDistance, Color.red, 1f);
-                var hit = Physics2D.Raycast(position, direction, wallDetectionDistance, LayerMask.GetMask("Default"));
+                Debug.DrawRay(position, direction * WallDetectionDistance, Color.red, 1f);
+                var hit = Physics2D.Raycast(position, direction, WallDetectionDistance, LayerMask.GetMask("Default"));
                 if (!hit.collider) continue;
 
                 if (!(hit.distance < closestDistance)) continue;
@@ -96,7 +91,7 @@ namespace Larvae.States
 
         public override bool CanTransitionTo(string stateName)
         {
-            return stateName == "Spastic" || stateName == "KHole" || TimeInState >= layingTime;
+            return TimeInState >= LayingTime;
         }
     }
 }

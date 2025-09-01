@@ -23,6 +23,7 @@ public class LarvaSimulation : MonoBehaviour
     [SerializeField] private EthanolEffect ethanolEffect;
     [SerializeField] private TetrodotoxinEffect tetrodotoxinEffect;
     [SerializeField] private KetamineEffect ketamineEffect;
+    [SerializeField] private MorphineEffect morphineEffect;
 
     [SerializeField] private float drugDosage = 1f;
 
@@ -165,6 +166,7 @@ public class LarvaSimulation : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E)) ApplyDrugToAllLarvae(ethanolEffect);
         if (Input.GetKeyDown(KeyCode.T)) ApplyDrugToAllLarvae(tetrodotoxinEffect);
         if (Input.GetKeyDown(KeyCode.K)) ApplyDrugToAllLarvae(ketamineEffect);
+        if (Input.GetKeyDown(KeyCode.M)) ApplyDrugToAllLarvae(morphineEffect);
 
         if (Input.GetKeyDown(KeyCode.X))
         {
