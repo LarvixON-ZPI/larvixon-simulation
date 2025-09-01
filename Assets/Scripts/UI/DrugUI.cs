@@ -10,13 +10,13 @@ namespace UI
 {
     public class DrugUI : MonoBehaviour
     {
-        [Header("Drug Configuration")]
-        [SerializeField] private List<DrugEffect> availableDrugs = new();
+        [Header("Drug Configuration")] [SerializeField]
+        private List<DrugEffect> availableDrugs = new();
 
         [SerializeField] private LarvaSimulation larvaSimulation;
 
-        [Header("UI References")]
-        [SerializeField] private Text currentStateText;
+        [Header("UI References")] [SerializeField]
+        private Text currentStateText;
 
         [SerializeField] private Slider dosageSlider;
         [SerializeField] private Text dosageText;
@@ -34,8 +34,8 @@ namespace UI
         [SerializeField] private Button closeButton;
         [SerializeField] private Button openButton;
 
-        [Header("Movement Stat Sliders")]
-        [SerializeField] private Slider speedSlider;
+        [Header("Movement Stat Sliders")] [SerializeField]
+        private Slider speedSlider;
 
         [SerializeField] private Text speedLabel;
         [SerializeField] private Slider coordinationSlider;
@@ -51,14 +51,12 @@ namespace UI
         [SerializeField] private Slider restoreForceSlider;
         [SerializeField] private Text restoreForceLabel;
 
-        [Header("Colors")]
-        [SerializeField] private Color normalTextColor = Color.white;
+        [Header("Colors")] [SerializeField] private Color normalTextColor = Color.white;
 
         [SerializeField] private Color warningTextColor = Color.yellow;
         [SerializeField] private Color dangerTextColor = Color.red;
 
-        [Header("Runtime")]
-        [SerializeField] private float currentDosage = 1f;
+        [Header("Runtime")] [SerializeField] private float currentDosage = 1f;
 
         private readonly Dictionary<string, (Slider slider, Text label)> _movementStats = new();
         private readonly List<Larva> _targetLarvae = new();
@@ -224,13 +222,13 @@ namespace UI
         private void UpdateMovementStats()
         {
             var modifier = _drugSystem.CurrentModifier;
-            SetMovementStat("Speed", modifier.speedMultiplier);
-            SetMovementStat("Coordination", modifier.coordinationMultiplier);
-            SetMovementStat("Randomness", modifier.randomnessMultiplier);
-            SetMovementStat("Direction Stability", modifier.directionStability);
-            SetMovementStat("Segment Sync", modifier.segmentSyncMultiplier);
-            SetMovementStat("Head Force", modifier.headForceMultiplier);
-            SetMovementStat("Restore Force", modifier.restoreForceMultiplier);
+            SetMovementStat("Speed", modifier.SpeedMultiplier);
+            SetMovementStat("Coordination", modifier.SegmentCoordinationMultiplier);
+            SetMovementStat("Randomness", modifier.RandomnessMultiplier);
+            SetMovementStat("Direction Stability", modifier.DirectionStability);
+            SetMovementStat("Segment Sync", modifier.SegmentSyncMultiplier);
+            SetMovementStat("Head Force", modifier.HeadForceMultiplier);
+            SetMovementStat("Restore Force", modifier.RestoreForceMultiplier);
         }
 
         private void SetMovementStat(string movementStatName, float value)
@@ -251,9 +249,9 @@ namespace UI
         {
             var modifier = _drugSystem.CurrentModifier;
             if (canMoveIndicator)
-                canMoveIndicator.color = modifier.canMove ? Color.green : dangerTextColor;
+                canMoveIndicator.color = modifier.CanMove ? Color.green : dangerTextColor;
             if (canChangeDirectionIndicator)
-                canChangeDirectionIndicator.color = modifier.canChangeDirection ? Color.green : dangerTextColor;
+                canChangeDirectionIndicator.color = modifier.CanChangeDirection ? Color.green : dangerTextColor;
         }
 
         private void UpdateActiveEffectsSummary()

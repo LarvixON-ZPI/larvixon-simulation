@@ -89,15 +89,15 @@ namespace Drugs
 
             return new MovementModifier
             {
-                speedMultiplier = speedMultiplier,
-                coordinationMultiplier = coordinationMultiplier,
-                randomnessMultiplier = randomnessMultiplier,
-                directionStability = directionStability,
-                segmentSyncMultiplier = segmentSyncMultiplier,
-                headForceMultiplier = headForceMultiplier,
-                restoreForceMultiplier = restoreForceMultiplier,
-                canMove = true,
-                canChangeDirection = true
+                SpeedMultiplier = speedMultiplier,
+                SegmentCoordinationMultiplier = coordinationMultiplier,
+                RandomnessMultiplier = randomnessMultiplier,
+                DirectionStability = directionStability,
+                SegmentSyncMultiplier = segmentSyncMultiplier,
+                HeadForceMultiplier = headForceMultiplier,
+                RestoreForceMultiplier = restoreForceMultiplier,
+                CanMove = true,
+                CanChangeDirection = true
             };
         }
     }

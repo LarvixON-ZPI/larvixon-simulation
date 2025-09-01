@@ -96,7 +96,7 @@ namespace Larvae
 
         private void TweakTargetDirection()
         {
-            targetDirection += DirectionTweakMultiplier * CurrentMovementModifier.randomnessMultiplier *
+            targetDirection += DirectionTweakMultiplier * CurrentMovementModifier.RandomnessMultiplier *
                                Random.insideUnitCircle;
             targetDirection.Normalize();
         }
@@ -187,8 +187,8 @@ namespace Larvae
 
         private float GetRandomCoordinationMultiplier()
         {
-            return Random.Range(CurrentMovementModifier.coordinationMultiplier,
-                2 - CurrentMovementModifier.coordinationMultiplier);
+            return Random.Range(CurrentMovementModifier.SegmentCoordinationMultiplier,
+                2 - CurrentMovementModifier.SegmentCoordinationMultiplier);
         }
 
         private async UniTask UpdateMovementWave()
@@ -196,14 +196,14 @@ namespace Larvae
             while (_stateMachine.CurrentState.StateName != "Dead")
             {
                 var modifier = CurrentMovementModifier;
-                var adjustedPhaseTime = movementPhaseTime / (modifier.speedMultiplier + 0.1f);
+                var adjustedPhaseTime = movementPhaseTime / (modifier.SpeedMultiplier + 0.1f);
 
                 await UniTask.Delay(TimeSpan.FromSeconds(adjustedPhaseTime));
 
-                if (!isMoving || !modifier.canMove) continue;
+                if (!isMoving || !modifier.CanMove) continue;
 
                 // Apply segment synchronization effects
-                var shouldContinueNormalPhase = modifier.segmentSyncMultiplier > Random.value;
+                var shouldContinueNormalPhase = modifier.SegmentSyncMultiplier > Random.value;
 
                 if (shouldContinueNormalPhase)
                 {
@@ -251,12 +251,12 @@ namespace Larvae
         private void ApplySegmentConstraints()
         {
             var modifier = CurrentMovementModifier;
-            var headDirectionalForce = headForwardForce * modifier.headForceMultiplier * targetDirection;
+            var headDirectionalForce = headForwardForce * modifier.HeadForceMultiplier * targetDirection;
 
-            var randomForce = modifier.randomnessMultiplier * Time.fixedDeltaTime * Random.insideUnitCircle;
+            var randomForce = modifier.RandomnessMultiplier * Time.fixedDeltaTime * Random.insideUnitCircle;
             headDirectionalForce += randomForce;
 
-            if (!modifier.canMove || !isMoving) headDirectionalForce = Vector2.zero;
+            if (!modifier.CanMove || !isMoving) headDirectionalForce = Vector2.zero;
 
             if (movementPhase != MovementPhase.DraggingTail)
                 ApplySegmentConstraint(0, 1, _segmentTargetLengths[0], false, headDirectionalForce);
@@ -318,12 +318,12 @@ namespace Larvae
             if (applyRepelFromPoints) correction += CalculateRepelFromPoints(i);
 
             var modifier = CurrentMovementModifier;
-            var modifiedRestoreForce = restoreForce * modifier.restoreForceMultiplier * _movementModifier;
+            var modifiedRestoreForce = restoreForce * modifier.RestoreForceMultiplier * _movementModifier;
 
-            if (modifier.segmentSyncMultiplier < 1f && Random.value > modifier.segmentSyncMultiplier)
+            if (modifier.SegmentSyncMultiplier < 1f && Random.value > modifier.SegmentSyncMultiplier)
             {
                 correction *= Random.Range(0.1f, 1.5f);
-                correction += modifier.randomnessMultiplier * 0.5f * Random.insideUnitCircle;
+                correction += modifier.RandomnessMultiplier * 0.5f * Random.insideUnitCircle;
             }
 
             _velocities[i] += modifiedRestoreForce * Time.fixedDeltaTime * correction;
@@ -385,10 +385,11 @@ namespace Larvae
             {
                 points[i] = _segments[i].transform.position;
 
-                var velocity = _velocities[i] * modifier.speedMultiplier;
+                var velocity = _velocities[i] * modifier.SpeedMultiplier;
 
-                if (modifier.coordinationMultiplier < 1f)
-                    velocity += (1f - modifier.coordinationMultiplier) * Time.fixedDeltaTime * Random.insideUnitCircle;
+                if (modifier.SegmentCoordinationMultiplier < 1f)
+                    velocity += (1f - modifier.SegmentCoordinationMultiplier) * Time.fixedDeltaTime *
+                                Random.insideUnitCircle;
 
                 points[i] += velocity * Time.fixedDeltaTime;
                 _velocities[i] *= dampening;
@@ -484,7 +485,7 @@ namespace Larvae
             var modifier = CurrentMovementModifier;
             var angleArc = Random.value < headDirectionInfluence ? AheadTargetAngleArc : WideTargetAngleArc;
 
-            if (Random.value > modifier.directionStability) angleArc = WideTargetAngleArc;
+            if (Random.value > modifier.DirectionStability) angleArc = WideTargetAngleArc;
 
             var halfArc = angleArc / 2f;
             var randomAngle = Random.Range(-halfArc, halfArc);
@@ -502,11 +503,11 @@ namespace Larvae
         {
             var modifier = CurrentMovementModifier;
 
-            if (!modifier.canChangeDirection && Random.value > 0.1f) return;
+            if (!modifier.CanChangeDirection && Random.value > 0.1f) return;
 
-            if (modifier.directionStability < 1f)
+            if (modifier.DirectionStability < 1f)
             {
-                var randomInfluence = 1f - modifier.directionStability;
+                var randomInfluence = 1f - modifier.DirectionStability;
                 var randomDirection = Random.insideUnitCircle.normalized;
                 direction = Vector2.Lerp(direction, randomDirection, randomInfluence);
             }
