@@ -11,3 +11,13 @@ This simulation models larvae as 5-point segmented creatures that move using per
 - **Middle**: Center segment
 - **4/5 Point**: Second body segment
 - **Back**: Tail segment (blue)
+
+## Drugs
+
+Apply a drug to the currently selected larva by pressing its key:
+
+- m — Morphine (reduces movement, slows peristaltic waves)
+- c — Cocaine (increases activity; faster, more frequent contractions)
+- e — Ethanol (depressant; reduces coordination, weakens contractions)
+- k — Ketamine (dissociative; disrupts normal wave patterns)
+- t — Tetrodotoxin (TTX; blocks neural activity, halts movement)
