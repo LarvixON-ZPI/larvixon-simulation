@@ -15,9 +15,9 @@ MonoBehaviour:
   drugName: Morphine
   description: 
   maxIntensity: 1
-  duration: 1500
-  onsetTime: 100
-  comedownTime: 300
+  duration: 473
+  onsetTime: 31
+  comedownTime: 94
   speedMultiplier:
     serializedVersion: 2
     m_Curve:
@@ -30,6 +30,15 @@ MonoBehaviour:
       weightedMode: 0
       inWeight: 0
       outWeight: 0
+    - serializedVersion: 3
+      time: 0.39788055
+      value: 1.0912824
+      inSlope: -0.89903903
+      outSlope: -0.89903903
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
       value: 0.3

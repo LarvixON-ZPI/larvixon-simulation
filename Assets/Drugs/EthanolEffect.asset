@@ -51,8 +51,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  maxRandomnessMultiplier: 0.5
-  maxHeadForceMultiplier: 0.5
+  maxRandomnessMultiplier: 2
+  maxHeadForceMultiplier: 0.6
   maxRestoreForceMultiplier: 0.5
   minCoordinationMultiplier: 0.2
   minDirectionStability: 0.5

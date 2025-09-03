@@ -15,7 +15,7 @@ MonoBehaviour:
   drugName: Cocaine
   description: 
   maxIntensity: 1
-  duration: 800
+  duration: 400
   onsetTime: 100
   comedownTime: 100
   speedMultiplier:
@@ -31,7 +31,7 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 1.0
+      time: 1
       value: 1.7
       inSlope: 0
       outSlope: 0

@@ -15,9 +15,9 @@ MonoBehaviour:
   drugName: Ketamine
   description: 
   maxIntensity: 1
-  duration: 1500
-  onsetTime: 300
-  comedownTime: 300
+  duration: 430
+  onsetTime: 85
+  comedownTime: 85
   speedMultiplier:
     serializedVersion: 2
     m_Curve:

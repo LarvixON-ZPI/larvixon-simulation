@@ -17,7 +17,7 @@ MonoBehaviour:
   maxIntensity: 1
   duration: 200
   onsetTime: 120
-  comedownTime: 400
+  comedownTime: 300
   speedMultiplier:
     serializedVersion: 2
     m_Curve:
@@ -47,7 +47,7 @@ MonoBehaviour:
   maxRestoreForceMultiplier: 0.05
   minCoordinationMultiplier: 1
   minDirectionStability: 1
-  minSegmentSyncMultiplier: 1
+  minSegmentSyncMultiplier: 0.5
   lethalTimeRange:
     serializedVersion: 2
     m_Curve:
