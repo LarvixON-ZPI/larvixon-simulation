@@ -21,8 +21,7 @@ namespace Drugs
         [Range(0.1f, 1800f)] public float comedownTime = 300f;
 
         [Header("Movement Modifiers")]
-        [Range(0f, 2f)]
-        public float maxSpeedMultiplier = 1f;
+        [SerializeField] private AnimationCurve speedMultiplier = AnimationCurve.Constant(0, 1, 1);
 
         [Range(0f, 5f)] public float maxRandomnessMultiplier = 1f;
 
@@ -90,7 +89,7 @@ namespace Drugs
 
         public virtual MovementModifier GetMovementModifier(float intensity)
         {
-            var speedMultiplier = Mathf.Lerp(1f, maxSpeedMultiplier, intensity);
+            var calculatedSpeedMultiplier = speedMultiplier.Evaluate(intensity);
             var coordinationMultiplier = Mathf.Lerp(1f, minCoordinationMultiplier, intensity);
             var randomnessMultiplier = Mathf.Lerp(1f, maxRandomnessMultiplier, intensity);
             var directionStability = Mathf.Lerp(1f, minDirectionStability, intensity);
@@ -100,7 +99,7 @@ namespace Drugs
 
             return new MovementModifier
             {
-                SpeedMultiplier = speedMultiplier,
+                SpeedMultiplier = calculatedSpeedMultiplier,
                 SegmentCoordinationMultiplier = coordinationMultiplier,
                 RandomnessMultiplier = randomnessMultiplier,
                 DirectionStability = directionStability,

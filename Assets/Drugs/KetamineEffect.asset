@@ -15,10 +15,42 @@ MonoBehaviour:
   drugName: Ketamine
   description: 
   maxIntensity: 1
-  duration: 1500
-  onsetTime: 300
-  comedownTime: 300
-  maxSpeedMultiplier: 0.2
+  duration: 430
+  onsetTime: 85
+  comedownTime: 85
+  speedMultiplier:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.5016657
+      value: 1.3679436
+      inSlope: -1.0644305
+      outSlope: -1.0644305
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   maxRandomnessMultiplier: 4
   maxHeadForceMultiplier: 1
   maxRestoreForceMultiplier: 1.5

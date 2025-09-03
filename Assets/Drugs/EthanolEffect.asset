@@ -18,9 +18,41 @@ MonoBehaviour:
   duration: 400
   onsetTime: 100
   comedownTime: 100
-  maxSpeedMultiplier: 0.5
-  maxRandomnessMultiplier: 0.5
-  maxHeadForceMultiplier: 0.5
+  speedMultiplier:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0.12627026
+      outSlope: 0.12627026
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.26785073
+    - serializedVersion: 3
+      time: 0.4596964
+      value: 1.1759268
+      inSlope: -0.60231555
+      outSlope: -0.60231555
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0.5
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  maxRandomnessMultiplier: 2
+  maxHeadForceMultiplier: 0.6
   maxRestoreForceMultiplier: 0.5
   minCoordinationMultiplier: 0.2
   minDirectionStability: 0.5
