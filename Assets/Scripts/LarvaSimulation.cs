@@ -224,7 +224,7 @@ public class LarvaSimulation : MonoBehaviour
 
     public IReadOnlyList<DrugEffect> GetAvailableDrugEffects()
     {
-        var list = new List<DrugEffect>(5)
+        var list = new List<DrugEffect>
         {
             cocaineEffect,
             ethanolEffect,

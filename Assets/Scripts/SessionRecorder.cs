@@ -19,7 +19,7 @@ public class SessionRecorder : MonoBehaviour
 
     [Header("Recording Settings")] public int sessionLengthSeconds = 600;
     public string outputRootFolder = "Recordings";
-    public int captureFps = 30;
+    public float captureFps = 30;
     public bool useUnityRecorderIfAvailable = true;
     public bool useFfmpegFallback = true;
     public bool generateVideo = true;
@@ -39,13 +39,21 @@ public class SessionRecorder : MonoBehaviour
     private float _frameInterval;
     private bool _isRecording;
     private Random _rng;
+
+    private RenderTexture _rt;
+    private Texture2D _screenShotTexture;
     private float _sessionElapsed;
     private float _timeSinceLastFrame;
 
     private void Awake()
     {
         _rng = new Random();
-        _frameInterval = 1f / Mathf.Max(1, captureFps);
+        if (captureFps <= 0)
+            throw new ArgumentOutOfRangeException(nameof(captureFps), "Capture FPS must be greater than zero.");
+        _frameInterval = 1f / captureFps;
+
+        _rt = new RenderTexture(Screen.width, Screen.height, 24);
+        _screenShotTexture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
     }
 
     private void Start()
@@ -144,21 +152,17 @@ public class SessionRecorder : MonoBehaviour
 
     private void CapturePngFrame()
     {
-        if (captureCamera == null) return;
+        if (!captureCamera) return;
 
-        var rt = new RenderTexture(Screen.width, Screen.height, 24);
-        captureCamera.targetTexture = rt;
-        var screenShot = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
+        captureCamera.targetTexture = _rt;
         captureCamera.Render();
-        RenderTexture.active = rt;
-        screenShot.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
-        screenShot.Apply();
+        RenderTexture.active = _rt;
+        _screenShotTexture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
+        _screenShotTexture.Apply();
         captureCamera.targetTexture = null;
         RenderTexture.active = null;
-        Destroy(rt);
 
-        var bytes = screenShot.EncodeToPNG();
-        Destroy(screenShot);
+        var bytes = _screenShotTexture.EncodeToPNG();
 
         var fileName = Path.Combine(_currentFramesFolder, $"frame_{_currentFrameIndex:D06}.png");
         File.WriteAllBytes(fileName, bytes);
@@ -179,7 +183,7 @@ public class SessionRecorder : MonoBehaviour
             Debug.LogError($"SessionRecorder: Error finalizing session: {ex}");
         }
 
-        SceneManager.LoadScene("Scenes/SceneTest");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     private void WriteBufferedJsonToDisk()
@@ -251,7 +255,7 @@ public class SessionRecorder : MonoBehaviour
         public string sessionStartTimeIso;
         public float simulationStartTime;
         public float simulationEndTime;
-        public int captureFps;
+        public float captureFps;
         public int frameCount;
         public List<FrameData> frames;
     }
