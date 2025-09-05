@@ -2573,6 +2573,7 @@ MonoBehaviour:
   useUnityRecorderIfAvailable: 1
   useFfmpegFallback: 1
   generateVideo: 1
+  simulationSpeed: 4
   prettyPrintJson: 1
 --- !u!4 &1585462721
 Transform:

@@ -6,6 +6,7 @@ using System.Text;
 using Cysharp.Threading.Tasks;
 using Drugs;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
 using Random = System.Random;
@@ -19,10 +20,11 @@ public class SessionRecorder : MonoBehaviour
 
     [Header("Recording Settings")] public int sessionLengthSeconds = 600;
     public string outputRootFolder = "Recordings";
-    public float captureFps = 30;
+    public float captureFps = 0.25f;
     public bool useUnityRecorderIfAvailable = true;
     public bool useFfmpegFallback = true;
     public bool generateVideo = true;
+    public float simulationSpeed = 1f;
 
     [Header("JSON Settings")] public bool prettyPrintJson;
     private readonly List<FrameData> _frameBuffer = new();
@@ -53,13 +55,17 @@ public class SessionRecorder : MonoBehaviour
             throw new ArgumentOutOfRangeException(nameof(captureFps), "Capture FPS must be greater than zero.");
         _frameInterval = 1f / captureFps;
 
-        _rt = new RenderTexture(Screen.width, Screen.height, 24);
-        _screenShotTexture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
+        var w = Screen.width / 2;
+        var h = Screen.height / 2;
+        _rt = new RenderTexture(w, h, 1);
+        _screenShotTexture = new Texture2D(w, h, TextureFormat.RGB24, false);
     }
 
     private void Start()
     {
         _availableDrugs = larvaSimulation?.GetAvailableDrugEffects();
+
+        larvaSimulation!.OnSimulationSpeedChanged(simulationSpeed);
 
         BeginSession();
     }
@@ -159,16 +165,21 @@ public class SessionRecorder : MonoBehaviour
 
         captureCamera.targetTexture = _rt;
         captureCamera.Render();
-        RenderTexture.active = _rt;
-        _screenShotTexture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
-        _screenShotTexture.Apply();
         captureCamera.targetTexture = null;
-        RenderTexture.active = null;
 
-        var bytes = _screenShotTexture.EncodeToPNG();
+        AsyncGPUReadback.Request(_rt, 0, TextureFormat.RGB24, request =>
+        {
+            if (request.hasError) return;
+            var data = request.GetData<byte>().ToArray();
+            var tex = new Texture2D(_rt.width, _rt.height, TextureFormat.RGB24, false);
+            tex.LoadRawTextureData(data);
+            tex.Apply();
+            var bytes = tex.EncodeToPNG();
+            Destroy(tex);
 
-        var fileName = Path.Combine(_currentFramesFolder, $"frame_{_currentFrameIndex:D06}.png");
-        File.WriteAllBytes(fileName, bytes);
+            var fileName = Path.Combine(_currentFramesFolder, $"frame_{_currentFrameIndex:D06}.png");
+            File.WriteAllBytesAsync(fileName, bytes);
+        });
     }
 
     private async UniTaskVoid EndCurrentSession()
