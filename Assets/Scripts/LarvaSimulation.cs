@@ -188,7 +188,7 @@ public class LarvaSimulation : MonoBehaviour
         }
     }
 
-    private void ApplyDrugToAllLarvae(DrugEffect drugEffect)
+    public void ApplyDrugToAllLarvae(DrugEffect drugEffect)
     {
         if (!drugEffect)
         {
@@ -202,9 +202,36 @@ public class LarvaSimulation : MonoBehaviour
         Debug.Log($"Applied {drugEffect.drugName} (dosage: {drugDosage}) to all larvae");
     }
 
-    private void ClearAllDrugsFromLarvae()
+    public void ClearAllDrugsFromLarvae()
     {
         foreach (var larva in _larvae)
             larva.ClearAllDrugEffects();
+    }
+
+    public void ApplyDrugToAllLarvaeWithDosage(DrugEffect drugEffect, float dosage)
+    {
+        if (!drugEffect)
+        {
+            Debug.LogError("DrugEffect not assigned! Please assign it in the inspector.");
+            return;
+        }
+
+        foreach (var larva in _larvae)
+            larva.AddDrugEffect(drugEffect, dosage);
+
+        Debug.Log($"Applied {drugEffect.drugName} (dosage: {dosage}) to all larvae");
+    }
+
+    public IReadOnlyList<DrugEffect> GetAvailableDrugEffects()
+    {
+        var list = new List<DrugEffect>(5)
+        {
+            cocaineEffect,
+            ethanolEffect,
+            tetrodotoxinEffect,
+            ketamineEffect,
+            morphineEffect
+        };
+        return list;
     }
 }

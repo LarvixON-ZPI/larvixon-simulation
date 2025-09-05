@@ -21,3 +21,7 @@ Apply a drug to the currently selected larva by pressing its key:
 - e — Ethanol (depressant; reduces coordination, weakens contractions)
 - k — Ketamine (dissociative; disrupts normal wave patterns)
 - t — Tetrodotoxin (TTX; blocks neural activity, halts movement)
+
+## Running recorder
+
+You need to have ffmpeg on path
