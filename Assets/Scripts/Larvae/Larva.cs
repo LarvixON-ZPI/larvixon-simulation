@@ -63,6 +63,7 @@ namespace Larvae
 
         private MovementModifier CurrentMovementModifier => _drugSystem?.CurrentModifier ?? MovementModifier.Normal;
         public LarvaStateMachine StateMachine { get; private set; }
+        public bool IsAlive => StateMachine.CurrentState.StateName != "Dead";
 
         private void Awake()
         {
@@ -200,7 +201,7 @@ namespace Larvae
 
         private async UniTask UpdateMovementWave()
         {
-            while (StateMachine.CurrentState.StateName != "Dead")
+            while (IsAlive)
             {
                 var modifier = CurrentMovementModifier;
                 var adjustedPhaseTime = movementPhaseTime / (modifier.SpeedMultiplier + 0.1f);

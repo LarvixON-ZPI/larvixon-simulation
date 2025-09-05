@@ -35,6 +35,7 @@ public class SessionRecorder : MonoBehaviour
     private string _currentSessionFolder;
     private float _currentSessionSimulationStartTime;
     private string _currentSessionStartIso;
+    private float? _deathTime;
 
     private float _frameInterval;
     private bool _isRecording;
@@ -76,6 +77,8 @@ public class SessionRecorder : MonoBehaviour
             _timeSinceLastFrame -= _frameInterval;
             CaptureFrame();
         }
+
+        if (_deathTime == null && !larvaSimulation.Larvae[0].IsAlive) _deathTime = _sessionElapsed;
 
         if (_sessionElapsed >= sessionLengthSeconds) EndCurrentSession().Forget();
     }
@@ -198,6 +201,7 @@ public class SessionRecorder : MonoBehaviour
             simulationEndTime = simulationEndTime,
             captureFps = captureFps,
             frameCount = _frameBuffer.Count,
+            deathTime = _deathTime ?? -1f,
             frames = _frameBuffer
         };
 
@@ -257,6 +261,7 @@ public class SessionRecorder : MonoBehaviour
         public float simulationEndTime;
         public float captureFps;
         public int frameCount;
+        public float deathTime;
         public List<FrameData> frames;
     }
 

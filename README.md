@@ -25,3 +25,7 @@ Apply a drug to the currently selected larva by pressing its key:
 ## Running recorder
 
 You need to have ffmpeg on path
+
+## Recorder json
+
+If deathTime is -1, then larva has not died
