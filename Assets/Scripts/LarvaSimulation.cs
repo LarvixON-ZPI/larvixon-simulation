@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using Drugs;
 using Larvae;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class LarvaSimulation : MonoBehaviour
 {
@@ -30,6 +33,9 @@ public class LarvaSimulation : MonoBehaviour
     [SerializeField] private Transform larvaeParent;
     [SerializeField] private Transform larvaeSegmentParent;
 
+    [SerializeField] private bool stopSimulation;
+    [SerializeField] private float stopSimulationAfterSeconds = 600f;
+
     private readonly List<Larva> _larvae = new();
     private Camera _camera;
     private float _nextDirectionChange;
@@ -50,6 +56,15 @@ public class LarvaSimulation : MonoBehaviour
     private void Update()
     {
         HandleInput();
+
+        if (stopSimulation && Time.time > stopSimulationAfterSeconds)
+        {
+#if UNITY_EDITOR
+            EditorApplication.ExitPlaymode();
+#else
+            Application.Quit();
+#endif
+        }
     }
 
     private void OnDrawGizmosSelected()

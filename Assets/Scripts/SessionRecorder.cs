@@ -107,7 +107,7 @@ public class SessionRecorder : MonoBehaviour
         _currentJsonPath = Path.Combine(_currentSessionFolder, "larva_points.json");
 
         _currentSessionStartIso = DateTime.Now.ToString("o");
-        _currentSessionSimulationStartTime = Time.time;
+        _currentSessionSimulationStartTime = _sessionElapsed;
 
         _isRecording = true;
     }
@@ -130,7 +130,7 @@ public class SessionRecorder : MonoBehaviour
         var frame = new FrameData
         {
             frameIndex = _currentFrameIndex,
-            timestamp = Time.time,
+            timestamp = _sessionElapsed,
             larvae = new List<LarvaData>(larvae.Count)
         };
 
@@ -196,7 +196,7 @@ public class SessionRecorder : MonoBehaviour
 
     private void WriteBufferedJsonToDisk()
     {
-        var simulationEndTime = Time.time;
+        var simulationEndTime = _sessionElapsed;
         var session = new SessionData
         {
             sessionDrugName = _currentSessionDrug ? _currentSessionDrug.drugName : string.Empty,
