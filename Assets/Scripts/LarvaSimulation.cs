@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using Drugs;
 using Larvae;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class LarvaSimulation : MonoBehaviour
 {
@@ -30,6 +33,9 @@ public class LarvaSimulation : MonoBehaviour
     [SerializeField] private Transform larvaeParent;
     [SerializeField] private Transform larvaeSegmentParent;
 
+    [SerializeField] private bool stopSimulation;
+    [SerializeField] private float stopSimulationAfterSeconds = 600f;
+
     private readonly List<Larva> _larvae = new();
     private Camera _camera;
     private float _nextDirectionChange;
@@ -50,6 +56,15 @@ public class LarvaSimulation : MonoBehaviour
     private void Update()
     {
         HandleInput();
+
+        if (stopSimulation && Time.time > stopSimulationAfterSeconds)
+        {
+#if UNITY_EDITOR
+            EditorApplication.ExitPlaymode();
+#else
+            Application.Quit();
+#endif
+        }
     }
 
     private void OnDrawGizmosSelected()
@@ -188,7 +203,7 @@ public class LarvaSimulation : MonoBehaviour
         }
     }
 
-    private void ApplyDrugToAllLarvae(DrugEffect drugEffect)
+    public void ApplyDrugToAllLarvae(DrugEffect drugEffect)
     {
         if (!drugEffect)
         {
@@ -202,9 +217,36 @@ public class LarvaSimulation : MonoBehaviour
         Debug.Log($"Applied {drugEffect.drugName} (dosage: {drugDosage}) to all larvae");
     }
 
-    private void ClearAllDrugsFromLarvae()
+    public void ClearAllDrugsFromLarvae()
     {
         foreach (var larva in _larvae)
             larva.ClearAllDrugEffects();
+    }
+
+    public void ApplyDrugToAllLarvaeWithDosage(DrugEffect drugEffect, float dosage)
+    {
+        if (!drugEffect)
+        {
+            Debug.LogError("DrugEffect not assigned! Please assign it in the inspector.");
+            return;
+        }
+
+        foreach (var larva in _larvae)
+            larva.AddDrugEffect(drugEffect, dosage);
+
+        Debug.Log($"Applied {drugEffect.drugName} (dosage: {dosage}) to all larvae");
+    }
+
+    public IReadOnlyList<DrugEffect> GetAvailableDrugEffects()
+    {
+        var list = new List<DrugEffect>
+        {
+            cocaineEffect,
+            ethanolEffect,
+            tetrodotoxinEffect,
+            ketamineEffect,
+            morphineEffect
+        };
+        return list;
     }
 }

@@ -414,7 +414,7 @@ RectTransform:
   m_Father: {fileID: 95079041}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0.1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -768,7 +768,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &218233944
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1958,8 +1958,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 472749717}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0.1, y: 0}
+  m_AnchorMax: {x: 0.1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2260,7 +2260,7 @@ MonoBehaviour:
   larvaCount: 1
   spawnArea: {x: 20, y: 20}
   setRandomTargetDirectionOnStart: 0
-  simulationSpeed: 1
+  simulationSpeed: 4
   targetFrameRate: 120
   fixedDeltaTime: 0.01
   mutateLarva: 0
@@ -2272,6 +2272,8 @@ MonoBehaviour:
   drugDosage: 1
   larvaeParent: {fileID: 510926915}
   larvaeSegmentParent: {fileID: 709971255}
+  stopSimulation: 1
+  stopSimulationAfterSeconds: 600
 --- !u!1 &1369510401
 GameObject:
   m_ObjectHideFlags: 0
@@ -2536,6 +2538,60 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &1585462719
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1585462721}
+  - component: {fileID: 1585462720}
+  m_Layer: 0
+  m_Name: SessionRecorder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &1585462720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1585462719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fe249589edce412e8a69feda5f934d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SessionRecorder
+  larvaSimulation: {fileID: 1321582329}
+  captureCamera: {fileID: 519420031}
+  sessionLengthSeconds: 600
+  outputRootFolder: Recordings
+  captureFps: 0.25
+  useFfmpegFallback: 1
+  generateVideo: 1
+  simulationSpeed: 2
+  dosage: 1
+  prettyPrintJson: 1
+--- !u!4 &1585462721
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1585462719}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1640545707
 GameObject:
   m_ObjectHideFlags: 0
@@ -10564,6 +10620,7 @@ SceneRoots:
   - {fileID: 519420032}
   - {fileID: 619394802}
   - {fileID: 1321582328}
+  - {fileID: 1585462721}
   - {fileID: 215152113}
   - {fileID: 510926915}
   - {fileID: 1662182471}
