@@ -2552,7 +2552,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1585462720
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2570,10 +2570,10 @@ MonoBehaviour:
   sessionLengthSeconds: 600
   outputRootFolder: Recordings
   captureFps: 0.25
-  useUnityRecorderIfAvailable: 1
   useFfmpegFallback: 1
   generateVideo: 1
   simulationSpeed: 4
+  dosage: 1
   prettyPrintJson: 1
 --- !u!4 &1585462721
 Transform:

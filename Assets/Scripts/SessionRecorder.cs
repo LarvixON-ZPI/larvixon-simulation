@@ -21,10 +21,10 @@ public class SessionRecorder : MonoBehaviour
     [Header("Recording Settings")] public int sessionLengthSeconds = 600;
     public string outputRootFolder = "Recordings";
     public float captureFps = 0.25f;
-    public bool useUnityRecorderIfAvailable = true;
     public bool useFfmpegFallback = true;
     public bool generateVideo = true;
     public float simulationSpeed = 1f;
+    public float dosage = 1f;
 
     [Header("JSON Settings")] public bool prettyPrintJson;
     private readonly List<FrameData> _frameBuffer = new();
@@ -96,8 +96,11 @@ public class SessionRecorder : MonoBehaviour
         _currentFrameIndex = 0;
         _frameBuffer.Clear();
 
+        var drugName = ApplyRandomDrugAtDose(dosage);
+
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-        _currentSessionFolder = Path.Combine(Application.dataPath, "..", outputRootFolder, $"session_{timestamp}");
+        _currentSessionFolder =
+            Path.Combine(Application.dataPath, "..", outputRootFolder, $"{drugName}_{dosage:F2}_{timestamp}");
         Directory.CreateDirectory(_currentSessionFolder);
         _currentFramesFolder = Path.Combine(_currentSessionFolder, "frames");
         Directory.CreateDirectory(_currentFramesFolder);
@@ -106,28 +109,19 @@ public class SessionRecorder : MonoBehaviour
         _currentSessionStartIso = DateTime.Now.ToString("o");
         _currentSessionSimulationStartTime = Time.time;
 
-        ApplyRandomDrugAtFullDose();
-
         _isRecording = true;
     }
 
-    private void ApplyRandomDrugAtFullDose()
+    private string ApplyRandomDrugAtDose(float appliedDosage)
     {
-        if (_availableDrugs == null || _availableDrugs.Count == 0)
-        {
-            Debug.LogWarning("No drug effects available to apply.");
-            return;
-        }
-
-        larvaSimulation.ClearAllDrugsFromLarvae();
-
         var index = _rng.Next(_availableDrugs.Count);
         var chosen = _availableDrugs[index];
         _currentSessionDrug = chosen;
-        _currentSessionDosage = 1f;
-        larvaSimulation.ApplyDrugToAllLarvaeWithDosage(chosen, _currentSessionDosage);
+        larvaSimulation.ApplyDrugToAllLarvaeWithDosage(chosen, appliedDosage);
 
         Debug.Log($"SessionRecorder: Started session with drug: {chosen.drugName}");
+
+        return chosen.drugName;
     }
 
     private void CaptureFrame()
@@ -222,10 +216,6 @@ public class SessionRecorder : MonoBehaviour
 
     private async UniTask TryAssembleVideoAsync()
     {
-        if (useUnityRecorderIfAvailable)
-        {
-        }
-
         if (!useFfmpegFallback) return;
 
         const string ffmpegPath = "ffmpeg";
