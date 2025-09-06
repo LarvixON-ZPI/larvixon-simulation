@@ -114,6 +114,8 @@ public class SessionRecorder : MonoBehaviour
 
     private string ApplyRandomDrugAtDose(float appliedDosage)
     {
+        _currentSessionDosage = appliedDosage;
+            
         var index = _rng.Next(_availableDrugs.Count);
         var chosen = _availableDrugs[index];
         _currentSessionDrug = chosen;
