@@ -258,19 +258,24 @@ namespace Larvae
 
         private void ApplySegmentConstraints()
         {
-            var modifier = CurrentMovementModifier;
-            var headDirectionalForce = headForwardForce * modifier.HeadForceMultiplier * targetDirection;
-
-            var randomForce = modifier.RandomnessMultiplier * Time.fixedDeltaTime * Random.insideUnitCircle;
-            headDirectionalForce += randomForce;
-
-            if (!modifier.CanMove || !isMoving) headDirectionalForce = Vector2.zero;
-
             if (movementPhase != MovementPhase.DraggingTail)
-                ApplySegmentConstraint(0, 1, _segmentTargetLengths[0], false, headDirectionalForce);
+            {
+                var modifier = CurrentMovementModifier;
+                var headDirectionalForce = headForwardForce * modifier.HeadForceMultiplier * targetDirection;
 
-            for (var i = 1; i < points.Length; i++)
+                var randomForce = modifier.RandomnessMultiplier * Time.fixedDeltaTime * Random.insideUnitCircle;
+                headDirectionalForce += randomForce;
+
+                if (!modifier.CanMove || !isMoving) headDirectionalForce = Vector2.zero;
+
+                ApplySegmentConstraint(0, 1, _segmentTargetLengths[0], false, headDirectionalForce);
+            }
+
+            for (var i = 1; i < points.Length - 1; i++)
                 ApplySegmentConstraint(i, i - 1, _segmentTargetLengths[i - 1], true);
+
+            if (movementPhase != MovementPhase.ExtendingHead)
+                ApplySegmentConstraint(4, 3, _segmentTargetLengths[3], true);
 
             ApplyCurveStraighteningForces();
         }

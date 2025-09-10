@@ -203,7 +203,7 @@ public class LarvaSimulation : MonoBehaviour
         }
     }
 
-    public void ApplyDrugToAllLarvae(DrugEffect drugEffect)
+    private void ApplyDrugToAllLarvae(DrugEffect drugEffect)
     {
         if (!drugEffect)
         {
@@ -217,7 +217,7 @@ public class LarvaSimulation : MonoBehaviour
         Debug.Log($"Applied {drugEffect.drugName} (dosage: {drugDosage}) to all larvae");
     }
 
-    public void ClearAllDrugsFromLarvae()
+    private void ClearAllDrugsFromLarvae()
     {
         foreach (var larva in _larvae)
             larva.ClearAllDrugEffects();
