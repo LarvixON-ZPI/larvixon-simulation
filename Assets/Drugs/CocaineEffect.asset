@@ -42,12 +42,12 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  maxRandomnessMultiplier: 2.5
-  maxHeadForceMultiplier: 1.2
-  maxRestoreForceMultiplier: 1.3
-  minCoordinationMultiplier: 0.5
-  minDirectionStability: 0.1
-  minSegmentSyncMultiplier: 0.3
+  maxRandomnessMultiplier: 2
+  maxHeadForceMultiplier: 1.1
+  maxRestoreForceMultiplier: 1.1
+  minCoordinationMultiplier: 0.6
+  minDirectionStability: 0.2
+  minSegmentSyncMultiplier: 0.5
   lethalTimeRange:
     serializedVersion: 2
     m_Curve:

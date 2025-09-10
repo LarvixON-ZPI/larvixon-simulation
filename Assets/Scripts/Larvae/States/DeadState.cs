@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 
 namespace Larvae.States
 {
@@ -14,7 +15,14 @@ namespace Larvae.States
             var larva = stateMachine.LarvaController;
 
             larva.StopMoving();
-            larva.SetMovementMultiplier(0f);
+
+            OnEnter(larva).Forget();
+        }
+
+        private async UniTask OnEnter(Larva larva)
+        {
+            await larva.SoftChangeMovementMultiplier(.1f);
+            await larva.SoftChangeMovementMultiplier(20f, 0f);
         }
 
         public override bool CanTransitionTo(string stateName)
