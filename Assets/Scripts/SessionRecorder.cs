@@ -25,6 +25,10 @@ public class SessionRecorder : MonoBehaviour
     public bool generateVideo = true;
     public float simulationSpeed = 1f;
     public float dosage = 1f;
+    
+    [Header("Config Mode")]
+    public bool enableConfigMode = true;
+    private ConfigReader.SimulationConfig _config;
 
     [Header("JSON Settings")] public bool prettyPrintJson;
     private readonly List<FrameData> _frameBuffer = new();
@@ -50,6 +54,8 @@ public class SessionRecorder : MonoBehaviour
 
     private void Awake()
     {
+        if (enableConfigMode) LoadConfig();
+        
         _rng = new Random();
         if (captureFps <= 0)
             throw new ArgumentOutOfRangeException(nameof(captureFps), "Capture FPS must be greater than zero.");
@@ -59,6 +65,26 @@ public class SessionRecorder : MonoBehaviour
         var h = Screen.height / 2;
         _rt = new RenderTexture(w, h, 1);
         _screenShotTexture = new Texture2D(w, h, TextureFormat.RGB24, false);
+    }
+
+    private void LoadConfig()
+    {
+        _config = ConfigReader.LoadConfig();
+        
+        sessionLengthSeconds = (int)_config.simulationTimeSeconds;
+        simulationSpeed = _config.simulationSpeed;
+        dosage = _config.intensity;
+        outputRootFolder = _config.outputPath;
+        
+        ConfigReader.LogConfig(_config);
+        
+        if (_config.headlessMode)
+        {
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = 60;
+            generateVideo = false; 
+            captureFps = 0;
+        }
     }
 
     private void Start()
@@ -92,18 +118,27 @@ public class SessionRecorder : MonoBehaviour
     private void BeginSession()
     {
         _sessionElapsed = 0f;
-        _timeSinceLastFrame = 0f;
+        _timeSinceLastFrame = Random.Range(0f, _frameInterval);
         _currentFrameIndex = 0;
         _frameBuffer.Clear();
 
-        var drugName = ApplyRandomDrugAtDose(dosage);
+        string drugName;
+        if (enableConfigMode && _config.useRandomIntensity)
+        {
+            var newIntensity = UnityEngine.Random.Range(_config.minIntensity, _config.maxIntensity);
+            dosage = newIntensity;
+        }
+        
+        drugName = ApplyRandomDrugAtDose(dosage);
 
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         _currentSessionFolder =
             Path.Combine(Application.dataPath, "..", outputRootFolder, $"{drugName}_{dosage:F2}_{timestamp}");
         Directory.CreateDirectory(_currentSessionFolder);
+        
         _currentFramesFolder = Path.Combine(_currentSessionFolder, "frames");
         Directory.CreateDirectory(_currentFramesFolder);
+        
         _currentJsonPath = Path.Combine(_currentSessionFolder, "larva_points.json");
 
         _currentSessionStartIso = DateTime.Now.ToString("o");
@@ -157,7 +192,7 @@ public class SessionRecorder : MonoBehaviour
 
     private void CapturePngFrame()
     {
-        if (!captureCamera) return;
+        if (!captureCamera || _rt == null) return;
 
         captureCamera.targetTexture = _rt;
         captureCamera.Render();
@@ -173,8 +208,11 @@ public class SessionRecorder : MonoBehaviour
             var bytes = tex.EncodeToPNG();
             Destroy(tex);
 
-            var fileName = Path.Combine(_currentFramesFolder, $"frame_{_currentFrameIndex:D06}.png");
-            File.WriteAllBytesAsync(fileName, bytes);
+            if (!string.IsNullOrEmpty(_currentFramesFolder))
+            {
+                var fileName = Path.Combine(_currentFramesFolder, $"frame_{_currentFrameIndex:D06}.png");
+                File.WriteAllBytesAsync(fileName, bytes);
+            }
         });
     }
 

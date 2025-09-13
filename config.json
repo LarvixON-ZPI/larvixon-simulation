@@ -1,0 +1,11 @@
+{
+  "simulationTimeSeconds": 600.0,
+  "simulationSpeed": 1.0,
+  "framesPerSecond": 0.25,
+  "intensity": 1.0,
+  "useRandomIntensity": false,
+  "minIntensity": 0.1,
+  "maxIntensity": 2.0,
+  "headlessMode": true,
+  "outputPath": "Recordings"
+}

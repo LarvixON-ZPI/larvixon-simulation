@@ -59,6 +59,7 @@ public class LarvaSimulation : MonoBehaviour
 
         if (stopSimulation && Time.time > stopSimulationAfterSeconds)
         {
+            Debug.Log("Simulation time limit reached, stopping simulation");
 #if UNITY_EDITOR
             EditorApplication.ExitPlaymode();
 #else
