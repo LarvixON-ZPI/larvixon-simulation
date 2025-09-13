@@ -196,14 +196,14 @@ public class SessionRecorder : MonoBehaviour
             intensity = newIntensity;
         }
 
-        var drugName = ApplyRandomDrugAtDose(intensity);
+        var drugName = ApplyRandomDrugAtDose(intensity).ToLower();
 
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         var resolvedOutputPath = ResolveOutputPath(outputRootFolder);
-        _currentSessionFolder = Path.Combine(resolvedOutputPath, $"{drugName}_{intensity:F2}_{timestamp}");
+        _currentSessionFolder = Path.Combine(resolvedOutputPath, $"{drugName}");
         Directory.CreateDirectory(_currentSessionFolder);
 
-        _currentFramesFolder = Path.Combine(_currentSessionFolder, "frames");
+        _currentFramesFolder = Path.Combine(_currentSessionFolder, $"frames_{timestamp}");
         Directory.CreateDirectory(_currentFramesFolder);
 
         _currentJsonPath = Path.Combine(_currentSessionFolder, "larva_points.json");
