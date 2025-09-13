@@ -98,6 +98,30 @@ public class SessionRecorder : MonoBehaviour
         if (_sessionElapsed >= sessionLengthSeconds) EndCurrentSession().Forget();
     }
 
+    private static string ResolveOutputPath(string outputPath)
+    {
+        if (string.IsNullOrEmpty(outputPath)) outputPath = "Recordings";
+
+        if (Path.IsPathRooted(outputPath)) return Path.GetFullPath(outputPath);
+
+        // Path is relative
+        string basePath;
+
+        if (Application.isEditor)
+        {
+            // In editor, use project root directory
+            basePath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+        }
+        else
+        {
+            // In build, use directory containing the executable
+            var executablePath = Environment.GetCommandLineArgs()[0];
+            basePath = Path.GetDirectoryName(executablePath) ?? Environment.CurrentDirectory;
+        }
+
+        return Path.GetFullPath(Path.Combine(basePath, outputPath));
+    }
+
     private void LoadConfig()
     {
         _config = ConfigReader.LoadConfig();
@@ -137,8 +161,8 @@ public class SessionRecorder : MonoBehaviour
         var drugName = ApplyRandomDrugAtDose(intensity);
 
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-        _currentSessionFolder =
-            Path.Combine(Application.dataPath, "..", outputRootFolder, $"{drugName}_{intensity:F2}_{timestamp}");
+        var resolvedOutputPath = ResolveOutputPath(outputRootFolder);
+        _currentSessionFolder = Path.Combine(resolvedOutputPath, $"{drugName}_{intensity:F2}_{timestamp}");
         Directory.CreateDirectory(_currentSessionFolder);
 
         _currentFramesFolder = Path.Combine(_currentSessionFolder, "frames");

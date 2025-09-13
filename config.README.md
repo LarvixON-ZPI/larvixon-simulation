@@ -4,7 +4,9 @@ This file contains the configuration for the Larvixon simulation. Place this fil
 
 ## Configuration Options
 
-- **allowedDrugTypes**: specify allowed drugs to be simulated by providing full names as a comma separated list (or specify all accepted: "*")
+- **allowedDrugs**: specify allowed drugs to be simulated by providing full names as a comma/space/semicolon separated list
+  - to specify that all are allowed: "*"
+  - following list example would allow for these 5 (currently all available drugs): "cOCAine ; morPHINE,tetrodotoxin, ethanol;ketamine"
 - **simulationTimeSeconds**: Duration of the simulation in seconds (default: 600)
 - **simulationSpeed**: Speed multiplier for the simulation (default: 1.0)
 - **framesPerSecond**: How many times per second take a screenshot
@@ -14,6 +16,8 @@ This file contains the configuration for the Larvixon simulation. Place this fil
 - **maxIntensity**: Maximum intensity for random mode (default: 1.0)
 - **headlessMode**: Whether to run without graphics (default: true)
 - **outputPath**: Directory for output recordings (default: "Recordings")
+  - Can be an absolute path (e.g., "/tmp/recordings" on Linux/macOS, "C:\\temp\\recordings" on Windows)
+  - Can be a relative path (relative to the executable in builds, or project root in editor)
 
 ## Usage
 
@@ -24,7 +28,7 @@ This file contains the configuration for the Larvixon simulation. Place this fil
 
 ```json
 {
-  "allowedDrugTypes": "*",
+  "allowedDrugs": "*",
   "simulationTimeSeconds": 600.0,
   "simulationSpeed": 1.0,
   "framesPerSecond": 0.25,
