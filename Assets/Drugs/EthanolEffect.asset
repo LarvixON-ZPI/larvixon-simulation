@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: EthanolEffect
   m_EditorClassIdentifier: Assembly-CSharp::Drugs.EthanolEffect
   drugName: Ethanol
+  drugType: 1
   description: 
   maxIntensity: 1
   duration: 400

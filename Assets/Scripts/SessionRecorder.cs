@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Cysharp.Threading.Tasks;
 using Drugs;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using Debug = UnityEngine.Debug;
 using Random = System.Random;
 
@@ -24,11 +26,15 @@ public class SessionRecorder : MonoBehaviour
     public bool useFfmpegFallback = true;
     public bool generateVideo = true;
     public float simulationSpeed = 1f;
-    public float dosage = 1f;
+    [FormerlySerializedAs("dosage")] public float intensity = 1f;
+
+    [Header("Config Mode")]
+    public bool enableConfigMode = true;
 
     [Header("JSON Settings")] public bool prettyPrintJson;
     private readonly List<FrameData> _frameBuffer = new();
     private IReadOnlyList<DrugEffect> _availableDrugs;
+    private ConfigReader.SimulationConfig _config;
     private int _currentFrameIndex;
     private string _currentFramesFolder;
     private string _currentJsonPath;
@@ -51,9 +57,6 @@ public class SessionRecorder : MonoBehaviour
     private void Awake()
     {
         _rng = new Random();
-        if (captureFps <= 0)
-            throw new ArgumentOutOfRangeException(nameof(captureFps), "Capture FPS must be greater than zero.");
-        _frameInterval = 1f / captureFps;
 
         var w = Screen.width / 2;
         var h = Screen.height / 2;
@@ -65,9 +68,15 @@ public class SessionRecorder : MonoBehaviour
     {
         _availableDrugs = larvaSimulation?.GetAvailableDrugEffects();
 
-        larvaSimulation!.OnSimulationSpeedChanged(simulationSpeed);
+        if (enableConfigMode) LoadConfig();
+
+        if (captureFps <= 0)
+            throw new ArgumentOutOfRangeException(nameof(captureFps), "Capture FPS must be greater than zero.");
+        _frameInterval = 1f / captureFps;
 
         BeginSession();
+
+        larvaSimulation!.OnSimulationSpeedChanged(simulationSpeed);
     }
 
     private void Update()
@@ -89,21 +98,80 @@ public class SessionRecorder : MonoBehaviour
         if (_sessionElapsed >= sessionLengthSeconds) EndCurrentSession().Forget();
     }
 
+    private static string ResolveOutputPath(string outputPath)
+    {
+        if (string.IsNullOrEmpty(outputPath)) outputPath = "Recordings";
+
+        if (Path.IsPathRooted(outputPath)) return Path.GetFullPath(outputPath);
+
+        // Path is relative
+        string basePath;
+
+        if (Application.isEditor)
+        {
+            // In editor, use project root directory
+            basePath = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+        }
+        else
+        {
+            // In build, use directory containing the executable
+            var executablePath = Environment.GetCommandLineArgs()[0];
+            basePath = Path.GetDirectoryName(executablePath) ?? Environment.CurrentDirectory;
+        }
+
+        return Path.GetFullPath(Path.Combine(basePath, outputPath));
+    }
+
+    private void LoadConfig()
+    {
+        _config = ConfigReader.LoadConfig();
+
+        sessionLengthSeconds = (int)_config.simulationTimeSeconds;
+        simulationSpeed = _config.simulationSpeed;
+        captureFps = _config.framesPerSecond;
+        intensity = _config.GetIntensity();
+        outputRootFolder = _config.outputPath;
+
+        ConfigReader.LogConfig(_config);
+
+        var allowedDrugTypes = _config.GetAllowedDrugs();
+        var filtered = _availableDrugs.Where(drug => allowedDrugTypes.Contains(drug.drugType)).ToList();
+        _availableDrugs = filtered;
+
+        if (_availableDrugs.Count == 0)
+            throw new InvalidOperationException(
+                "No available drugs match the allowed drug types specified in the configuration. Please check your config.");
+
+        if (_config.headlessMode)
+        {
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = 60;
+        }
+    }
+
     private void BeginSession()
     {
         _sessionElapsed = 0f;
-        _timeSinceLastFrame = 0f;
+        _timeSinceLastFrame = UnityEngine.Random.Range(0f, _frameInterval);
         _currentFrameIndex = 0;
         _frameBuffer.Clear();
 
-        var drugName = ApplyRandomDrugAtDose(dosage);
+        if (enableConfigMode && _config.useRandomIntensity)
+        {
+            var newIntensity = UnityEngine.Random.Range(_config.minIntensity, _config.maxIntensity);
+            intensity = newIntensity;
+        }
+
+        var drugName = ApplyRandomDrugAtDose(intensity);
 
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-        _currentSessionFolder =
-            Path.Combine(Application.dataPath, "..", outputRootFolder, $"{drugName}_{dosage:F2}_{timestamp}");
+        var resolvedOutputPath = ResolveOutputPath(outputRootFolder);
+        _currentSessionFolder = Path.Combine(resolvedOutputPath, $"{drugName}_{intensity:F2}_{timestamp}");
         Directory.CreateDirectory(_currentSessionFolder);
+
         _currentFramesFolder = Path.Combine(_currentSessionFolder, "frames");
         Directory.CreateDirectory(_currentFramesFolder);
+
         _currentJsonPath = Path.Combine(_currentSessionFolder, "larva_points.json");
 
         _currentSessionStartIso = DateTime.Now.ToString("o");
@@ -115,7 +183,7 @@ public class SessionRecorder : MonoBehaviour
     private string ApplyRandomDrugAtDose(float appliedDosage)
     {
         _currentSessionDosage = appliedDosage;
-            
+
         var index = _rng.Next(_availableDrugs.Count);
         var chosen = _availableDrugs[index];
         _currentSessionDrug = chosen;
@@ -157,7 +225,7 @@ public class SessionRecorder : MonoBehaviour
 
     private void CapturePngFrame()
     {
-        if (!captureCamera) return;
+        if (!captureCamera || _rt == null) return;
 
         captureCamera.targetTexture = _rt;
         captureCamera.Render();
@@ -165,7 +233,7 @@ public class SessionRecorder : MonoBehaviour
 
         AsyncGPUReadback.Request(_rt, 0, TextureFormat.RGB24, request =>
         {
-            if (request.hasError) return;
+            if (request.hasError || !_rt) return;
             var data = request.GetData<byte>().ToArray();
             var tex = new Texture2D(_rt.width, _rt.height, TextureFormat.RGB24, false);
             tex.LoadRawTextureData(data);
@@ -173,8 +241,11 @@ public class SessionRecorder : MonoBehaviour
             var bytes = tex.EncodeToPNG();
             Destroy(tex);
 
-            var fileName = Path.Combine(_currentFramesFolder, $"frame_{_currentFrameIndex:D06}.png");
-            File.WriteAllBytesAsync(fileName, bytes);
+            if (!string.IsNullOrEmpty(_currentFramesFolder))
+            {
+                var fileName = Path.Combine(_currentFramesFolder, $"frame_{_currentFrameIndex:D06}.png");
+                File.WriteAllBytesAsync(fileName, bytes);
+            }
         });
     }
 

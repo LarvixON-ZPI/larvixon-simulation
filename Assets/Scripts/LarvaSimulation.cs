@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Drugs;
 using Larvae;
 using UnityEngine;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -16,6 +17,9 @@ public class LarvaSimulation : MonoBehaviour
     public bool setRandomTargetDirectionOnStart;
 
     [SerializeField] private float simulationSpeed = 1;
+
+    [FormerlySerializedAs("setSimulationSpeedOnStart")] [SerializeField]
+    private bool validateOnStart = true;
 
     [SerializeField] private int targetFrameRate = 120;
     [SerializeField] private float fixedDeltaTime = 0.01f;
@@ -44,7 +48,8 @@ public class LarvaSimulation : MonoBehaviour
     private void Start()
     {
         _camera = Camera.main;
-        OnValidate();
+
+        if (validateOnStart) OnValidate();
 
         SpawnLarvae();
 
@@ -59,6 +64,7 @@ public class LarvaSimulation : MonoBehaviour
 
         if (stopSimulation && Time.time > stopSimulationAfterSeconds)
         {
+            Debug.Log("Simulation time limit reached, stopping simulation");
 #if UNITY_EDITOR
             EditorApplication.ExitPlaymode();
 #else
@@ -124,10 +130,10 @@ public class LarvaSimulation : MonoBehaviour
 
     private static void MutateLarva(Larva larva)
     {
-        larva.segmentLength *= Random.Range(0.8f, 1.2f);
-        larva.headForwardForce *= Random.Range(0.8f, 1.2f);
+        larva.segmentLength *= Random.Range(0.95f, 1.05f);
+        larva.headForwardForce *= Random.Range(0.95f, 1.05f);
         larva.dampening *= Random.Range(0.95f, 1.05f);
-        larva.restoreForce *= Random.Range(0.8f, 1.2f);
+        larva.restoreForce *= Random.Range(0.95f, 1.05f);
     }
 
     private void StartAllMovement()

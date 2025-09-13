@@ -1,12 +1,25 @@
+using System;
+using System.Collections.Generic;
 using Larvae;
 using UnityEngine;
 
 namespace Drugs
 {
+    public enum DrugType
+    {
+        Cocaine,
+        Ethanol,
+        Tetrodotoxin,
+        Ketamine,
+        Morphine
+    }
+
     public abstract class DrugEffect : ScriptableObject
     {
         [Header("Drug Properties")]
         public string drugName;
+
+        public DrugType drugType;
 
         [SerializeField]
         [TextArea(3, 6)] private string description;
@@ -64,6 +77,9 @@ namespace Drugs
                 return positiveCount / (steps + 1f);
             }
         }
+
+        public static IReadOnlyList<DrugType> AllDrugTypes { get; } =
+            (DrugType[])Enum.GetValues(typeof(DrugType));
 
         public bool IsSafeDose(float dose)
         {

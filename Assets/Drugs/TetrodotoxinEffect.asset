@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: TetrodotoxinEffect
   m_EditorClassIdentifier: Assembly-CSharp::Drugs.TetrodotoxinEffect
   drugName: Tetrodotoxin
+  drugType: 2
   description: 
   maxIntensity: 1
   duration: 200

@@ -29,3 +29,23 @@ You need to have ffmpeg on path
 ## Recorder json
 
 If deathTime is -1, then larva has not died
+
+## Logs location
+
+Windows standalone:
+
+```text
+C:\Users\<User>\AppData\LocalLow\Larvixon\simulation\Player.log
+```
+
+Linux standalone:
+
+```text
+~/.config/unity3d/Larvixon/simulation/Player.log
+```
+
+Mac standalone:
+
+```text
+~/Library/Logs/Larvixon/simulation/Player.log
+```
