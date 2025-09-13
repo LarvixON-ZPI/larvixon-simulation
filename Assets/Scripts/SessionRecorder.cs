@@ -102,6 +102,11 @@ public class SessionRecorder : MonoBehaviour
     {
         if (string.IsNullOrEmpty(outputPath)) outputPath = "Recordings";
 
+        if (outputPath.StartsWith("~"))
+        {
+            outputPath = ExpandTildePath(outputPath);
+        }
+
         if (Path.IsPathRooted(outputPath)) return Path.GetFullPath(outputPath);
 
         // Path is relative
@@ -120,6 +125,35 @@ public class SessionRecorder : MonoBehaviour
         }
 
         return Path.GetFullPath(Path.Combine(basePath, outputPath));
+    }
+
+    private static string ExpandTildePath(string path)
+    {
+        if (string.IsNullOrEmpty(path) || !path.StartsWith("~"))
+            return path;
+
+        var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        
+        if (string.IsNullOrEmpty(homeDirectory))
+        {
+            homeDirectory = Environment.GetEnvironmentVariable("HOME") ?? 
+                           Environment.GetEnvironmentVariable("USERPROFILE") ?? 
+                           Environment.CurrentDirectory;
+        }
+
+        if (path == "~")
+        {
+            return homeDirectory;
+        }
+        else if (path.StartsWith("~/") || path.StartsWith("~\\"))
+        {
+            return Path.Combine(homeDirectory, path.Substring(2));
+        }
+        else
+        {
+            Debug.LogWarning($"Tilde expansion with username not supported: {path}");
+            return path;
+        }
     }
 
     private void LoadConfig()
