@@ -61,7 +61,7 @@ public static class ConfigReader
     [Serializable]
     public struct SimulationConfig
     {
-        public List<DrugType> allowedDrugs;
+        public string allowedDrugs;
         public float simulationTimeSeconds;
         public float simulationSpeed;
         public float framesPerSecond;
@@ -84,6 +84,30 @@ public static class ConfigReader
             headlessMode = true,
             outputPath = "Recordings"
         };
+
+        private bool AllowAllDrugs => string.IsNullOrEmpty(allowedDrugs) || allowedDrugs.Trim() == "*";
+
+        public IReadOnlyList<DrugType> GetAllowedDrugs()
+        {
+            return AllowAllDrugs
+                ? DrugEffect.AllDrugTypes
+                : ParseAllowedDrugs();
+        }
+
+        private IReadOnlyList<DrugType> ParseAllowedDrugs()
+        {
+            var drugs = new List<DrugType>();
+            if (string.IsNullOrEmpty(allowedDrugs)) return drugs;
+
+            var entries = allowedDrugs.Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var entry in entries)
+                if (Enum.TryParse(entry, true, out DrugType drug))
+                    drugs.Add(drug);
+                else
+                    Debug.LogWarning($"Unknown drug type in config: '{entry}'");
+
+            return drugs;
+        }
 
         public float GetIntensity()
         {

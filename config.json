@@ -1,4 +1,5 @@
 {
+  "allowedDrugs": "*",
   "simulationTimeSeconds": 600.0,
   "simulationSpeed": 100.0,
   "framesPerSecond": 2.5,
@@ -7,5 +8,5 @@
   "minIntensity": 0.1,
   "maxIntensity": 1.0,
   "headlessMode": false,
-  "outputPath": "~/Desktop/larvae"
+  "outputPath": "Recordings"
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Cysharp.Threading.Tasks;
 using Drugs;
@@ -55,12 +56,7 @@ public class SessionRecorder : MonoBehaviour
 
     private void Awake()
     {
-        if (enableConfigMode) LoadConfig();
-
         _rng = new Random();
-        if (captureFps <= 0)
-            throw new ArgumentOutOfRangeException(nameof(captureFps), "Capture FPS must be greater than zero.");
-        _frameInterval = 1f / captureFps;
 
         var w = Screen.width / 2;
         var h = Screen.height / 2;
@@ -71,6 +67,12 @@ public class SessionRecorder : MonoBehaviour
     private void Start()
     {
         _availableDrugs = larvaSimulation?.GetAvailableDrugEffects();
+
+        if (enableConfigMode) LoadConfig();
+
+        if (captureFps <= 0)
+            throw new ArgumentOutOfRangeException(nameof(captureFps), "Capture FPS must be greater than zero.");
+        _frameInterval = 1f / captureFps;
 
         BeginSession();
 
@@ -107,6 +109,10 @@ public class SessionRecorder : MonoBehaviour
         outputRootFolder = _config.outputPath;
 
         ConfigReader.LogConfig(_config);
+
+        var allowedDrugTypes = _config.GetAllowedDrugs();
+        var filtered = _availableDrugs.Where(drug => allowedDrugTypes.Contains(drug.drugType)).ToList();
+        _availableDrugs = filtered;
 
         if (_config.headlessMode)
         {

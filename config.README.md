@@ -4,6 +4,7 @@ This file contains the configuration for the Larvixon simulation. Place this fil
 
 ## Configuration Options
 
+- **allowedDrugTypes**: specify allowed drugs to be simulated by providing full names as a comma separated list (or specify all accepted: "*")
 - **simulationTimeSeconds**: Duration of the simulation in seconds (default: 600)
 - **simulationSpeed**: Speed multiplier for the simulation (default: 1.0)
 - **framesPerSecond**: How many times per second take a screenshot
@@ -23,6 +24,7 @@ This file contains the configuration for the Larvixon simulation. Place this fil
 
 ```json
 {
+  "allowedDrugTypes": "*",
   "simulationTimeSeconds": 600.0,
   "simulationSpeed": 1.0,
   "framesPerSecond": 0.25,

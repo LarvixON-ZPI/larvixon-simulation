@@ -130,10 +130,10 @@ public class LarvaSimulation : MonoBehaviour
 
     private static void MutateLarva(Larva larva)
     {
-        larva.segmentLength *= Random.Range(0.8f, 1.2f);
-        larva.headForwardForce *= Random.Range(0.8f, 1.2f);
+        larva.segmentLength *= Random.Range(0.95f, 1.05f);
+        larva.headForwardForce *= Random.Range(0.95f, 1.05f);
         larva.dampening *= Random.Range(0.95f, 1.05f);
-        larva.restoreForce *= Random.Range(0.8f, 1.2f);
+        larva.restoreForce *= Random.Range(0.95f, 1.05f);
     }
 
     private void StartAllMovement()

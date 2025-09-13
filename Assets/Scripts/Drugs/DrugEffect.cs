@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Larvae;
 using UnityEngine;
 
@@ -75,6 +77,9 @@ namespace Drugs
                 return positiveCount / (steps + 1f);
             }
         }
+
+        public static IReadOnlyList<DrugType> AllDrugTypes { get; } =
+            (DrugType[])Enum.GetValues(typeof(DrugType));
 
         public bool IsSafeDose(float dose)
         {
