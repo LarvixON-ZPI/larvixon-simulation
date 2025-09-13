@@ -20,12 +20,6 @@ public class HeadlessSimulationManager : MonoBehaviour
     private void Start()
     {
         if (Application.isBatchMode) Debug.Log("Running in batch mode - graphics disabled by Unity");
-
-        Debug.Log($"Platform: {Application.platform}");
-        Debug.Log($"Data Path: {Application.dataPath}");
-        Debug.Log($"Persistent Data Path: {Application.persistentDataPath}");
-        Debug.Log($"Batch Mode: {Application.isBatchMode}");
-        Debug.Log($"Target Frame Rate: {Application.targetFrameRate}");
     }
 
     private void ConfigureForHeadless()

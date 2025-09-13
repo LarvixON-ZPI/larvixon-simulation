@@ -35,8 +35,8 @@ public class SessionRecorder : MonoBehaviour
     private readonly List<FrameData> _frameBuffer = new();
     private IReadOnlyList<DrugEffect> _availableDrugs;
     private ConfigReader.SimulationConfig _config;
+    private string _currentDrugFolder;
     private int _currentFrameIndex;
-    private string _currentFramesFolder;
     private string _currentJsonPath;
     private float _currentSessionDosage;
     private DrugEffect _currentSessionDrug;
@@ -102,6 +102,8 @@ public class SessionRecorder : MonoBehaviour
     {
         if (string.IsNullOrEmpty(outputPath)) outputPath = "Recordings";
 
+        if (outputPath.StartsWith("~")) outputPath = ExpandTildePath(outputPath);
+
         if (Path.IsPathRooted(outputPath)) return Path.GetFullPath(outputPath);
 
         // Path is relative
@@ -120,6 +122,21 @@ public class SessionRecorder : MonoBehaviour
         }
 
         return Path.GetFullPath(Path.Combine(basePath, outputPath));
+    }
+
+    private static string ExpandTildePath(string path)
+    {
+        if (string.IsNullOrEmpty(path) || !path.StartsWith("~"))
+            return path;
+
+        var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+        if (path == "~") return homeDirectory;
+
+        if (path.StartsWith("~/") || path.StartsWith("~\\")) return Path.Combine(homeDirectory, path.Substring(2));
+
+        Debug.LogWarning($"Tilde expansion with username not supported: {path}");
+        return path;
     }
 
     private void LoadConfig()
@@ -162,15 +179,15 @@ public class SessionRecorder : MonoBehaviour
             intensity = newIntensity;
         }
 
-        var drugName = ApplyRandomDrugAtDose(intensity);
+        var drugName = ApplyRandomDrugAtDose(intensity).ToLower();
 
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         var resolvedOutputPath = ResolveOutputPath(outputRootFolder);
-        _currentSessionFolder = Path.Combine(resolvedOutputPath, $"{drugName}_{intensity:F2}_{timestamp}");
-        Directory.CreateDirectory(_currentSessionFolder);
+        _currentDrugFolder = Path.Combine(resolvedOutputPath, $"{drugName}");
+        Directory.CreateDirectory(_currentDrugFolder);
 
-        _currentFramesFolder = Path.Combine(_currentSessionFolder, "frames");
-        Directory.CreateDirectory(_currentFramesFolder);
+        _currentSessionFolder = Path.Combine(_currentDrugFolder, $"frames_{timestamp}");
+        Directory.CreateDirectory(_currentSessionFolder);
 
         _currentJsonPath = Path.Combine(_currentSessionFolder, "larva_points.json");
 
@@ -241,9 +258,9 @@ public class SessionRecorder : MonoBehaviour
             var bytes = tex.EncodeToPNG();
             Destroy(tex);
 
-            if (!string.IsNullOrEmpty(_currentFramesFolder))
+            if (!string.IsNullOrEmpty(_currentSessionFolder))
             {
-                var fileName = Path.Combine(_currentFramesFolder, $"frame_{_currentFrameIndex:D06}.png");
+                var fileName = Path.Combine(_currentSessionFolder, $"frame_{_currentFrameIndex:D06}.png");
                 File.WriteAllBytesAsync(fileName, bytes);
             }
         });
@@ -296,7 +313,7 @@ public class SessionRecorder : MonoBehaviour
 
         // Build a ffmpeg command to convert PNG sequence to MP4 at captureFps
         var args =
-            $"-y -framerate {captureFps} -i \"{Path.Combine(_currentFramesFolder, "frame_%06d.png")}\" -c:v libx264 -pix_fmt yuv420p -movflags +faststart \"{sessionVideoPath}\"";
+            $"-y -framerate {captureFps} -i \"{Path.Combine(_currentSessionFolder, "frame_%06d.png")}\" -c:v libx264 -pix_fmt yuv420p -movflags +faststart \"{sessionVideoPath}\"";
 
         await RunShellCommandAsync(ffmpegPath, args);
     }

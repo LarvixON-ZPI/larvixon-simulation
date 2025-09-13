@@ -18,6 +18,7 @@ This file contains the configuration for the Larvixon simulation. Place this fil
 - **outputPath**: Directory for output recordings (default: "Recordings")
   - Can be an absolute path (e.g., "/tmp/recordings" on Linux/macOS, "C:\\temp\\recordings" on Windows)
   - Can be a relative path (relative to the executable in builds, or project root in editor)
+  - Supports tilde expansion on Unix-like systems (e.g., "~/recordings", "~/Documents/simulations")
 
 ## Usage
 
