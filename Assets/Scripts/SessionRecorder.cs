@@ -101,6 +101,7 @@ public class SessionRecorder : MonoBehaviour
 
         sessionLengthSeconds = (int)_config.simulationTimeSeconds;
         simulationSpeed = _config.simulationSpeed;
+        captureFps = _config.framesPerSecond;
         dosage = _config.intensity;
         outputRootFolder = _config.outputPath;
 
@@ -110,8 +111,6 @@ public class SessionRecorder : MonoBehaviour
         {
             QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = 60;
-            generateVideo = false;
-            captureFps = 0;
         }
     }
 

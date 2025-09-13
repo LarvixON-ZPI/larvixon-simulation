@@ -7,7 +7,6 @@ public class HeadlessSimulationManager : MonoBehaviour
     [SerializeField] private bool forceHeadlessMode;
 
     [SerializeField] private bool disableAllRendering = true;
-    [SerializeField] private bool disableAudio = true;
     [SerializeField] private int targetFrameRate = 60;
 
     private void Awake()

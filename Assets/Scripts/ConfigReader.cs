@@ -57,13 +57,7 @@ public static class ConfigReader
 
     public static void LogConfig(SimulationConfig config)
     {
-        Debug.Log("Simulation Configuration:");
-        Debug.Log($"  Time: {config.simulationTimeSeconds} seconds");
-        Debug.Log($"  Speed: {config.simulationSpeed}x");
-        Debug.Log($"  Intensity: {config.intensity}" + (config.useRandomIntensity ? " (random)" : " (fixed)"));
-        if (config.useRandomIntensity) Debug.Log($"  Intensity Range: {config.minIntensity} - {config.maxIntensity}");
-        Debug.Log($"  Output Path: {config.outputPath}");
-        Debug.Log($"  Headless Mode: {config.headlessMode}");
+        Debug.Log("Current Simulation Configuration:\n" + config);
     }
 
     [Serializable]
@@ -71,6 +65,7 @@ public static class ConfigReader
     {
         public float simulationTimeSeconds;
         public float simulationSpeed;
+        public float framesPerSecond;
         public float intensity;
         public bool useRandomIntensity;
         public float minIntensity;
@@ -82,6 +77,7 @@ public static class ConfigReader
         {
             simulationTimeSeconds = 600f,
             simulationSpeed = 1f,
+            framesPerSecond = .25f,
             intensity = 1f,
             useRandomIntensity = false,
             minIntensity = 0.1f,
@@ -89,5 +85,10 @@ public static class ConfigReader
             headlessMode = true,
             outputPath = "Recordings"
         };
+
+        public override string ToString()
+        {
+            return JsonUtility.ToJson(this, true);
+        }
     }
 }
