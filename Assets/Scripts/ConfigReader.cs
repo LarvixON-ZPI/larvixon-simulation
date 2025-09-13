@@ -80,7 +80,7 @@ public static class ConfigReader
             intensity = 1f,
             useRandomIntensity = false,
             minIntensity = 0.1f,
-            maxIntensity = 2f,
+            maxIntensity = 1f,
             headlessMode = true,
             outputPath = "Recordings"
         };

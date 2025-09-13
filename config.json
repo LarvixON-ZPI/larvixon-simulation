@@ -2,7 +2,7 @@
   "allowedDrugs": "*",
   "simulationTimeSeconds": 600.0,
   "simulationSpeed": 100.0,
-  "framesPerSecond": 2.5,
+  "framesPerSecond": 0.25,
   "intensity": 1.0,
   "useRandomIntensity": true,
   "minIntensity": 0.1,

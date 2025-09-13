@@ -138,6 +138,10 @@ public class SessionRecorder : MonoBehaviour
         var filtered = _availableDrugs.Where(drug => allowedDrugTypes.Contains(drug.drugType)).ToList();
         _availableDrugs = filtered;
 
+        if (_availableDrugs.Count == 0)
+            throw new InvalidOperationException(
+                "No available drugs match the allowed drug types specified in the configuration. Please check your config.");
+
         if (_config.headlessMode)
         {
             QualitySettings.vSyncCount = 0;
