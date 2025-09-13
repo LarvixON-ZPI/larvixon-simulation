@@ -131,11 +131,6 @@ public class SessionRecorder : MonoBehaviour
 
         var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        if (string.IsNullOrEmpty(homeDirectory))
-            homeDirectory = Environment.GetEnvironmentVariable("HOME") ??
-                            Environment.GetEnvironmentVariable("USERPROFILE") ??
-                            Environment.CurrentDirectory;
-
         if (path == "~") return homeDirectory;
 
         if (path.StartsWith("~/") || path.StartsWith("~\\")) return Path.Combine(homeDirectory, path.Substring(2));
