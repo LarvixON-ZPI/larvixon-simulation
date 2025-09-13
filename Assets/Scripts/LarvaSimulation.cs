@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Drugs;
 using Larvae;
 using UnityEngine;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -16,6 +17,9 @@ public class LarvaSimulation : MonoBehaviour
     public bool setRandomTargetDirectionOnStart;
 
     [SerializeField] private float simulationSpeed = 1;
+
+    [FormerlySerializedAs("setSimulationSpeedOnStart")] [SerializeField]
+    private bool validateOnStart = true;
 
     [SerializeField] private int targetFrameRate = 120;
     [SerializeField] private float fixedDeltaTime = 0.01f;
@@ -44,7 +48,8 @@ public class LarvaSimulation : MonoBehaviour
     private void Start()
     {
         _camera = Camera.main;
-        OnValidate();
+
+        if (validateOnStart) OnValidate();
 
         SpawnLarvae();
 

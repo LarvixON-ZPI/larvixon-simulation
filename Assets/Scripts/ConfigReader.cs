@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using Drugs;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -7,11 +9,7 @@ public static class ConfigReader
 {
     public static SimulationConfig LoadConfig()
     {
-        var config = LoadConfigFromFile();
-
-        if (config.useRandomIntensity) config.intensity = Random.Range(config.minIntensity, config.maxIntensity);
-
-        return config;
+        return LoadConfigFromFile();
     }
 
     private static SimulationConfig LoadConfigFromFile()
@@ -63,6 +61,7 @@ public static class ConfigReader
     [Serializable]
     public struct SimulationConfig
     {
+        public List<DrugType> allowedDrugs;
         public float simulationTimeSeconds;
         public float simulationSpeed;
         public float framesPerSecond;
@@ -85,6 +84,11 @@ public static class ConfigReader
             headlessMode = true,
             outputPath = "Recordings"
         };
+
+        public float GetIntensity()
+        {
+            return useRandomIntensity ? Random.Range(minIntensity, maxIntensity) : intensity;
+        }
 
         public override string ToString()
         {

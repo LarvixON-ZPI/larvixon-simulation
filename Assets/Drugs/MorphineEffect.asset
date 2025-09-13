@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: MorphineEffect
   m_EditorClassIdentifier: Assembly-CSharp::Drugs.MorphineEffect
   drugName: Morphine
+  drugType: 4
   description: 
   maxIntensity: 1
   duration: 473

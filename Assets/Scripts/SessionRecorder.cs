@@ -8,6 +8,7 @@ using Drugs;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using Debug = UnityEngine.Debug;
 using Random = System.Random;
 
@@ -24,7 +25,7 @@ public class SessionRecorder : MonoBehaviour
     public bool useFfmpegFallback = true;
     public bool generateVideo = true;
     public float simulationSpeed = 1f;
-    public float dosage = 1f;
+    [FormerlySerializedAs("dosage")] public float intensity = 1f;
 
     [Header("Config Mode")]
     public bool enableConfigMode = true;
@@ -71,9 +72,9 @@ public class SessionRecorder : MonoBehaviour
     {
         _availableDrugs = larvaSimulation?.GetAvailableDrugEffects();
 
-        larvaSimulation!.OnSimulationSpeedChanged(simulationSpeed);
-
         BeginSession();
+
+        larvaSimulation!.OnSimulationSpeedChanged(simulationSpeed);
     }
 
     private void Update()
@@ -102,7 +103,7 @@ public class SessionRecorder : MonoBehaviour
         sessionLengthSeconds = (int)_config.simulationTimeSeconds;
         simulationSpeed = _config.simulationSpeed;
         captureFps = _config.framesPerSecond;
-        dosage = _config.intensity;
+        intensity = _config.GetIntensity();
         outputRootFolder = _config.outputPath;
 
         ConfigReader.LogConfig(_config);
@@ -124,14 +125,14 @@ public class SessionRecorder : MonoBehaviour
         if (enableConfigMode && _config.useRandomIntensity)
         {
             var newIntensity = UnityEngine.Random.Range(_config.minIntensity, _config.maxIntensity);
-            dosage = newIntensity;
+            intensity = newIntensity;
         }
 
-        var drugName = ApplyRandomDrugAtDose(dosage);
+        var drugName = ApplyRandomDrugAtDose(intensity);
 
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         _currentSessionFolder =
-            Path.Combine(Application.dataPath, "..", outputRootFolder, $"{drugName}_{dosage:F2}_{timestamp}");
+            Path.Combine(Application.dataPath, "..", outputRootFolder, $"{drugName}_{intensity:F2}_{timestamp}");
         Directory.CreateDirectory(_currentSessionFolder);
 
         _currentFramesFolder = Path.Combine(_currentSessionFolder, "frames");
@@ -198,7 +199,7 @@ public class SessionRecorder : MonoBehaviour
 
         AsyncGPUReadback.Request(_rt, 0, TextureFormat.RGB24, request =>
         {
-            if (request.hasError) return;
+            if (request.hasError || !_rt) return;
             var data = request.GetData<byte>().ToArray();
             var tex = new Texture2D(_rt.width, _rt.height, TextureFormat.RGB24, false);
             tex.LoadRawTextureData(data);

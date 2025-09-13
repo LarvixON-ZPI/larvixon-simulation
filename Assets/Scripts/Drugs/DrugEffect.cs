@@ -3,10 +3,21 @@ using UnityEngine;
 
 namespace Drugs
 {
+    public enum DrugType
+    {
+        Cocaine,
+        Ethanol,
+        Tetrodotoxin,
+        Ketamine,
+        Morphine
+    }
+
     public abstract class DrugEffect : ScriptableObject
     {
         [Header("Drug Properties")]
         public string drugName;
+
+        public DrugType drugType;
 
         [SerializeField]
         [TextArea(3, 6)] private string description;

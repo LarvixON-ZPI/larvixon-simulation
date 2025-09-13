@@ -2261,6 +2261,7 @@ MonoBehaviour:
   spawnArea: {x: 20, y: 20}
   setRandomTargetDirectionOnStart: 0
   simulationSpeed: 1
+  validateOnStart: 0
   targetFrameRate: 120
   fixedDeltaTime: 0.01
   mutateLarva: 0
@@ -2575,7 +2576,7 @@ MonoBehaviour:
   useFfmpegFallback: 1
   generateVideo: 1
   simulationSpeed: 2
-  dosage: 1
+  intensity: 1
   enableConfigMode: 1
   prettyPrintJson: 1
 --- !u!4 &1585462721
@@ -3148,7 +3149,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HeadlessSimulationManager
   forceHeadlessMode: 0
   disableAllRendering: 1
-  disableAudio: 1
   targetFrameRate: 60
 --- !u!4 &2135932824
 Transform:
