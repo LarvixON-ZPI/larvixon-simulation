@@ -65,11 +65,7 @@ public class LarvaSimulation : MonoBehaviour
         if (stopSimulation && Time.time > stopSimulationAfterSeconds)
         {
             Debug.Log("Simulation time limit reached, stopping simulation");
-#if UNITY_EDITOR
-            EditorApplication.ExitPlaymode();
-#else
-            Application.Quit();
-#endif
+            Quit();
         }
     }
 
@@ -83,6 +79,15 @@ public class LarvaSimulation : MonoBehaviour
         Application.targetFrameRate = targetFrameRate;
         Time.fixedDeltaTime = fixedDeltaTime;
         SetSimulationSpeed(simulationSpeed);
+    }
+
+    private static void Quit()
+    {
+#if UNITY_EDITOR
+        EditorApplication.ExitPlaymode();
+#else
+            Application.Quit();
+#endif
     }
 
     private void DrawSpawnAreaGizmos()
@@ -161,6 +166,9 @@ public class LarvaSimulation : MonoBehaviour
 
     private void HandleInput()
     {
+        if (Input.GetKeyDown(KeyCode.Escape)) Quit();
+
+#if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.Space))
         {
             setRandomTargetDirectionOnStart = !setRandomTargetDirectionOnStart;
@@ -207,6 +215,7 @@ public class LarvaSimulation : MonoBehaviour
                 larva.SetMovementDirection(directionToMouse);
             }
         }
+#endif
     }
 
     private void ApplyDrugToAllLarvae(DrugEffect drugEffect)
