@@ -69,7 +69,6 @@ public static class ConfigReader
         public bool useRandomIntensity;
         public float minIntensity;
         public float maxIntensity;
-        public bool headlessMode;
         public string outputPath;
 
         public static SimulationConfig Default => new()
@@ -81,7 +80,6 @@ public static class ConfigReader
             useRandomIntensity = false,
             minIntensity = 0.1f,
             maxIntensity = 1f,
-            headlessMode = true,
             outputPath = "Recordings"
         };
 

@@ -14,7 +14,6 @@ This file contains the configuration for the Larvixon simulation. Place this fil
 - **useRandomIntensity**: Whether to use random intensity between min/max values (default: false)
 - **minIntensity**: Minimum intensity for random mode (default: 0.1)
 - **maxIntensity**: Maximum intensity for random mode (default: 1.0)
-- **headlessMode**: Whether to run without graphics (default: true)
 - **outputPath**: Directory for output recordings (default: "Recordings")
   - Can be an absolute path (e.g., "/tmp/recordings" on Linux/macOS, "C:\\temp\\recordings" on Windows)
   - Can be a relative path (relative to the executable in builds, or project root in editor)
@@ -37,7 +36,6 @@ This file contains the configuration for the Larvixon simulation. Place this fil
   "useRandomIntensity": false,
   "minIntensity": 0.1,
   "maxIntensity": 1.0,
-  "headlessMode": true,
   "outputPath": "Recordings"
 }
 ```
