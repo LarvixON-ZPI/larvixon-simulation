@@ -158,12 +158,6 @@ public class SessionRecorder : MonoBehaviour
         if (_availableDrugs.Count == 0)
             throw new InvalidOperationException(
                 "No available drugs match the allowed drug types specified in the configuration. Please check your config.");
-
-        if (_config.headlessMode)
-        {
-            QualitySettings.vSyncCount = 0;
-            Application.targetFrameRate = 60;
-        }
     }
 
     private void BeginSession()

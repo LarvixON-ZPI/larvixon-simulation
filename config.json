@@ -7,6 +7,5 @@
   "useRandomIntensity": true,
   "minIntensity": 0.1,
   "maxIntensity": 1.0,
-  "headlessMode": false,
   "outputPath": "~/Data"
 }
