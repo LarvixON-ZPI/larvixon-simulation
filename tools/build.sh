@@ -22,7 +22,7 @@ fi
 
 PROJECT_PATH=${PROJECT_PATH:-"$ROOT_DIR"}
 OUTPUT_DIR=${OUTPUT_DIR:-"$ROOT_DIR/Builds"}
-BUILD_VERSION=${BUILD_VERSION:-"1.0.0"}
+BUILD_VERSION=${BUILD_VERSION:-$(grep '^  bundleVersion:' "$PROJECT_PATH/ProjectSettings/ProjectSettings.asset" | awk '{print $2}')}
 LOG_DIR="$OUTPUT_DIR/_logs"
 WIN_DIR="$OUTPUT_DIR/windows/$BUILD_VERSION"
 LINUX_DIR="$OUTPUT_DIR/linux/$BUILD_VERSION"
