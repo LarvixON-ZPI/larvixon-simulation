@@ -103,3 +103,7 @@ InitTestScene*.unity*
 
 # Local build env config
 tools/.env
+
+# Ignore temporaries from GameCI
+/[Aa]rtifacts/
+/[Cc]odeCoverage/
