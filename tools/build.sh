@@ -89,6 +89,29 @@ else
 	echo "Linux build failed with exit code: ${LINUX_EXIT:-1}" >&2
 fi
 
+
+zip_build() {
+	local build_dir="$1"
+	local zip_name="$2"
+	local parent_dir
+	parent_dir=$(dirname "$build_dir")
+	if [[ -d "$build_dir" ]]; then
+		(cd "$parent_dir" && zip -r -q "$zip_name" "$(basename "$build_dir")")
+		if [[ -f "$parent_dir/$zip_name" ]]; then
+			echo "Zipped $build_dir to $parent_dir/$zip_name"
+		else
+			echo "Failed to create zip: $parent_dir/$zip_name" >&2
+		fi
+	fi
+}
+
+if [[ ${WIN_EXIT:-1} -eq 0 ]]; then
+	zip_build "$WIN_DIR" "simulation-windows.zip"
+fi
+if [[ ${LINUX_EXIT:-1} -eq 0 ]]; then
+	zip_build "$LINUX_DIR" "simulation-linux.zip"
+fi
+
 echo
 echo "Build summary:"
 if [[ -z "$BUILD_METHOD" ]]; then
