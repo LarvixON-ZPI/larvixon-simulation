@@ -53,7 +53,7 @@ Mac standalone:
 ## Builds
 
 - Script: `tools/build.sh` builds Windows and Linux players via Unity CLI and copies `README.md` and `config.README.md` into each build folder.
-- Requires `UNITY_PATH` to point to your Unity Editor binary.
+- Requires `UNITY_PATH` to point to your Unity Editor binary. Recommended Unity Version: 6000.2.2f1.
 
 Quick usage (Linux host):
 
@@ -66,4 +66,16 @@ edit tools/.env to set UNITY_PATH, etc.
 
 ```sh
 ./tools/build.sh
+```
+
+## Act
+
+You need to populate **.github/workflows/.secrets** file with actual values
+
+<https://game.ci/docs/github/activation>
+
+```sh
+act --workflows ".github/workflows/build.yml" \
+--secret-file .github/workflows/.secrets \
+--secret UNITY_LICENSE="$(cat ~/.local/share/unity3d/Unity/Unity_lic.ulf)"
 ```
