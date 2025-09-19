@@ -7,6 +7,11 @@ on:
       # temp on all branches and pr for testing
       - "*"
       - "pull/*"
+  pull_request:
+    branches:
+      - main
+      - "*"
+      - "pull/*"
 
 jobs:
   build:
