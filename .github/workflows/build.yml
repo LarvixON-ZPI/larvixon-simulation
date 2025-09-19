@@ -13,6 +13,8 @@ on:
       - "*"
       - "pull/*"
 
+  workflow_call:
+
 jobs:
   build:
     name: Build ${{ matrix.targetPlatform }} ✨
