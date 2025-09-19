@@ -42,6 +42,17 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           allowDirtyBuild: true
 
+      # Copy README files to build directory
+      - name: Copy README files
+        run: |
+          mkdir -p build/${{ matrix.targetPlatform }}/
+          if [ -f "README.md" ]; then
+            cp README.md build/${{ matrix.targetPlatform }}/
+          fi
+          if [ -f "config.README.md" ]; then
+            cp config.README.md build/${{ matrix.targetPlatform }}/
+          fi
+
       # Upload artifact
       - uses: actions/upload-artifact@v4
         with:
