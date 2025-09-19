@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+      # temp on all branches and pr for testing
+      - "*"
+      - "pull/*"
 
 jobs:
   build:
