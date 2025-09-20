@@ -100,3 +100,10 @@ InitTestScene*.unity*
 
 # Unity Package Manager
 [Pp]ackages/.com.*
+
+# Local build env config
+tools/.env
+
+# Ignore temporaries from GameCI
+/[Aa]rtifacts/
+/[Cc]odeCoverage/

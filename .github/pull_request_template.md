@@ -4,6 +4,7 @@
 <!-- Provide a short overview of the changes introduced by this PR -->
 
 ## ✅ Changes
+
 - [ ] Feature
 - [ ] Bugfix
 - [ ] Documentation
@@ -21,5 +22,5 @@ Resolves #ISSUE_NUMBER
 - [ ] Manually tested in local environment  
 - [ ] Other: ___________
 
-## 📸 Screenshots / Demos (if applicable)
-<!-- Insert screenshots, screen recordings, or gifs here -->
+<!-- ## 📸 Screenshots / Demos (if applicable)
+Insert screenshots, screen recordings, or gifs here -->

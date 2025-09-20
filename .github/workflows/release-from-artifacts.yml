@@ -1,0 +1,102 @@
+name: Release from Artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g., v1.0.0)"
+        required: true
+        default: "v1.0.0"
+      prerelease:
+        description: "Mark as pre-release"
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  release:
+    name: Create GitHub Release from Latest Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout for release notes
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for changelog generation
+
+      # Download latest build artifacts directly
+      - name: Download latest build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: Build-*
+          path: ./artifacts
+          merge-multiple: false
+
+      # Create release archives (tar.gz for all platforms)
+      - name: Create release archives
+        run: |
+          mkdir -p release-files
+          
+          for artifact_dir in ./artifacts/Build-*/; do
+            if [ -d "$artifact_dir" ]; then
+              platform_name=$(basename "$artifact_dir" | sed 's/Build-//')
+              echo "Processing $platform_name"
+              
+              cd "$artifact_dir"
+              
+              case "$platform_name" in
+                StandaloneLinux64)
+                  tar -czf "../../release-files/larvixon-simulation-linux.tar.gz" .
+                  ;;
+                StandaloneWindows64)
+                  tar -czf "../../release-files/larvixon-simulation-windows.tar.gz" .
+                  ;;
+                StandaloneOSX)
+                  tar -czf "../../release-files/larvixon-simulation-macos.tar.gz" .
+                  ;;
+                WebGL)
+                  tar -czf "../../release-files/larvixon-simulation-webgl.tar.gz" .
+                  ;;
+              esac
+              
+              cd - > /dev/null
+            fi
+          done
+          
+          echo "Release files created:"
+          ls -la release-files/
+
+      # Generate changelog from commits
+      - name: Generate changelog
+        run: |
+          if git describe --tags --abbrev=0 HEAD^ 2>/dev/null; then
+            LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null)
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" $LAST_TAG..HEAD)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" -10)
+          fi
+          
+          echo "## Changes" > changelog.md
+          echo "" >> changelog.md
+          echo "$CHANGELOG" >> changelog.md
+          echo "" >> changelog.md
+          echo "## Platforms" >> changelog.md
+          echo "- 🐧 Linux (.tar.gz)" >> changelog.md
+          echo "- 🪟 Windows (.tar.gz)" >> changelog.md
+          echo "- 🍎 macOS (.tar.gz)" >> changelog.md
+          echo "- 🌐 WebGL (.tar.gz)" >> changelog.md
+
+      # Create GitHub Release
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Larvixon Simulation ${{ github.event.inputs.version }}
+          body_path: changelog.md
+          files: release-files/*
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

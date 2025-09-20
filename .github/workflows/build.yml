@@ -1,0 +1,57 @@
+name: Build Project
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_call:
+
+jobs:
+  build:
+    name: Build ${{ matrix.targetPlatform }} ✨
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - StandaloneLinux64
+          - StandaloneWindows64
+          - StandaloneOSX
+          - WebGL
+
+    steps:
+      # Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Cache
+      - uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
+
+      # Build
+      - name: Build project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          allowDirtyBuild: true
+
+      - name: Prepare artifact
+        run: |
+          mkdir -p artifact/${{ matrix.targetPlatform }}
+          cp -r build/${{ matrix.targetPlatform }}/* artifact/${{ matrix.targetPlatform }}/
+          if [ -f "README.md" ]; then cp README.md artifact/${{ matrix.targetPlatform }}/; fi
+          if [ -f "config.README.md" ]; then cp config.README.md artifact/${{ matrix.targetPlatform }}/; fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Build-${{ matrix.targetPlatform }}
+          path: artifact/${{ matrix.targetPlatform }}
