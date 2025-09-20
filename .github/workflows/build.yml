@@ -4,14 +4,6 @@ on:
   push:
     branches:
       - main
-      # temp on all branches and pr for testing
-      - "*"
-      - "pull/*"
-  pull_request:
-    branches:
-      - main
-      - "*"
-      - "pull/*"
 
   workflow_call:
 
