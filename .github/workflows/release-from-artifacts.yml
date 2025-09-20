@@ -1,6 +1,3 @@
-permissions:
-  contents: write
-
 name: Release from Artifacts
 
 on:
@@ -16,90 +13,90 @@ on:
         required: false
         default: false
 
+permissions:
+  contents: write
+
 jobs:
   release:
     name: Create GitHub Release from Latest Build
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout for release notes
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Fetch all history for changelog generation
 
-      # Download latest build artifacts directly
       - name: Download latest build artifacts
         uses: actions/download-artifact@v4
         with:
           pattern: Build-*
           path: ./artifacts
           merge-multiple: false
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Create release archives (tar.gz for all platforms)
       - name: Create release archives
         run: |
           mkdir -p release-files
+          if [ -d "./artifacts" ]; then
+            for artifact_dir in ./artifacts/Build-*/; do
+              if [ -d "$artifact_dir" ]; then
+                platform_name=$(basename "$artifact_dir" | sed 's/Build-//')
+                echo "Processing $platform_name"
+                
+                archive_name=""
+                case "$platform_name" in
+                  StandaloneLinux64)
+                    archive_name="larvixon-simulation-linux.tar.gz"
+                    ;;
+                  StandaloneWindows64)
+                    archive_name="larvixon-simulation-windows.tar.gz"
+                    ;;
+                  StandaloneOSX)
+                    archive_name="larvixon-simulation-macos.tar.gz"
+                    ;;
+                  WebGL)
+                    archive_name="larvixon-simulation-webgl.tar.gz"
+                    ;;
+                esac
 
-          for artifact_dir in ./artifacts/Build-*/; do
-            if [ -d "$artifact_dir" ]; then
-              platform_name=$(basename "$artifact_dir" | sed 's/Build-//')
-              echo "Processing $platform_name"
-              
-              cd "$artifact_dir"
-              
-              case "$platform_name" in
-                StandaloneLinux64)
-                  tar -czf "../../release-files/larvixon-simulation-linux.tar.gz" .
-                  ;;
-                StandaloneWindows64)
-                  tar -czf "../../release-files/larvixon-simulation-windows.tar.gz" .
-                  ;;
-                StandaloneOSX)
-                  tar -czf "../../release-files/larvixon-simulation-macos.tar.gz" .
-                  ;;
-                WebGL)
-                  tar -czf "../../release-files/larvixon-simulation-webgl.tar.gz" .
-                  ;;
-              esac
-              
-              cd - > /dev/null
-            fi
-          done
+                if [ -n "$archive_name" ]; then
+                  tar -czf "./release-files/$archive_name" -C "$artifact_dir" .
+                fi
+              fi
+            done
+          else
+            echo "No artifacts found to archive."
+            exit 1
+          fi
 
           echo "Release files created:"
           ls -la release-files/
 
-      # Generate changelog from commits
-      - name: Generate changelog
+      - name: Generate changelog body
+        id: changelog
         run: |
-          if git describe --tags --abbrev=0 HEAD^ 2>/dev/null; then
-            LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null)
-            CHANGELOG=$(git log --pretty=format:"- %s (%h)" $LAST_TAG..HEAD)
-          else
-            CHANGELOG=$(git log --pretty=format:"- %s (%h)" -10)
-          fi
+          CHANGELOG_BODY=$(git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD)
+          {
+            echo "changelog_text<<EOF"
+            echo "## Changes"
+            echo ""
+            echo "$CHANGELOG_BODY"
+            echo ""
+            echo "## Platforms"
+            echo "- 🐧 Linux (.tar.gz)"
+            echo "- 🪟 Windows (.tar.gz)"
+            echo "- 🍎 macOS (.tar.gz)"
+            echo "- 🌐 WebGL (.tar.gz)"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
-          echo "## Changes" > changelog.md
-          echo "" >> changelog.md
-          echo "$CHANGELOG" >> changelog.md
-          echo "" >> changelog.md
-          echo "## Platforms" >> changelog.md
-          echo "- 🐧 Linux (.tar.gz)" >> changelog.md
-          echo "- 🪟 Windows (.tar.gz)" >> changelog.md
-          echo "- 🍎 macOS (.tar.gz)" >> changelog.md
-          echo "- 🌐 WebGL (.tar.gz)" >> changelog.md
-
-      # Create GitHub Release
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.inputs.version }}
           name: Larvixon Simulation ${{ github.event.inputs.version }}
-          body_path: changelog.md
+          body: ${{ steps.changelog.outputs.changelog_text }}
           files: release-files/*
           draft: false
-          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: ${{ github.event.inputs.prerelease }}
