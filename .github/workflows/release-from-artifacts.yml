@@ -1,3 +1,6 @@
+permissions:
+  contents: write
+
 name: Release from Artifacts
 
 on:
@@ -17,13 +20,13 @@ jobs:
   release:
     name: Create GitHub Release from Latest Build
     runs-on: ubuntu-latest
-    
+
     steps:
       # Checkout for release notes
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for changelog generation
+          fetch-depth: 0 # Fetch all history for changelog generation
 
       # Download latest build artifacts directly
       - name: Download latest build artifacts
@@ -37,7 +40,7 @@ jobs:
       - name: Create release archives
         run: |
           mkdir -p release-files
-          
+
           for artifact_dir in ./artifacts/Build-*/; do
             if [ -d "$artifact_dir" ]; then
               platform_name=$(basename "$artifact_dir" | sed 's/Build-//')
@@ -63,7 +66,7 @@ jobs:
               cd - > /dev/null
             fi
           done
-          
+
           echo "Release files created:"
           ls -la release-files/
 
@@ -76,7 +79,7 @@ jobs:
           else
             CHANGELOG=$(git log --pretty=format:"- %s (%h)" -10)
           fi
-          
+
           echo "## Changes" > changelog.md
           echo "" >> changelog.md
           echo "$CHANGELOG" >> changelog.md
