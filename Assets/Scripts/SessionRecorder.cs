@@ -57,11 +57,6 @@ public class SessionRecorder : MonoBehaviour
     private void Awake()
     {
         _rng = new Random();
-
-        var w = Screen.width / 2;
-        var h = Screen.height / 2;
-        _rt = new RenderTexture(w, h, 1);
-        _screenShotTexture = new Texture2D(w, h, TextureFormat.RGB24, false);
     }
 
     private void Start()
@@ -69,6 +64,8 @@ public class SessionRecorder : MonoBehaviour
         _availableDrugs = larvaSimulation?.GetAvailableDrugEffects();
 
         if (enableConfigMode) LoadConfig();
+
+        SetupRenderTexture();
 
         if (captureFps <= 0)
             throw new ArgumentOutOfRangeException(nameof(captureFps), "Capture FPS must be greater than zero.");
@@ -96,6 +93,14 @@ public class SessionRecorder : MonoBehaviour
         if (_deathTime == null && !larvaSimulation.Larvae[0].IsAlive) _deathTime = _sessionElapsed;
 
         if (_sessionElapsed >= sessionLengthSeconds) EndCurrentSession().Forget();
+    }
+
+    private void SetupRenderTexture()
+    {
+        var w = _config.resolutionWidth;
+        var h = _config.resolutionHeight;
+        _rt = new RenderTexture(w, h, 1);
+        _screenShotTexture = new Texture2D(w, h, TextureFormat.RGB24, false);
     }
 
     private static string ResolveOutputPath(string outputPath)

@@ -18,6 +18,8 @@ This file contains the configuration for the Larvixon simulation. Place this fil
   - Can be an absolute path (e.g., "/tmp/recordings" on Linux/macOS, "C:\\temp\\recordings" on Windows)
   - Can be a relative path (relative to the executable in builds, or project root in editor)
   - Supports tilde expansion on Unix-like systems (e.g., "~/recordings", "~/Documents/simulations")
+- **resolutionWidth**: Width of the output resolution (default: 960)
+- **resolutionHeight**: Height of the output resolution (default: 540)
 
 ## Usage
 
@@ -36,6 +38,8 @@ This file contains the configuration for the Larvixon simulation. Place this fil
   "useRandomIntensity": false,
   "minIntensity": 0.1,
   "maxIntensity": 1.0,
-  "outputPath": "Recordings"
+  "outputPath": "Recordings",
+  "resolutionWidth": 960,
+  "resolutionHeight": 540
 }
 ```

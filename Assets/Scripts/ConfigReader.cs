@@ -70,6 +70,8 @@ public static class ConfigReader
         public float minIntensity;
         public float maxIntensity;
         public string outputPath;
+        public int resolutionWidth;
+        public int resolutionHeight;
 
         public static SimulationConfig Default => new()
         {
@@ -80,7 +82,9 @@ public static class ConfigReader
             useRandomIntensity = false,
             minIntensity = 0.1f,
             maxIntensity = 1f,
-            outputPath = "Recordings"
+            outputPath = "Recordings",
+            resolutionWidth = 960,
+            resolutionHeight = 540
         };
 
         private bool AllowAllDrugs => string.IsNullOrEmpty(allowedDrugs) || allowedDrugs.Trim() == "*";
