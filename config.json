@@ -7,5 +7,7 @@
   "useRandomIntensity": true,
   "minIntensity": 0.1,
   "maxIntensity": 1.0,
-  "outputPath": "~/Data"
+  "outputPath": "~/Data",
+  "resolutionWidth": 960,
+  "resolutionHeight": 540
 }
