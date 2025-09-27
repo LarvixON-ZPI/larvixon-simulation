@@ -61,16 +61,13 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           allowDirtyBuild: true
 
-      # Copy README files to build directory
-      - name: Copy README files
+      # Copy static files to build directory
+      - name: Copy static files
         run: |
           mkdir -p build/${{ matrix.targetPlatform }}/
-          if [ -f "README.md" ]; then
-            cp README.md build/${{ matrix.targetPlatform }}/
-          fi
-          if [ -f "config.README.md" ]; then
-            cp config.README.md build/${{ matrix.targetPlatform }}/
-          fi
+          cp README.md build/${{ matrix.targetPlatform }}/
+          cp config.README.md build/${{ matrix.targetPlatform }}/
+          cp config.json build/${{ matrix.targetPlatform }}/
 
       # Create platform-specific archive for release (tar.gz for all)
       - name: Create release archive
