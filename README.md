@@ -1,3 +1,6 @@
+<!-- markdownlint-disable MD041 -->
+[![Build Project](https://github.com/LarvixON-ZPI/larvixon-simulation/actions/workflows/build.yml/badge.svg)](https://github.com/LarvixON-ZPI/larvixon-simulation/actions/workflows/build.yml)
+
 # Larvixon Simulation
 
 A Unity project simulating larvae movement with realistic peristaltic motion.
