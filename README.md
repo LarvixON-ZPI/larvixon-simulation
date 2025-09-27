@@ -1,5 +1,6 @@
 <!-- markdownlint-disable MD041 -->
 [![Build Project](https://github.com/LarvixON-ZPI/larvixon-simulation/actions/workflows/build.yml/badge.svg)](https://github.com/LarvixON-ZPI/larvixon-simulation/actions/workflows/build.yml)
+[![Release from Artifacts](https://github.com/LarvixON-ZPI/larvixon-simulation/actions/workflows/release-from-artifacts.yml/badge.svg)](https://github.com/LarvixON-ZPI/larvixon-simulation/actions/workflows/release-from-artifacts.yml)
 
 # Larvixon Simulation
 
