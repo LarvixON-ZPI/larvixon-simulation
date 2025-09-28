@@ -36,6 +36,9 @@ jobs:
           - WebGL
 
     steps:
+      - name: Delete unnecessary tools folder
+        run: rm -rf /opt/hostedtoolcache
+
       # Checkout
       - name: Checkout repository
         uses: actions/checkout@v4

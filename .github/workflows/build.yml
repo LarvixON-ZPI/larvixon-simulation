@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build ${{ matrix.targetPlatform }} ✨
+    name: Build ${{ matrix.targetPlatform }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -21,6 +21,9 @@ jobs:
           - WebGL
 
     steps:
+      - name: Delete unnecessary tools folder
+        run: rm -rf /opt/hostedtoolcache
+
       # Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
