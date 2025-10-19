@@ -5,7 +5,7 @@
     "com.lm.pro": "https://github.com/lmProgramming/lm-pro-package.git",
     "com.svermeulen.extenject": "https://github.com/Mathijs-Bakker/Extenject.git?path=UnityProject/Assets/Plugins/Zenject/Source",
     "com.unity.2d.enhancers": "1.0.0",
-    "com.unity.addressables": "2.7.2",
+    "com.unity.addressables": "2.7.3",
     "com.unity.ai.assistant": "1.0.0-pre.12",
     "com.unity.ai.generators": "1.0.0-pre.20",
     "com.unity.ai.inference": "2.3.0",
