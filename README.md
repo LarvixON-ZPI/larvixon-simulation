@@ -10,11 +10,11 @@ A Unity project simulating larvae movement with realistic peristaltic motion.
 
 This simulation models larvae as 5-point segmented creatures that move using peristaltic waves (contractions and extensions) similar to real larvae. Each larva consists of:
 
-- **Head**: The front segment (red)
+- **Head**: The front segment
 - **2/5 Point**: First body segment  
 - **Middle**: Center segment
 - **4/5 Point**: Second body segment
-- **Back**: Tail segment (blue)
+- **Back**: Tail segment
 
 ## Drugs
 
@@ -52,24 +52,6 @@ Mac standalone:
 
 ```text
 ~/Library/Logs/Larvixon/simulation/Player.log
-```
-
-## Builds
-
-- Script: `tools/build.sh` builds Windows and Linux players via Unity CLI and copies `README.md` and `config.README.md` into each build folder.
-- Requires `UNITY_PATH` to point to your Unity Editor binary. Recommended Unity Version: 6000.2.2f1.
-
-Quick usage (Linux host):
-
-```sh
-chmod +x tools/build.sh
-cp tools/.env.example tools/.env
-```
-
-edit tools/.env to set UNITY_PATH, etc.
-
-```sh
-./tools/build.sh
 ```
 
 ## Act
