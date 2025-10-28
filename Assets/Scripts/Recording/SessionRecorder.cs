@@ -54,7 +54,6 @@ namespace Recording
         private Random _rng;
 
         private RenderTexture _rt;
-        private Texture2D _screenShotTexture;
         private float _sessionElapsed;
         private float _timeSinceLastFrame;
 
@@ -104,7 +103,6 @@ namespace Recording
             var w = _config.resolutionWidth;
             var h = _config.resolutionHeight;
             _rt = new RenderTexture(w, h, 1);
-            _screenShotTexture = new Texture2D(w, h, TextureFormat.RGB24, false);
         }
 
         private static string ResolveOutputPath(string outputPath)
@@ -246,7 +244,7 @@ namespace Recording
 
         private void CapturePngFrame()
         {
-            if (!captureCamera || _rt == null) return;
+            if (!captureCamera || !_rt) return;
 
             captureCamera.targetTexture = _rt;
             captureCamera.Render();
@@ -262,11 +260,10 @@ namespace Recording
                 var bytes = tex.EncodeToPNG();
                 Destroy(tex);
 
-                if (!string.IsNullOrEmpty(_currentSessionFolder))
-                {
-                    var fileName = Path.Combine(_currentSessionFolder, $"frame_{_currentFrameIndex:D06}.png");
-                    File.WriteAllBytesAsync(fileName, bytes);
-                }
+                if (string.IsNullOrEmpty(_currentSessionFolder)) return;
+
+                var fileName = Path.Combine(_currentSessionFolder, $"frame_{_currentFrameIndex:D06}.png");
+                File.WriteAllBytesAsync(fileName, bytes);
             });
         }
 

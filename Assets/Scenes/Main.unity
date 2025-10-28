@@ -2576,6 +2576,7 @@ MonoBehaviour:
   useFfmpegFallback: 1
   generateVideo: 1
   simulationSpeed: 2
+  videoFormat: mp4
   intensity: 1
   enableConfigMode: 1
   prettyPrintJson: 1
