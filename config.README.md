@@ -20,6 +20,8 @@ This file contains the configuration for the Larvixon simulation. Place this fil
   - Supports tilde expansion on Unix-like systems (e.g., "~/recordings", "~/Documents/simulations")
 - **resolutionWidth**: Width of the output resolution (default: 960)
 - **resolutionHeight**: Height of the output resolution (default: 540)
+- **videoFormat**: Format of the output video (default: "mp4")
+  - Supported formats: "mp4", "avi", "mov", "webm"
 
 ## Usage
 
@@ -40,6 +42,7 @@ This file contains the configuration for the Larvixon simulation. Place this fil
   "maxIntensity": 1.0,
   "outputPath": "Recordings",
   "resolutionWidth": 960,
-  "resolutionHeight": 540
+  "resolutionHeight": 540,
+  "videoFormat": "mp4"
 }
 ```

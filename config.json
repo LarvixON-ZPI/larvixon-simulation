@@ -1,6 +1,6 @@
 {
   "allowedDrugs": "*",
-  "simulationTimeSeconds": 600.0,
+  "simulationTimeSeconds": 6.0,
   "simulationSpeed": 4.0,
   "framesPerSecond": 0.25,
   "intensity": 1.0,
@@ -9,5 +9,6 @@
   "maxIntensity": 1.0,
   "outputPath": "~/Data",
   "resolutionWidth": 960,
-  "resolutionHeight": 540
+  "resolutionHeight": 540,
+  "videoFormat": "mp4"
 }
