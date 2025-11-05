@@ -36,7 +36,6 @@ jobs:
           restore-keys: |
             Library-${{ matrix.targetPlatform }}-
 
-      # Build
       - name: Build project
         uses: game-ci/unity-builder@v4
         env:
@@ -46,6 +45,13 @@ jobs:
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
           allowDirtyBuild: true
+
+      - name: Upload Editor Log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Editor-Log-${{ matrix.targetPlatform }}
+          path: ~/.config/unity3d/Editor.log
 
       - name: Prepare artifact
         run: |
