@@ -33,11 +33,9 @@ jobs:
       - name: Delete unnecessary tools folder
         run: rm -rf /opt/hostedtoolcache
 
-      # Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Cache
       - uses: actions/cache@v3
         with:
           path: Library
@@ -54,13 +52,6 @@ jobs:
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
           allowDirtyBuild: true
-
-      - name: Upload Editor Log
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: Editor-Log-${{ matrix.targetPlatform }}
-          path: ~/.config/unity3d/Editor.log
 
       - name: Prepare artifact
         run: |
