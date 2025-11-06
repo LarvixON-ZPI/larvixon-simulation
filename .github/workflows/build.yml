@@ -18,7 +18,7 @@ jobs:
           - targetPlatform: StandaloneLinux64
             os: ubuntu-latest
           - targetPlatform: StandaloneWindows64
-            os: windows-2019
+            os: windows-latest
           - targetPlatform: StandaloneOSX
             os: macos-latest
           - targetPlatform: WebGL
