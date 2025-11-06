@@ -4,31 +4,38 @@ on:
   push:
     branches:
       - main
-
+  pull_request:
   workflow_call:
 
 jobs:
   build:
     name: Build ${{ matrix.targetPlatform }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash
+
     strategy:
       fail-fast: false
       matrix:
-        targetPlatform:
-          - StandaloneLinux64
-          - StandaloneWindows64
-          - StandaloneOSX
-          - WebGL
+        include:
+          - targetPlatform: StandaloneLinux64
+            os: ubuntu-latest
+          - targetPlatform: StandaloneWindows64
+            os: windows-latest
+          - targetPlatform: StandaloneOSX
+            os: macos-latest
+          - targetPlatform: WebGL
+            os: ubuntu-latest
 
     steps:
       - name: Delete unnecessary tools folder
         run: rm -rf /opt/hostedtoolcache
 
-      # Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Cache
       - uses: actions/cache@v3
         with:
           path: Library
@@ -36,7 +43,6 @@ jobs:
           restore-keys: |
             Library-${{ matrix.targetPlatform }}-
 
-      # Build
       - name: Build project
         uses: game-ci/unity-builder@v4
         env:

@@ -8,10 +8,11 @@
       "hash": "d4fc38c92fb139b4184912f20556ab27a3b519fa"
     },
     "com.cysharp.unitask": {
-      "version": "file:.com.cysharp.unitask@2.5.10",
+      "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
       "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
+      "source": "git",
+      "dependencies": {},
+      "hash": "73a63b7f672b88f7e9992f6917eb458a8cbb6fa9"
     },
     "com.lm.pro": {
       "version": "https://github.com/lmProgramming/lm-pro-package.git",
@@ -23,10 +24,11 @@
       "hash": "ad1f0dd3ad2363b93b4d01e714dde59f6ab9345d"
     },
     "com.svermeulen.extenject": {
-      "version": "file:.com.svermeulen.extenject@9.2.0",
+      "version": "https://github.com/Mathijs-Bakker/Extenject.git?path=UnityProject/Assets/Plugins/Zenject/Source",
       "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
+      "source": "git",
+      "dependencies": {},
+      "hash": "ec31a279be809bc98f5d1ed9f2add1ce3ddc77fc"
     },
     "com.unity.2d.animation": {
       "version": "12.0.2",
