@@ -10,15 +10,19 @@ on:
 jobs:
   build:
     name: Build ${{ matrix.targetPlatform }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        targetPlatform:
-          - StandaloneLinux64
-          - StandaloneWindows64
-          - StandaloneOSX
-          - WebGL
+        include:
+          - targetPlatform: StandaloneLinux64
+            os: ubuntu-latest
+          - targetPlatform: StandaloneWindows64
+            os: windows-2019
+          - targetPlatform: StandaloneOSX
+            os: macos-latest
+          - targetPlatform: WebGL
+            os: ubuntu-latest
 
     steps:
       - name: Delete unnecessary tools folder
