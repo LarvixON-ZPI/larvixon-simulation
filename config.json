@@ -1,6 +1,6 @@
 {
   "allowedDrugs": "*",
-  "simulationTimeSeconds": 6.0,
+  "simulationTimeSeconds": 600.0,
   "simulationSpeed": 4.0,
   "framesPerSecond": 0.25,
   "intensity": 1.0,
