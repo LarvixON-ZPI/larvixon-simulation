@@ -10,7 +10,8 @@ namespace Events.UICloseOpenAction
     public enum ActionType
     {
         Open,
-        Close
+        Close,
+        Reverse
     }
 
     [Serializable]

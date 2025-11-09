@@ -14,7 +14,10 @@ namespace UI
         [SerializeField] private Slider simulationSpeedSlider;
 
         [SerializeField]
-        private GameObject drugCanvas;
+        private GameObject selectDrugCanvas;
+
+        [SerializeField]
+        private GameObject drugsInfoCanvas;
 
         [SerializeField]
         private GameObject timeCanvas;
@@ -23,6 +26,8 @@ namespace UI
         private GameObject stateCanvas;
 
         public UnityEvent<float> onSimulationSpeedChanged = new();
+
+        private bool _isUIOpen = true;
         private float _simulationSpeed = 1f;
 
         [Inject]
@@ -54,14 +59,16 @@ namespace UI
                     switch (data.action)
                     {
                         case ActionType.Close:
-                            drugCanvas.SetActive(false);
-                            timeCanvas.SetActive(true);
-                            stateCanvas.SetActive(true);
+                            CloseUI();
                             break;
                         case ActionType.Open:
-                            drugCanvas.SetActive(true);
-                            timeCanvas.SetActive(false);
-                            stateCanvas.SetActive(false);
+                            ShowUI();
+                            break;
+                        case ActionType.Reverse:
+                            if (_isUIOpen)
+                                CloseUI();
+                            else
+                                ShowUI();
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -71,6 +78,24 @@ namespace UI
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private void CloseUI()
+        {
+            selectDrugCanvas.SetActive(false);
+            drugsInfoCanvas.SetActive(false);
+            timeCanvas.SetActive(false);
+            stateCanvas.SetActive(false);
+            _isUIOpen = false;
+        }
+
+        private void ShowUI()
+        {
+            selectDrugCanvas.SetActive(true);
+            drugsInfoCanvas.SetActive(true);
+            timeCanvas.SetActive(true);
+            stateCanvas.SetActive(true);
+            _isUIOpen = true;
         }
 
         private void OnSimulationSpeedSliderChanged(float newValue)

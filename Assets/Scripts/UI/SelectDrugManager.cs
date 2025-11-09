@@ -46,7 +46,7 @@ namespace UI
                 clearAllButton.onClick.RemoveListener(OnClearAllButtonClicked);
         }
 
-        public void HandleDrugButtonCLicked(string drugName)
+        public void HandleDrugButtonClicked(string drugName)
         {
             switch (drugName)
             {

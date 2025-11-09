@@ -54,6 +54,14 @@ Mac standalone:
 ~/Library/Logs/Larvixon/simulation/Player.log
 ```
 
+## Build for Flutter
+
+Make sure you’ve cloned the [LarvixON frontend repository](https://github.com/LarvixON-ZPI/larvixon-frontend) — it contains the Flutter app that includes this repo as a submodule.  
+This is the easiest way to build.
+
+1. Open the Unity project from that submodule location.  
+2. In the top menu, select: **Flutter → Export WebGL**.
+
 ## Act
 
 You need to populate **.github/workflows/.secrets** file with actual values

@@ -450,7 +450,7 @@ namespace Larvae
             ResetTargetLengths();
         }
 
-        public void SetMovementMultiplier(float modifier)
+        private void SetMovementMultiplier(float modifier)
         {
             _movementModifier = modifier;
         }

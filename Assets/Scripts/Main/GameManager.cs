@@ -1,4 +1,5 @@
 using Events.Signal;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
@@ -7,21 +8,27 @@ namespace Main
 {
     public class GameManager : MonoBehaviour
     {
-        [Inject(Id = GameSignalId.RequestPause)]
-        private SignalEventChannel _requestPauseEventChannel;
-        [Inject(Id = GameSignalId.RequestResume)]
-        private SignalEventChannel _requestResumeEventChannel;
-        [Inject(Id = GameSignalId.RequestQuit)]
-        private SignalEventChannel _requestQuitEventChannel;
-        [Inject(Id = GameSignalId.RequestRestart)]
-        private SignalEventChannel _requestRestartEventChannel;
+        private bool _isPaused;
+
         [Inject(Id = GameSignalId.OnPaused)]
         private SignalEventChannel _onPausedEventChannel;
+
         [Inject(Id = GameSignalId.OnResumed)]
         private SignalEventChannel _onResumedEventChannel;
 
-        private bool _isPaused;
         private float _previousTimeScale = 1f;
+
+        [Inject(Id = GameSignalId.RequestPause)]
+        private SignalEventChannel _requestPauseEventChannel;
+
+        [Inject(Id = GameSignalId.RequestQuit)]
+        private SignalEventChannel _requestQuitEventChannel;
+
+        [Inject(Id = GameSignalId.RequestRestart)]
+        private SignalEventChannel _requestRestartEventChannel;
+
+        [Inject(Id = GameSignalId.RequestResume)]
+        private SignalEventChannel _requestResumeEventChannel;
 
         private void OnEnable()
         {
@@ -42,7 +49,7 @@ namespace Main
         private static void Quit()
         {
 #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
+            EditorApplication.isPlaying = false;
 #else
             Application.Quit();
 #endif
@@ -65,9 +72,9 @@ namespace Main
             _onResumedEventChannel?.Raise();
         }
 
-        private void Restart()
+        private static void Restart()
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }
 }

@@ -2373,6 +2373,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 970540493}
   m_CullTransparentMesh: 1
+--- !u!1 &1013477822 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1849910807671784652, guid: 1f4fc229d7484f1a1869b7a402526e5f, type: 3}
+  m_PrefabInstance: {fileID: 7600859791114764042}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1269340649
 GameObject:
   m_ObjectHideFlags: 0
@@ -2830,7 +2835,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   simulationTimeText: {fileID: 69772614}
   simulationSpeedSlider: {fileID: 105357732}
-  drugCanvas: {fileID: 0}
+  selectDrugCanvas: {fileID: 2138626310}
+  drugsInfoCanvas: {fileID: 1013477822}
   timeCanvas: {fileID: 218233943}
   stateCanvas: {fileID: 496001120}
   onSimulationSpeedChanged:
@@ -3124,6 +3130,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1991119061}
   m_CullTransparentMesh: 1
+--- !u!1 &2138626310 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 982247983153405406, guid: fb90d6dde7c06e1949dce2132250b3e5, type: 3}
+  m_PrefabInstance: {fileID: 233569169877658886}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &233569169877658886
 PrefabInstance:
   m_ObjectHideFlags: 0
