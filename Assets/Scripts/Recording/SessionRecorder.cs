@@ -314,9 +314,8 @@ namespace Recording
             var extension = videoFormat;
             var sessionVideoPath = Path.Combine(_currentSessionFolder, $"session.{extension}");
 
-            // Build a ffmpeg command to convert PNG sequence to video at captureFps
             var args =
-                $"-y -framerate {captureFps} -i \"{Path.Combine(_currentSessionFolder, "frame_%06d.png")}\" -c:v libx264 -pix_fmt yuv420p -movflags +faststart \"{sessionVideoPath}\"";
+                $"-y -framerate {captureFps} -pattern_type glob -i \"{Path.Combine(_currentSessionFolder, "frame_*.png")}\" -c:v libx264 -pix_fmt yuv420p -movflags +faststart \"{sessionVideoPath}\"";
 
             await RunShellCommandAsync(ffmpegPath, args);
         }
