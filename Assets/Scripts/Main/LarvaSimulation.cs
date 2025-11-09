@@ -80,7 +80,7 @@ namespace Main
 
         private void Update()
         {
-            if (!stopSimulation || !(Time.time > stopSimulationAfterSeconds)) return;
+            if (!stopSimulation || Time.time <= stopSimulationAfterSeconds) return;
             Debug.Log("Simulation time limit reached, stopping simulation");
             _requestQuitEventChannel.Raise();
         }
@@ -159,7 +159,14 @@ namespace Main
 
         private void ApplyDrugToAllLarvae(ApplyDrugData applyDrugData)
         {
-            var drugEffect = drugEffects.First(d => d.drugType == applyDrugData.drugType);
+            var drugEffect = drugEffects.FirstOrDefault(d => d.drugType == applyDrugData.drugType);
+            
+            if (drugEffect == null)
+            {
+                Debug.LogError($"DrugEffect of type {applyDrugData.drugType} not found! Please check the drugEffects list in the inspector.");
+                return;
+            }
+            
             ApplyDrugToAllLarvae(drugEffect, applyDrugData.intensity);
         }
 

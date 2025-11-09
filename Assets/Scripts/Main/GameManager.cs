@@ -22,16 +22,16 @@ namespace Main
 
         private void OnEnable()
         {
-            _requestPauseEventChannel?.Register(Pause);
-            _requestResumeEventChannel?.Register(Resume);
-            _requestQuitEventChannel?.Register(Quit);
+            _requestPauseEventChannel.Register(Pause);
+            _requestResumeEventChannel.Register(Resume);
+            _requestQuitEventChannel.Register(Quit);
         }
 
         private void OnDisable()
         {
             _requestPauseEventChannel.Unregister(Pause);
-            _requestResumeEventChannel?.Unregister(Resume);
-            _requestQuitEventChannel?.Unregister(Quit);
+            _requestResumeEventChannel.Unregister(Resume);
+            _requestQuitEventChannel.Unregister(Quit);
         }
 
         private static void Quit()
