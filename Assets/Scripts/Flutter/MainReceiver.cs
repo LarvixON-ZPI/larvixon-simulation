@@ -1,5 +1,6 @@
 using Events.Signal;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace Flutter
@@ -10,8 +11,8 @@ namespace Flutter
         private SignalEventChannel _requestPauseEventChannel;
         [Inject(Id = GameSignalId.RequestResume)] 
         private SignalEventChannel _requestResumeEventChannel;
-        [Inject(Id = GameSignalId.RequestQuit)] 
-        private SignalEventChannel _requestQuitEventChannel;
+        [Inject(Id = GameSignalId.RequestRestart)] 
+        private SignalEventChannel _requestRestartEventChannel;
         
         public void HandleWebFnCall(string action)
         {
@@ -25,11 +26,8 @@ namespace Flutter
                 case "resume":
                     _requestResumeEventChannel.Raise();
                     break;
-                case "unload":
-                    Application.Unload();
-                    break;
-                case "quit":
-                    _requestQuitEventChannel.Raise();
+                case "restart":
+                    _requestRestartEventChannel.Raise();
                     break;
                 default:
                     Debug.LogWarning($"Unknown action: {action}");

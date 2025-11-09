@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Drugs;
+using Events.UICloseOpenAction;
 using Larvae;
 using Larvae.States;
 using Main;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 namespace UI
 {
@@ -63,6 +65,9 @@ namespace UI
         private readonly List<Larva> _targetLarvae = new();
         private DrugSystem _drugSystem;
         private Larva _targetLarva;
+        
+        [Inject]
+        private UICloseOpenActionChannel _uiCloseOpenActionChannel;
 
         private void Awake()
         {
@@ -83,7 +88,11 @@ namespace UI
 
         public void ToggleDrugUI(bool show)
         {
-            drugUIPanel.SetActive(show);
+            _uiCloseOpenActionChannel.Raise(new UICloseOpenActionData
+            {
+                action = show? ActionType.Open : ActionType.Close,
+                windowType = WindowType.DrugUI
+            });
 
             closeButton.gameObject.SetActive(show);
             openButton.gameObject.SetActive(!show);

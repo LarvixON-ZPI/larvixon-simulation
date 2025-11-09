@@ -1,5 +1,6 @@
 using Events.Signal;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace Main
@@ -12,6 +13,8 @@ namespace Main
         private SignalEventChannel _requestResumeEventChannel;
         [Inject(Id = GameSignalId.RequestQuit)]
         private SignalEventChannel _requestQuitEventChannel;
+        [Inject(Id = GameSignalId.RequestRestart)]
+        private SignalEventChannel _requestRestartEventChannel;
         [Inject(Id = GameSignalId.OnPaused)]
         private SignalEventChannel _onPausedEventChannel;
         [Inject(Id = GameSignalId.OnResumed)]
@@ -25,6 +28,7 @@ namespace Main
             _requestPauseEventChannel.Register(Pause);
             _requestResumeEventChannel.Register(Resume);
             _requestQuitEventChannel.Register(Quit);
+            _requestRestartEventChannel.Register(Restart);
         }
 
         private void OnDisable()
@@ -32,6 +36,7 @@ namespace Main
             _requestPauseEventChannel.Unregister(Pause);
             _requestResumeEventChannel.Unregister(Resume);
             _requestQuitEventChannel.Unregister(Quit);
+            _requestRestartEventChannel.Unregister(Restart);
         }
 
         private static void Quit()
@@ -58,6 +63,11 @@ namespace Main
             _isPaused = false;
             Time.timeScale = _previousTimeScale;
             _onResumedEventChannel?.Raise();
+        }
+
+        private void Restart()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);;
         }
     }
 }

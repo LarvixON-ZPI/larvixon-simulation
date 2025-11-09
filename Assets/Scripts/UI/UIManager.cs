@@ -1,15 +1,28 @@
+using System;
+using Events.UICloseOpenAction;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Zenject;
 
 namespace UI
 {
     public class UIManager : MonoBehaviour
     {
+        [Inject]
+        private UICloseOpenActionChannel _uiCloseOpenActionChannel;
+        
         [SerializeField] private TMP_Text simulationTimeText;
         [SerializeField] private Slider simulationSpeedSlider;
 
+        [SerializeField]
+        private GameObject drugCanvas; 
+        [SerializeField]
+        private GameObject timeCanvas;
+        [SerializeField]
+        private GameObject stateCanvas;
+        
         public UnityEvent<float> onSimulationSpeedChanged = new();
         private float _simulationSpeed = 1f;
 
@@ -18,15 +31,38 @@ namespace UI
             simulationTimeText.SetText(
                 $"{Time.timeSinceLevelLoad:F2}s, {_simulationSpeed:F2}x");
         }
-
+        
         private void OnEnable()
         {
             simulationSpeedSlider.onValueChanged.AddListener(OnSimulationSpeedSliderChanged);
+            _uiCloseOpenActionChannel.Register(HandleUICloseOpenAction);
         }
 
         private void OnDisable()
         {
             simulationSpeedSlider.onValueChanged.RemoveListener(OnSimulationSpeedSliderChanged);
+            _uiCloseOpenActionChannel.Unregister(HandleUICloseOpenAction);
+        }
+        
+        private void HandleUICloseOpenAction(UICloseOpenActionData data)
+        {
+            if (data.windowType != WindowType.DrugUI) return;
+
+            switch (data.action)
+            {
+                case ActionType.Close:
+                    drugCanvas.SetActive(false);
+                    timeCanvas.SetActive(true);
+                    stateCanvas.SetActive(true);
+                    break;
+                case ActionType.Open:
+                    drugCanvas.SetActive(true);
+                    timeCanvas.SetActive(false);
+                    stateCanvas.SetActive(false);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private void OnSimulationSpeedSliderChanged(float newValue)

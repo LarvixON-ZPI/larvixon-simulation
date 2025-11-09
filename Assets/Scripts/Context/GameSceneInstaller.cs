@@ -1,6 +1,7 @@
 using Events.ApplyDrug;
 using Events.MoveLarvaToPoint;
 using Events.Signal;
+using Events.UICloseOpenAction;
 using UnityEngine;
 using Zenject;
 
@@ -19,6 +20,7 @@ namespace Context
         public SignalBinding[] signalBindings;
         public ApplyDrugEventChannel applyDrugEventChannel;
         public SetDestinationForLarva setDestinationForLarva;
+        public UICloseOpenActionChannel uiCloseOpenActionChannel;
 
         public override void InstallBindings()
         {
@@ -29,6 +31,7 @@ namespace Context
 
             Container.BindInstance(setDestinationForLarva);
             Container.BindInstance(applyDrugEventChannel);
+            Container.BindInstance(uiCloseOpenActionChannel);
         }
     }
 }
