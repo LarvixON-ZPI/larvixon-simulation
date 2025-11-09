@@ -4,7 +4,7 @@ namespace Events.UICloseOpenAction
 {
     public enum WindowType
     {
-        DrugUI
+        All
     }
 
     public enum ActionType

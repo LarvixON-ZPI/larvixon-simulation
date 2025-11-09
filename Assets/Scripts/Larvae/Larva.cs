@@ -64,6 +64,7 @@ namespace Larvae
         private MovementModifier CurrentMovementModifier => _drugSystem?.CurrentModifier ?? MovementModifier.Normal;
         public LarvaStateMachine StateMachine { get; private set; }
         public bool IsAlive => StateMachine.CurrentState.StateName != "Dead";
+        public bool IsDead => !IsAlive;
 
         private void Awake()
         {

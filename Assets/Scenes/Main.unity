@@ -866,9 +866,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2c892173518517488f6353367dafb1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  autoSetupOnStart: 1
-  buttonSize: {x: 120, y: 30}
-  buttonSpacing: 10
 --- !u!1 &254677305
 GameObject:
   m_ObjectHideFlags: 0
@@ -2094,6 +2091,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d484914d5ffa8481cad0f2b054c699f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Context.GameSceneInstaller
+  larvaSimulation: {fileID: 1321582329}
   signalBindings:
   - id: 0
     channel: {fileID: 11400000, guid: 3b9ba0c3ef63394cc9eb07be00cfd2bf, type: 2}
@@ -2104,7 +2102,14 @@ MonoBehaviour:
   - id: 3
     channel: {fileID: 11400000, guid: 2803c6a0707f951bb9286c00f9e66adc, type: 2}
   - id: 4
+    channel: {fileID: 11400000, guid: 2803c6a0707f951bb9286c00f9e66adc, type: 2}
+  - id: 5
     channel: {fileID: 11400000, guid: fc5feb28ffba206d49b2965de9b38a0c, type: 2}
+  - id: 6
+    channel: {fileID: 11400000, guid: 9296332f6003a61fcb983bc32e573a6d, type: 2}
+  applyDrugEventChannel: {fileID: 11400000, guid: 57368dba731d86ffcb70c474d0becd73, type: 2}
+  setDestinationForLarva: {fileID: 11400000, guid: ce663de3c122ad35f95aa136f580b227, type: 2}
+  uiCloseOpenActionChannel: {fileID: 11400000, guid: 1eebced4562cb899eaad4cc394698a39, type: 2}
 --- !u!1 &913759904
 GameObject:
   m_ObjectHideFlags: 0
@@ -2488,11 +2493,12 @@ MonoBehaviour:
   targetFrameRate: 120
   fixedDeltaTime: 0.01
   mutateLarva: 0
-  cocaineEffect: {fileID: 11400000, guid: f6bdfe8143840974db2e1e394234455f, type: 2}
-  ethanolEffect: {fileID: 11400000, guid: ee1047761d418d247a253f3ff079f7eb, type: 2}
-  tetrodotoxinEffect: {fileID: 11400000, guid: aad61164811f71e34aff0733cfa63c48, type: 2}
-  ketamineEffect: {fileID: 11400000, guid: edd9e53f11656b870a4fabb1ff9aa3bf, type: 2}
-  morphineEffect: {fileID: 11400000, guid: d39794aa0b813070bb6d754a70a0145d, type: 2}
+  drugEffects:
+  - {fileID: 11400000, guid: f6bdfe8143840974db2e1e394234455f, type: 2}
+  - {fileID: 11400000, guid: ee1047761d418d247a253f3ff079f7eb, type: 2}
+  - {fileID: 11400000, guid: edd9e53f11656b870a4fabb1ff9aa3bf, type: 2}
+  - {fileID: 11400000, guid: d39794aa0b813070bb6d754a70a0145d, type: 2}
+  - {fileID: 11400000, guid: aad61164811f71e34aff0733cfa63c48, type: 2}
   drugDosage: 1
   larvaeParent: {fileID: 510926915}
   larvaeSegmentParent: {fileID: 709971255}
@@ -2974,6 +2980,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   simulationTimeText: {fileID: 69772614}
   simulationSpeedSlider: {fileID: 105357732}
+  drugCanvas: {fileID: 0}
+  timeCanvas: {fileID: 0}
+  stateCanvas: {fileID: 0}
   onSimulationSpeedChanged:
     m_PersistentCalls:
       m_Calls:
@@ -3305,43 +3314,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cae007a00f40883499e2c2d320b71e30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  availableDrugs:
-  - {fileID: 11400000, guid: f6bdfe8143840974db2e1e394234455f, type: 2}
-  larvaSimulation: {fileID: 1321582329}
-  currentStateText: {fileID: 7154622520891812791}
-  dosageSlider: {fileID: 2894358220993864867}
-  dosageText: {fileID: 778909707877981972}
-  drugControlPanel: {fileID: 845049890515963563}
-  larvaNameText: {fileID: 1775035309613878026}
-  mainPanel: {fileID: 6766973111172403309}
-  movementModifierText: {fileID: 6658026037813703615}
-  statsPanel: {fileID: 2050602321718374196}
-  statusText: {fileID: 4630027743567075546}
-  activeDrugsCountText: {fileID: 5241875576190809580}
-  canChangeDirectionIndicator: {fileID: 6768870929901278617}
-  canMoveIndicator: {fileID: 7102663856169872232}
-  activeEffectsSummaryText: {fileID: 2546957812466401433}
-  drugUIPanel: {fileID: 6766973111172403309}
-  closeButton: {fileID: 690875371}
-  openButton: {fileID: 1071321274}
-  speedSlider: {fileID: 2041575582704193704}
-  speedLabel: {fileID: 6541603808591503135}
-  coordinationSlider: {fileID: 87441591938132405}
-  coordinationLabel: {fileID: 6797123269779039339}
-  randomnessSlider: {fileID: 1087867504616600738}
-  randomnessLabel: {fileID: 2460528796587320176}
-  directionStabilitySlider: {fileID: 1097379225490198567}
-  directionStabilityLabel: {fileID: 2126454789545455573}
-  segmentSyncSlider: {fileID: 5532005899749528480}
-  segmentSyncLabel: {fileID: 284860190554987361}
-  headForceSlider: {fileID: 3577469996240502507}
-  headForceLabel: {fileID: 6608945679649577853}
-  restoreForceSlider: {fileID: 8723168849237727044}
-  restoreForceLabel: {fileID: 4802904530526440244}
-  normalTextColor: {r: 1, g: 1, b: 1, a: 1}
-  warningTextColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  dangerTextColor: {r: 1, g: 0, b: 0, a: 1}
-  currentDosage: 1
 --- !u!114 &6750028024709819
 MonoBehaviour:
   m_ObjectHideFlags: 0

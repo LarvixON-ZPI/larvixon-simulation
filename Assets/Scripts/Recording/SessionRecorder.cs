@@ -94,7 +94,7 @@ namespace Recording
                 CaptureFrame();
             }
 
-            if (_deathTime == null && !larvaSimulation.Larvae[0].IsAlive) _deathTime = _sessionElapsed;
+            if (_deathTime == null && larvaSimulation.Larvae[0].IsDead) _deathTime = _sessionElapsed;
 
             if (_sessionElapsed >= sessionLengthSeconds) EndCurrentSession().Forget();
         }

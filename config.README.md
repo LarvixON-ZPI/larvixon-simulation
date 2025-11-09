@@ -7,20 +7,20 @@ This file contains the configuration for the Larvixon simulation. Place this fil
 - **allowedDrugs**: specify allowed drugs to be simulated by providing full names as a comma/space/semicolon separated list
   - to specify that all are allowed: "*"
   - following list example would allow for these 5 (currently all available drugs): "cOCAine ; morPHINE,tetrodotoxin, ethanol;ketamine"
-- **simulationTimeSeconds**: Duration of the simulation in seconds (default: 600)
-- **simulationSpeed**: Speed multiplier for the simulation (default: 1.0)
+- **simulationTimeSeconds**: Duration of the simulation in seconds
+- **simulationSpeed**: Speed multiplier for the simulation
 - **framesPerSecond**: How many times per second take a screenshot
-- **intensity**: Drug intensity value (default: 1.0, must be between 0.0 and 1.0)
-- **useRandomIntensity**: Whether to use random intensity between min/max values (default: false)
-- **minIntensity**: Minimum intensity for random mode (default: 0.1)
-- **maxIntensity**: Maximum intensity for random mode (default: 1.0)
+- **intensity**: Drug intensity value (must be between 0.0 and 1.0)
+- **useRandomIntensity**: Whether to use random intensity between min/max values
+- **minIntensity**: Minimum intensity for random mode
+- **maxIntensity**: Maximum intensity for random mode
 - **outputPath**: Directory for output recordings (default: "Recordings")
   - Can be an absolute path (e.g., "/tmp/recordings" on Linux/macOS, "C:\\temp\\recordings" on Windows)
   - Can be a relative path (relative to the executable in builds, or project root in editor)
   - Supports tilde expansion on Unix-like systems (e.g., "~/recordings", "~/Documents/simulations")
 - **resolutionWidth**: Width of the output resolution (default: 960)
-- **resolutionHeight**: Height of the output resolution (default: 540)
-- **videoFormat**: Format of the output video (default: "mp4")
+- **resolutionHeight**: Height of the output resolution
+- **videoFormat**: Format of the output video
   - Supported formats: "mp4", "avi", "mov", "webm"
 
 ## Usage
@@ -34,8 +34,8 @@ This file contains the configuration for the Larvixon simulation. Place this fil
 {
   "allowedDrugs": "*",
   "simulationTimeSeconds": 600.0,
-  "simulationSpeed": 1.0,
-  "framesPerSecond": 0.25,
+  "simulationSpeed": 4.0,
+  "framesPerSecond": 4.0,
   "intensity": 1.0,
   "useRandomIntensity": false,
   "minIntensity": 0.1,
