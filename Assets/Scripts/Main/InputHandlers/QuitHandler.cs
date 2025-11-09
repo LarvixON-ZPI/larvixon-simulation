@@ -6,15 +6,9 @@ namespace Main.InputHandlers
 {
     public class QuitHandler : MonoBehaviour
     {
+        [Inject(Id = GameSignalId.RequestQuit)]
         private SignalEventChannel _requestQuitEventChannel;
         
-        [Inject]
-        public void Construct(
-            [Inject(Id = GameSignalId.RequestQuit)] SignalEventChannel requestResume)
-        {
-            _requestQuitEventChannel = requestResume;
-        }
-
         private void Update()
         {
             HandleInput();
@@ -23,7 +17,7 @@ namespace Main.InputHandlers
         private void HandleInput()
         {
             if (Input.GetKeyDown(KeyCode.Escape)) 
-                _requestQuitEventChannel.RaiseEvent();
+                _requestQuitEventChannel.Raise();
         }
     }
 }

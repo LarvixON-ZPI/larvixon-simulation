@@ -9,7 +9,7 @@ namespace Larvae.States
     {
         protected float TimeInState;
         public abstract string StateName { get; }
-        public bool OverridableByForce { get; private set; } = true;
+        public bool OverridableByForce { get; protected set; } = true;
 
         public virtual void Enter(LarvaStateMachine stateMachine)
         {

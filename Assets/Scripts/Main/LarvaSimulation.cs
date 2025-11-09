@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using Drugs;
+using Events.ApplyDrug;
+using Events.MoveLarvaToPoint;
 using Events.Signal;
 using Larvae;
 using UnityEngine;
@@ -27,11 +30,7 @@ namespace Main
 
         [SerializeField] private bool mutateLarva;
 
-        [SerializeField] private CocaineEffect cocaineEffect;
-        [SerializeField] private EthanolEffect ethanolEffect;
-        [SerializeField] private TetrodotoxinEffect tetrodotoxinEffect;
-        [SerializeField] private KetamineEffect ketamineEffect;
-        [SerializeField] private MorphineEffect morphineEffect;
+        [SerializeField] private DrugEffect[] drugEffects;
 
         [SerializeField] private float drugDosage = 1f;
 
@@ -42,23 +41,34 @@ namespace Main
         [SerializeField] private float stopSimulationAfterSeconds = 600f;
 
         private readonly List<Larva> _larvae = new();
-        private Camera _camera;
         private float _nextDirectionChange;
         public IReadOnlyList<Larva> Larvae => _larvae;
         
+        [Inject(Id = GameSignalId.RequestQuit)]
         private SignalEventChannel _requestQuitEventChannel;
-        
+        [Inject(Id = GameSignalId.ClearDrugs)]
+        private SignalEventChannel _clearDrugsEventChannel;
         [Inject]
-        public void Construct(
-            [Inject(Id = GameSignalId.RequestQuit)] SignalEventChannel requestResume)
+        private SetDestinationForLarva _setDestinationForLarva;
+        [Inject]
+        private ApplyDrugEventChannel _applyDrugEventChannel;
+        
+        private void OnEnable()
         {
-            _requestQuitEventChannel = requestResume;
+            _clearDrugsEventChannel.Register(ClearAllDrugsFromLarvae);
+            _setDestinationForLarva.Register(SetDestinationForLarva);
+            _applyDrugEventChannel.Register(ApplyDrugToAllLarvae);
+        }
+
+        private void OnDisable()
+        {
+            _clearDrugsEventChannel.Unregister(ClearAllDrugsFromLarvae);
+            _setDestinationForLarva.Unregister(SetDestinationForLarva);
+            _applyDrugEventChannel.Unregister(ApplyDrugToAllLarvae);
         }
 
         private void Start()
         {
-            _camera = Camera.main;
-
             if (validateOnStart) OnValidate();
 
             SpawnLarvae();
@@ -72,7 +82,7 @@ namespace Main
         {
             if (!stopSimulation || !(Time.time > stopSimulationAfterSeconds)) return;
             Debug.Log("Simulation time limit reached, stopping simulation");
-            _requestQuitEventChannel.RaiseEvent();
+            _requestQuitEventChannel.Raise();
         }
 
         private void OnDrawGizmosSelected()
@@ -147,21 +157,13 @@ namespace Main
             }
         }
 
-        private void StopAllMovement()
+        private void ApplyDrugToAllLarvae(ApplyDrugData applyDrugData)
         {
-            foreach (var larva in _larvae) larva.StopMoving();
+            var drugEffect = drugEffects.First(d => d.drugType == applyDrugData.drugType);
+            ApplyDrugToAllLarvae(drugEffect, applyDrugData.intensity);
         }
 
-        private void ChangeRandomDirections()
-        {
-            foreach (var larva in _larvae)
-            {
-                var randomDir = Random.insideUnitCircle.normalized;
-                larva.SetMovementDirection(randomDir);
-            }
-        }
-
-        private void ApplyDrugToAllLarvae(DrugEffect drugEffect)
+        private void ApplyDrugToAllLarvae(DrugEffect drugEffect, float selectedDrugDosage)
         {
             if (!drugEffect)
             {
@@ -170,9 +172,19 @@ namespace Main
             }
 
             foreach (var larva in _larvae)
-                larva.AddDrugEffect(drugEffect, drugDosage);
+                larva.AddDrugEffect(drugEffect, selectedDrugDosage);
 
-            Debug.Log($"Applied {drugEffect.drugName} (dosage: {drugDosage}) to all larvae");
+            Debug.Log($"Applied {drugEffect.drugName} (dosage: {selectedDrugDosage}) to all larvae");
+        }
+        
+        private void SetDestinationForLarva(Vector3 destination)
+        {
+            foreach (var larva in _larvae)
+            {
+                var larvaPos = larva.GetCenter();
+                var directionToMouse = ((Vector2)destination - larvaPos).normalized;
+                larva.SetMovementDirection(directionToMouse);
+            }
         }
 
         private void ClearAllDrugsFromLarvae()
@@ -197,15 +209,7 @@ namespace Main
 
         public IReadOnlyList<DrugEffect> GetAvailableDrugEffects()
         {
-            var list = new List<DrugEffect>
-            {
-                cocaineEffect,
-                ethanolEffect,
-                tetrodotoxinEffect,
-                ketamineEffect,
-                morphineEffect
-            };
-            return list;
+            return drugEffects;
         }
     }
 }

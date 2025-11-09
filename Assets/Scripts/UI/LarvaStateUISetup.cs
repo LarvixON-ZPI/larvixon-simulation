@@ -85,12 +85,8 @@ namespace UI
             layoutGroup.childForceExpandWidth = true;
             layoutGroup.childForceExpandHeight = false;
 
-            var buttonPrefab = CreateButtonPrefab(buttonContainer.transform);
-
             if (_uiManager == null) _uiManager = gameObject.AddComponent<LarvaStateUIManager>();
 
-            _uiManager.buttonContainer = buttonContainer.transform;
-            _uiManager.buttonPrefab = buttonPrefab.GetComponent<Button>();
             _uiManager.currentStateText = currentStateText;
 
             Debug.Log("Larva State UI setup complete!");

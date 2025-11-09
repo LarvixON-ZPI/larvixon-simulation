@@ -6,20 +6,12 @@ namespace Flutter
 {
     public class MainReceiver : MonoBehaviour, IFlutterReceiver
     {
+        [Inject(Id = GameSignalId.RequestPause)] 
         private SignalEventChannel _requestPauseEventChannel;
+        [Inject(Id = GameSignalId.RequestResume)] 
         private SignalEventChannel _requestResumeEventChannel;
+        [Inject(Id = GameSignalId.RequestQuit)] 
         private SignalEventChannel _requestQuitEventChannel;
-        
-        [Inject]
-        public void Construct(
-            [Inject(Id = GameSignalId.RequestPause)] SignalEventChannel requestPauseEventChannel, 
-            [Inject(Id = GameSignalId.RequestResume)] SignalEventChannel requestResumeEventChannel, 
-            [Inject(Id = GameSignalId.RequestQuit)] SignalEventChannel requestQuitEventChannel)
-        {
-            _requestPauseEventChannel = requestPauseEventChannel;
-            _requestResumeEventChannel = requestResumeEventChannel;
-            _requestQuitEventChannel = requestQuitEventChannel;
-        }
         
         public void HandleWebFnCall(string action)
         {
@@ -28,16 +20,16 @@ namespace Flutter
             switch (action)
             {
                 case "pause":
-                    _requestPauseEventChannel.RaiseEvent();
+                    _requestPauseEventChannel.Raise();
                     break;
                 case "resume":
-                    _requestResumeEventChannel.RaiseEvent();
+                    _requestResumeEventChannel.Raise();
                     break;
                 case "unload":
                     Application.Unload();
                     break;
                 case "quit":
-                    _requestQuitEventChannel.RaiseEvent();
+                    _requestQuitEventChannel.Raise();
                     break;
                 default:
                     Debug.LogWarning($"Unknown action: {action}");

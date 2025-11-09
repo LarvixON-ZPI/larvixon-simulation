@@ -1,4 +1,3 @@
-using Events;
 using Events.Signal;
 using UnityEngine;
 using Zenject;
@@ -7,42 +6,32 @@ namespace Main
 {
     public class GameManager : MonoBehaviour
     {
+        [Inject(Id = GameSignalId.RequestPause)]
         private SignalEventChannel _requestPauseEventChannel;
+        [Inject(Id = GameSignalId.RequestResume)]
         private SignalEventChannel _requestResumeEventChannel;
+        [Inject(Id = GameSignalId.RequestQuit)]
         private SignalEventChannel _requestQuitEventChannel;
+        [Inject(Id = GameSignalId.OnPaused)]
         private SignalEventChannel _onPausedEventChannel;
+        [Inject(Id = GameSignalId.OnResumed)]
         private SignalEventChannel _onResumedEventChannel;
 
         private bool _isPaused;
         private float _previousTimeScale = 1f;
 
-        [Inject]
-        public void Construct(
-            [Inject(Id = GameSignalId.RequestPause)] SignalEventChannel requestPause,
-            [Inject(Id = GameSignalId.RequestResume)] SignalEventChannel requestResume,
-            [Inject(Id = GameSignalId.RequestQuit)] SignalEventChannel requestQuit,
-            [Inject(Id = GameSignalId.OnPaused)] SignalEventChannel onPaused,
-            [Inject(Id = GameSignalId.OnResumed)] SignalEventChannel onResumed)
-        {
-            _requestPauseEventChannel = requestPause;
-            _requestResumeEventChannel = requestResume;
-            _requestQuitEventChannel = requestQuit;
-            _onPausedEventChannel = onPaused;
-            _onResumedEventChannel = onResumed;
-        }
-
         private void OnEnable()
         {
-            _requestPauseEventChannel?.RegisterListener(Pause);
-            _requestResumeEventChannel?.RegisterListener(Resume);
-            _requestQuitEventChannel?.RegisterListener(Quit);
+            _requestPauseEventChannel?.Register(Pause);
+            _requestResumeEventChannel?.Register(Resume);
+            _requestQuitEventChannel?.Register(Quit);
         }
 
         private void OnDisable()
         {
-            _requestPauseEventChannel?.UnregisterListener(Pause);
-            _requestResumeEventChannel?.UnregisterListener(Resume);
-            _requestQuitEventChannel?.UnregisterListener(Quit);
+            _requestPauseEventChannel.Unregister(Pause);
+            _requestResumeEventChannel?.Unregister(Resume);
+            _requestQuitEventChannel?.Unregister(Quit);
         }
 
         private static void Quit()
@@ -60,7 +49,7 @@ namespace Main
             _isPaused = true;
             _previousTimeScale = Time.timeScale;
             Time.timeScale = 0f;
-            _onPausedEventChannel?.RaiseEvent();
+            _onPausedEventChannel?.Raise();
         }
 
         private void Resume()
@@ -68,7 +57,7 @@ namespace Main
             if (!_isPaused) return;
             _isPaused = false;
             Time.timeScale = _previousTimeScale;
-            _onResumedEventChannel?.RaiseEvent();
+            _onResumedEventChannel?.Raise();
         }
     }
 }

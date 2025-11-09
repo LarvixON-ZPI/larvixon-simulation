@@ -7,6 +7,11 @@ namespace Larvae.States
     public class DeadState : BaseLarvaState
     {
         public override string StateName => "Dead";
+        
+        public DeadState()
+        {
+            OverridableByForce = false;
+        }
 
         public override void Enter(LarvaStateMachine stateMachine)
         {

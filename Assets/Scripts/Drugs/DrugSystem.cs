@@ -14,6 +14,8 @@ namespace Drugs
         public MovementModifier CurrentModifier { get; private set; } = MovementModifier.Normal;
         public bool HasActiveDrugs => _activeDrugs.Count > 0;
         public IReadOnlyList<ActiveDrugEffect> ActiveDrugs => _activeDrugs;
+        
+        public const float MaxDrugIntensity = 1f;
 
         private void Awake()
         {

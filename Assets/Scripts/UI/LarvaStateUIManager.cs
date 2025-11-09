@@ -10,28 +10,14 @@ namespace UI
     public class LarvaStateUIManager : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] public Transform buttonContainer;
-
-        [SerializeField] public Button buttonPrefab;
         [SerializeField] public Text currentStateText;
 
         [Header("State Management")]
         [SerializeField] private List<Larva> larvae = new();
 
-        private readonly List<string> _availableStates = new()
-        {
-            "Moving",
-            "LayingDown",
-            "LookingAtEnvironment",
-            "LayingNearWall",
-            "Dead",
-            "CurledLayingDown"
-        };
-
         private void Start()
         {
             InitializeLarvae();
-            CreateStateButtons();
             UpdateCurrentStateDisplay();
         }
 
@@ -44,35 +30,13 @@ namespace UI
         {
             if (larvae.Count == 0) larvae.AddRange(FindObjectsByType<Larva>(FindObjectsSortMode.None));
         }
-
-        private void CreateStateButtons()
-        {
-            if (buttonContainer == null || buttonPrefab == null)
-            {
-                Debug.LogError("ButtonContainer or ButtonPrefab is not assigned in LarvaStateUIManager!");
-                return;
-            }
-
-            foreach (var stateName in _availableStates) CreateStateButton(stateName);
-        }
-
-        private void CreateStateButton(string stateName)
-        {
-            var newButton = Instantiate(buttonPrefab, buttonContainer);
-            newButton.name = $"Button_{stateName}";
-
-            var buttonText = newButton.GetComponentInChildren<Text>();
-            if (buttonText != null) buttonText.text = FormatStateName(stateName);
-
-            newButton.onClick.AddListener(() => ChangeAllLarvaeToState(stateName));
-        }
-
+        
         private static string FormatStateName(string stateName)
         {
             return Regex.Replace(stateName, "([a-z])([A-Z])", "$1 $2");
         }
 
-        private void ChangeAllLarvaeToState(string stateName)
+        public void ChangeAllLarvaeToState(string stateName)
         {
             foreach (var larva in larvae)
                 if (larva != null)

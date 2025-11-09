@@ -6,6 +6,7 @@ namespace Events.Signal
         RequestResume,
         RequestQuit,
         OnPaused,
-        OnResumed
+        OnResumed,
+        ClearDrugs
     }
 }
