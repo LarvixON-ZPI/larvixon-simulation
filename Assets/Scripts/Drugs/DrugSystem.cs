@@ -8,6 +8,7 @@ namespace Drugs
 {
     public class DrugSystem : MonoBehaviour
     {
+        public const float MaxDrugIntensity = 1f;
         private readonly List<ActiveDrugEffect> _activeDrugs = new();
         private Larva _larva;
 
@@ -28,6 +29,8 @@ namespace Drugs
 
         public void AddDrug(DrugEffect drugEffect, float dosage = 1f)
         {
+            if (_larva.IsDead) return;
+
             var activeDrug = new ActiveDrugEffect(drugEffect, dosage);
             _activeDrugs.Add(activeDrug);
 

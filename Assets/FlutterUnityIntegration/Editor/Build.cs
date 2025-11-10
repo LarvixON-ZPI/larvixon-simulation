@@ -529,6 +529,7 @@ body { padding: 0; margin: 0; overflow: hidden; }
         {
             var scenes = EditorBuildSettings.scenes
                 .Where(s => s.enabled)
+                .Where(s => s.path.Contains("Flutter"))
                 .Select(s => s.path)
                 .ToArray();
 

@@ -64,6 +64,7 @@ namespace Larvae
         private MovementModifier CurrentMovementModifier => _drugSystem?.CurrentModifier ?? MovementModifier.Normal;
         public LarvaStateMachine StateMachine { get; private set; }
         public bool IsAlive => StateMachine.CurrentState.StateName != "Dead";
+        public bool IsDead => !IsAlive;
 
         private void Awake()
         {
@@ -449,7 +450,7 @@ namespace Larvae
             ResetTargetLengths();
         }
 
-        public void SetMovementMultiplier(float modifier)
+        private void SetMovementMultiplier(float modifier)
         {
             _movementModifier = modifier;
         }
